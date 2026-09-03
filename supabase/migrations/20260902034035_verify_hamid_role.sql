@@ -1,0 +1,1 @@
+SELECT id, display_name, role FROM public.profiles;

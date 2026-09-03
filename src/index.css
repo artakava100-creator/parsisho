@@ -1,0 +1,279 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   PARSISHO — DESIGN TOKENS
+   Color direction: warm light, petroleum blue + light brick
+   ============================================================ */
+@layer base {
+  :root {
+    /* ---- Color: Primary (Petroleum Blue) ---- */
+    --color-primary-50: #f2f6f8;
+    --color-primary-100: #dde9ee;
+    --color-primary-200: #bcd3dd;
+    --color-primary-300: #8fb5c6;
+    --color-primary-400: #5d90aa;
+    --color-primary-500: #3a7090;
+    --color-primary-600: #255775;
+    --color-primary-700: #173B4A;
+    --color-primary-800: #122e3a;
+    --color-primary-900: #0e2229;
+    --color-primary-950: #08151b;
+
+    /* ---- Color: Secondary (Blue-Gray) ---- */
+    --color-secondary-50: #f3f5f7;
+    --color-secondary-100: #e3e9ed;
+    --color-secondary-200: #c7d4dc;
+    --color-secondary-300: #a0b5c4;
+    --color-secondary-400: #7a91a5;
+    --color-secondary-500: #5a728a;
+    --color-secondary-600: #43596e;
+    --color-secondary-700: #36475a;
+    --color-secondary-800: #2d3a48;
+    --color-secondary-900: #26303b;
+    --color-secondary-950: #1a2129;
+
+    /* ---- Color: Accent (Light Brick) ---- */
+    --color-accent-50: #fdf5f2;
+    --color-accent-100: #fae6df;
+    --color-accent-200: #f4cdbf;
+    --color-accent-300: #ecab94;
+    --color-accent-400: #e08568;
+    --color-accent-500: #d26e4d;
+    --color-accent-600: #C65D3A;
+    --color-accent-700: #a14a2e;
+    --color-accent-800: #7e3a24;
+    --color-accent-900: #5e2c1c;
+    --color-accent-950: #331610;
+
+    /* ---- Color: Success (Green) ---- */
+    --color-success-50: #f0fdf4;
+    --color-success-100: #dcfce7;
+    --color-success-200: #bbf7d0;
+    --color-success-300: #86efac;
+    --color-success-400: #4ade80;
+    --color-success-500: #22c55e;
+    --color-success-600: #16a34a;
+    --color-success-700: #15803d;
+    --color-success-800: #166534;
+    --color-success-900: #14532d;
+    --color-success-950: #052e16;
+
+    /* ---- Color: Warning (Orange) ---- */
+    --color-warning-50: #fff7ed;
+    --color-warning-100: #ffedd5;
+    --color-warning-200: #fed7aa;
+    --color-warning-300: #fdba74;
+    --color-warning-400: #fb923c;
+    --color-warning-500: #f97316;
+    --color-warning-600: #ea580c;
+    --color-warning-700: #c2410c;
+    --color-warning-800: #9a3412;
+    --color-warning-900: #7c2d12;
+    --color-warning-950: #431407;
+
+    /* ---- Color: Error (Red) ---- */
+    --color-error-50: #fef2f2;
+    --color-error-100: #fee2e2;
+    --color-error-200: #fecaca;
+    --color-error-300: #fca5a5;
+    --color-error-400: #f87171;
+    --color-error-500: #ef4444;
+    --color-error-600: #dc2626;
+    --color-error-700: #b91c1c;
+    --color-error-800: #991b1b;
+    --color-error-900: #7f1d1d;
+    --color-error-950: #450a0a;
+
+    /* ---- Neutral (Slate — standard ramp, works for light theme) ---- */
+    --color-neutral-50: #f8fafc;
+    --color-neutral-100: #f1f5f9;
+    --color-neutral-200: #e2e8f0;
+    --color-neutral-300: #cbd5e1;
+    --color-neutral-400: #94a3b8;
+    --color-neutral-500: #64748b;
+    --color-neutral-600: #475569;
+    --color-neutral-700: #334155;
+    --color-neutral-800: #1e293b;
+    --color-neutral-900: #0f172a;
+    --color-neutral-950: #020617;
+
+    /* ---- Surface (warm light app shell) ---- */
+    --color-surface: #F7F4EE;
+    --color-surface-raised: #FFFFFF;
+    --color-surface-overlay: #F0EBE0;
+    --color-surface-sunken: #EDE7DA;
+
+    /* ---- Typography ---- */
+    --font-sans: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+
+    /* ---- Radius ---- */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --radius-2xl: 32px;
+    --radius-full: 9999px;
+
+    /* ---- Shadows ---- */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.10);
+    --shadow-glow-primary: 0 0 24px rgba(23, 59, 74, 0.18);
+    --shadow-glow-accent: 0 0 24px rgba(198, 93, 58, 0.20);
+
+    /* ---- Motion ---- */
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --dur-fast: 150ms;
+    --dur-normal: 250ms;
+    --dur-slow: 400ms;
+  }
+
+  * {
+    border-color: var(--color-neutral-200);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    background-color: var(--color-surface);
+    color: var(--color-neutral-800);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  /* Persian number rendering helpers */
+  .font-num {
+    font-feature-settings: 'ss01';
+    letter-spacing: 0;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-surface);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-neutral-300);
+    border-radius: var(--radius-full);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-neutral-400);
+  }
+
+  /* Focus ring */
+  :focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+  }
+
+  /* Selection */
+  ::selection {
+    background: var(--color-primary-700);
+    color: white;
+  }
+}
+
+/* ============================================================
+   PARSISHO — COMPONENT LAYER
+   ============================================================ */
+@layer components {
+  /* Glass surface used across cards */
+  .glass {
+    background: rgba(255, 255, 255, 0.80);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .glass-hover {
+    transition: border-color var(--dur-normal) var(--ease-out),
+      box-shadow var(--dur-normal) var(--ease-out),
+      transform var(--dur-normal) var(--ease-out);
+  }
+  .glass-hover:hover {
+    border-color: rgba(23, 59, 74, 0.25);
+    box-shadow: var(--shadow-glow-primary);
+    transform: translateY(-2px);
+  }
+
+  /* Gradient text */
+  .text-gradient-primary {
+    background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-800));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-gradient-accent {
+    background: linear-gradient(135deg, var(--color-accent-500), var(--color-accent-700));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
+
+/* ============================================================
+   PARSISHO — UTILITIES
+   ============================================================ */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn var(--dur-normal) var(--ease-out) both;
+  }
+  .animate-fade-in-up {
+    animation: fadeInUp var(--dur-slow) var(--ease-out) both;
+  }
+  .animate-scale-in {
+    animation: scaleIn var(--dur-normal) var(--ease-spring) both;
+  }
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--color-surface-raised) 25%,
+      var(--color-surface-overlay) 50%,
+      var(--color-surface-raised) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 12px rgba(23, 59, 74, 0.20); }
+    50% { box-shadow: 0 0 24px rgba(23, 59, 74, 0.35); }
+  }
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
