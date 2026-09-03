@@ -6,8 +6,7 @@ import { MarketplaceHero } from '@/components/marketplace/MarketplaceHero';
 import { CategoryNav } from '@/components/marketplace/CategoryNav';
 import { ProductSection } from '@/components/marketplace/ProductSection';
 import { TrustBanner } from '@/components/marketplace/TrustBanner';
-import { ProductCard, ProductCardSkeleton } from '@/components/marketplace/ProductCard';
-import { EmptyState } from '@/components/ui/EmptyState';
+
 
 export function StorePage() {
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -15,11 +14,11 @@ export function StorePage() {
   const { data: categories } = useCategories({ parentId: null, onlyNav: true });
   const { data: bestSellers, isLoading: loadingBest } = useProducts({
     onlyBestSellers: true,
-    limit: 6,
+    limit: 8,
   });
   const { data: newest, isLoading: loadingNew } = useProducts({
     onlyNew: true,
-    limit: 6,
+    limit: 8,
   });
   const { data: categoryProducts, isLoading: loadingCategory } = useProducts(
     activeCategory !== 'all' ? { categoryId: activeCategory } : undefined,
@@ -54,7 +53,7 @@ export function StorePage() {
             emptyIcon={<Store className="w-8 h-8" />}
             emptyTitle="محصولی یافت نشد"
             emptyDescription="در حال حاضر محصولی در این دسته‌بندی وجود ندارد"
-            columns={3}
+            columns={4}
           />
         </div>
       )}
@@ -70,7 +69,7 @@ export function StorePage() {
           emptyIcon={<TrendingUp className="w-8 h-8" />}
           emptyTitle="محصولی یافت نشد"
           emptyDescription="در حال حاضر محصول پرفروشی وجود ندارد"
-          columns={3}
+          columns={4}
         />
 
         {/* New Arrivals */}
@@ -82,7 +81,7 @@ export function StorePage() {
           emptyIcon={<Sparkles className="w-8 h-8" />}
           emptyTitle="محصولی یافت نشد"
           emptyDescription="در حال حاضر محصول جدیدی وجود ندارد"
-          columns={3}
+          columns={4}
         />
 
         {/* Trust Banner */}
