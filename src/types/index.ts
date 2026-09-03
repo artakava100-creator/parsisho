@@ -11,7 +11,141 @@ export type Permission =
   | 'manage_missions'
   | 'manage_businesses'
   | 'manage_content'
-  | 'manage_settings';
+  | 'manage_settings'
+  | 'manage_store_products'
+  | 'manage_store_categories'
+  | 'manage_store_variants'
+  | 'manage_store_media'
+  | 'manage_store_attributes'
+  | 'manage_store_inventory'
+  | 'manage_store_pricing';
+
+// ─── Marketplace Foundation Types ─────────────────────────────────
+
+export type ProductStatus = 'draft' | 'published' | 'archived';
+
+export type AttributeType = 'text' | 'number' | 'boolean' | 'select' | 'multi_select';
+
+export type PriceType = 'base' | 'sale';
+
+export type MediaType = 'image' | 'video';
+
+export interface ProductCategory {
+  id: string;
+  parentId: string | null;
+  name: string;
+  slug: string;
+  shortDescription: string | null;
+  description: string | null;
+  icon: string | null;
+  imageUrl: string | null;
+  bannerUrl: string | null;
+  sortOrder: number;
+  isActive: boolean;
+  showOnHome: boolean;
+  showInNavigation: boolean;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Product {
+  id: string;
+  categoryId: string;
+  name: string;
+  slug: string;
+  sku: string | null;
+  shortDescription: string | null;
+  description: string | null;
+  brandId: string | null;
+  sellerId: string | null;
+  producerId: string | null;
+  status: ProductStatus;
+  isPublished: boolean;
+  isActive: boolean;
+  isNew: boolean;
+  isSelected: boolean;
+  isEconomic: boolean;
+  isBestSeller: boolean;
+  isPopular: boolean;
+  isSpecialOffer: boolean;
+  isDiscounted: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductVariant {
+  id: string;
+  productId: string;
+  sku: string | null;
+  name: string;
+  attributes: Record<string, unknown>;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductMedia {
+  id: string;
+  productId: string;
+  mediaType: MediaType;
+  url: string;
+  altText: string | null;
+  sortOrder: number;
+  isPrimary: boolean;
+  createdAt: string;
+}
+
+export interface ProductAttributeDefinition {
+  id: string;
+  categoryId: string | null;
+  name: string;
+  slug: string;
+  attributeType: AttributeType;
+  options: Record<string, unknown> | null;
+  isFilterable: boolean;
+  isRequired: boolean;
+  sortOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductAttributeValue {
+  id: string;
+  productId: string;
+  attributeDefinitionId: string;
+  value: unknown;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ProductInventory {
+  id: string;
+  productId: string;
+  variantId: string | null;
+  stockQuantity: number;
+  reservedQuantity: number;
+  lowStockThreshold: number;
+  allowBackorder: boolean;
+  updatedAt: string;
+}
+
+export interface ProductPrice {
+  id: string;
+  productId: string;
+  variantId: string | null;
+  priceType: PriceType;
+  amount: number;
+  currency: string;
+  startsAt: string | null;
+  endsAt: string | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface Profile {
   id: string;

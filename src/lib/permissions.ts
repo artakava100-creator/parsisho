@@ -12,6 +12,13 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'manage_missions',
     'manage_businesses',
     'manage_content',
+    'manage_store_products',
+    'manage_store_categories',
+    'manage_store_variants',
+    'manage_store_media',
+    'manage_store_attributes',
+    'manage_store_inventory',
+    'manage_store_pricing',
   ],
   super_admin: [
     'manage_auctions',
@@ -23,6 +30,13 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'manage_businesses',
     'manage_content',
     'manage_settings',
+    'manage_store_products',
+    'manage_store_categories',
+    'manage_store_variants',
+    'manage_store_media',
+    'manage_store_attributes',
+    'manage_store_inventory',
+    'manage_store_pricing',
   ],
 };
 
