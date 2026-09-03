@@ -1,13 +1,22 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
-  ArrowRight, ShoppingCart, CheckCircle, XCircle, Store, AlertCircle,
+  ArrowRight,
+  ShoppingCart,
+  CheckCircle,
+  XCircle,
+  Store,
+  Minus,
+  Plus,
+  ChevronLeft,
 } from 'lucide-react';
-import { Card } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { ProductBadge } from '@/components/marketplace/ProductBadge';
+import { ProductGallery } from '@/components/marketplace/ProductGallery';
+import { VariantSelector } from '@/components/marketplace/VariantSelector';
+import { TrustBanner } from '@/components/marketplace/TrustBanner';
 import { formatCurrency, toPersianDigits } from '@/lib/persian';
 import {
   useProductBySlug,
@@ -20,21 +29,20 @@ import { useCategoryById } from '@/hooks/useCategories';
 import { useCartStore, type CartProduct } from '@/stores/cart-store';
 import { useToast } from '@/providers/useToast';
 
-function ProductDetailSkeleton() {
+function DetailSkeleton() {
   return (
-    <Card className="p-0 overflow-hidden">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-        <Skeleton className="aspect-square md:aspect-auto md:min-h-[360px] rounded-none" />
-        <div className="p-6 flex flex-col gap-4">
-          <Skeleton className="h-5 w-24" />
-          <Skeleton className="h-6 w-3/4" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-2/3" />
-          <Skeleton className="h-12 w-full" />
-          <Skeleton className="h-12 w-full" />
-        </div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <Skeleton className="aspect-square rounded-xl" />
+      <div className="flex flex-col gap-4">
+        <Skeleton className="h-5 w-24" />
+        <Skeleton className="h-7 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-2/3" />
+        <Skeleton className="h-px w-full" />
+        <Skeleton className="h-8 w-32" />
+        <Skeleton className="h-12 w-full" />
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -43,6 +51,7 @@ export function ProductDetailPage() {
   const addItem = useCartStore((s) => s.addItem);
   const toast = useToast();
   const [quantity, setQuantity] = useState(1);
+  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
 
   const { data: product, isLoading, isError } = useProductBySlug(slug);
   const { data: media } = useProductMedia(product?.id);
@@ -53,15 +62,15 @@ export function ProductDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="py-4 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in">
-        <ProductDetailSkeleton />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 animate-fade-in">
+        <DetailSkeleton />
       </div>
     );
   }
 
   if (isError || !product) {
     return (
-      <div className="py-8 px-4 max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <EmptyState
           icon={<Store className="w-8 h-8" />}
           title="محصول پیدا نشد"
@@ -69,7 +78,7 @@ export function ProductDetailPage() {
           action={
             <Link to="/market">
               <Button variant="outline">
-                بازگشت به فروشگاه
+                بازگشت به بازار
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
@@ -80,10 +89,11 @@ export function ProductDetailPage() {
   }
 
   const displayPrice = price?.amount ?? 0;
-  const inStock = inventory ? inventory.availableQuantity > 0 || inventory.allowBackorder : true;
+  const inStock = inventory
+    ? inventory.availableQuantity > 0 || inventory.allowBackorder
+    : true;
   const primaryMedia = media?.find((m) => m.isPrimary) ?? media?.[0];
   const imageUrl = primaryMedia?.url ?? '';
-  const categoryLabel = category?.name ?? '';
 
   const handleAddToCart = () => {
     const cartProduct: CartProduct = {
@@ -98,128 +108,147 @@ export function ProductDetailPage() {
   };
 
   return (
-    <div className="py-4 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in">
-      <nav className="flex items-center gap-2 text-sm text-neutral-500 mb-4">
-        <Link to="/" className="hover:text-neutral-600 transition-colors">میدان شهر</Link>
-        <ArrowRight className="w-3.5 h-3.5" />
-        <Link to="/market" className="hover:text-neutral-600 transition-colors">فروشگاه</Link>
-        <ArrowRight className="w-3.5 h-3.5" />
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 animate-fade-in">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-1.5 text-sm text-neutral-400 mb-6 overflow-x-auto scrollbar-hide">
+        <Link to="/" className="shrink-0 hover:text-neutral-600 transition-colors">
+          خانه
+        </Link>
+        <ChevronLeft className="w-3.5 h-3.5 shrink-0 rotate-180" />
+        <Link to="/market" className="shrink-0 hover:text-neutral-600 transition-colors">
+          بازار
+        </Link>
+        {category && (
+          <>
+            <ChevronLeft className="w-3.5 h-3.5 shrink-0 rotate-180" />
+            <span className="shrink-0 text-neutral-400">{category.name}</span>
+          </>
+        )}
+        <ChevronLeft className="w-3.5 h-3.5 shrink-0 rotate-180" />
         <span className="text-neutral-600 truncate">{product.name}</span>
       </nav>
 
-      <Card className="p-0 overflow-hidden">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-          <div className="aspect-square md:aspect-auto md:min-h-[360px] bg-gradient-to-br from-neutral-200 to-neutral-400 relative">
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt={primaryMedia?.altText ?? product.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-neutral-400">
-                <Store className="w-12 h-12" />
-              </div>
-            )}
-            <div className="absolute top-3 right-3 flex items-center gap-1.5">
-              {product.isNew && (
-                <Badge tone="success" variant="solid">جدید</Badge>
-              )}
-            </div>
-          </div>
-
-          <div className="p-6 flex flex-col gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                {categoryLabel && (
-                  <Badge tone="neutral" variant="soft">{categoryLabel}</Badge>
-                )}
-              </div>
-              <h1 className="text-xl font-extrabold text-neutral-800 mb-3">{product.name}</h1>
-              <p className="text-sm text-neutral-500 leading-relaxed">
-                {product.description ?? product.shortDescription ?? ''}
-              </p>
-            </div>
-
-            {variants && variants.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-neutral-600">مدل‌ها:</p>
-                <div className="flex flex-wrap gap-2">
-                  {variants.map((v) => (
-                    <Badge key={v.id} tone="neutral" variant="soft">{v.name}</Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="py-3 border-y border-neutral-200">
-              <p className="text-xs text-neutral-500 mb-1">قیمت محصول</p>
-              <p className="text-2xl font-extrabold text-primary-700 font-num">
-                {formatCurrency(displayPrice)}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2 text-sm">
-              {inStock ? (
-                <>
-                  <CheckCircle className="w-4 h-4 text-success-600" />
-                  <span className="text-success-700">
-                    {inventory ? `موجود (${toPersianDigits(inventory.availableQuantity)} عدد)` : 'موجود در انبار'}
-                  </span>
-                </>
-              ) : (
-                <>
-                  <XCircle className="w-4 h-4 text-error-600" />
-                  <span className="text-error-700">ناموجود</span>
-                </>
-              )}
-            </div>
-
-            {inStock && (
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-neutral-500">تعداد:</span>
-                <div className="flex items-center gap-1 bg-surface-overlay rounded-lg border border-neutral-300 p-0.5">
-                  <button
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="w-8 h-8 flex items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-200 transition-colors"
-                    aria-label="کاهش تعداد"
-                  >
-                    <span className="text-lg leading-none">−</span>
-                  </button>
-                  <span className="w-10 text-center text-sm font-bold text-neutral-800 font-num">
-                    {toPersianDigits(quantity)}
-                  </span>
-                  <button
-                    onClick={() => setQuantity((q) => q + 1)}
-                    className="w-8 h-8 flex items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-200 transition-colors"
-                    aria-label="افزایش تعداد"
-                  >
-                    <span className="text-lg leading-none">+</span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <div className="flex gap-3 mt-auto">
-              <Button
-                variant="primary"
-                fullWidth
-                size="lg"
-                disabled={!inStock}
-                onClick={handleAddToCart}
-              >
-                <ShoppingCart className="w-5 h-5" />
-                افزودن به سبد خرید
-              </Button>
-              <Link to="/market">
-                <Button variant="outline" size="lg">
-                  بازگشت
-                </Button>
-              </Link>
-            </div>
-          </div>
+      {/* Main content: Gallery | Info */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
+        {/* Gallery */}
+        <div>
+          <ProductGallery media={media} productName={product.name} />
         </div>
-      </Card>
+
+        {/* Product Info */}
+        <div className="flex flex-col gap-5">
+          {/* Badges */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {product.isNew && <ProductBadge type="new" />}
+            {product.isBestSeller && <ProductBadge type="best-seller" />}
+            {product.isSpecialOffer && <ProductBadge type="special" />}
+            {category && (
+              <span className="px-2.5 py-1 rounded-lg bg-neutral-100 text-neutral-500 text-xs font-medium">
+                {category.name}
+              </span>
+            )}
+          </div>
+
+          {/* Name */}
+          <h1 className="text-xl sm:text-2xl font-extrabold text-neutral-800 leading-tight">
+            {product.name}
+          </h1>
+
+          {/* Description */}
+          {(product.description || product.shortDescription) && (
+            <p className="text-sm text-neutral-500 leading-relaxed">
+              {product.description ?? product.shortDescription}
+            </p>
+          )}
+
+          {/* Variant selector */}
+          {variants && variants.length > 0 && (
+            <VariantSelector
+              variants={variants}
+              selectedId={selectedVariant ?? variants[0]?.id ?? null}
+              onSelect={setSelectedVariant}
+            />
+          )}
+
+          {/* Price */}
+          <div className="py-4 border-y border-neutral-200/80">
+            <span className="text-xs text-neutral-400 block mb-1">قیمت محصول</span>
+            <span className="text-2xl font-extrabold text-primary-700 font-num">
+              {formatCurrency(displayPrice)}
+            </span>
+          </div>
+
+          {/* Stock */}
+          <div className="flex items-center gap-2 text-sm">
+            {inStock ? (
+              <>
+                <CheckCircle className="w-4 h-4 text-success-600" />
+                <span className="text-success-700 font-medium">
+                  {inventory
+                    ? `موجود (${toPersianDigits(inventory.availableQuantity)} عدد)`
+                    : 'موجود در انبار'}
+                </span>
+              </>
+            ) : (
+              <>
+                <XCircle className="w-4 h-4 text-error-600" />
+                <span className="text-error-700 font-medium">ناموجود</span>
+              </>
+            )}
+          </div>
+
+          {/* Quantity + Add to cart */}
+          {inStock && (
+            <div className="flex items-center gap-4 mt-1">
+              <div className="flex items-center gap-0.5 bg-neutral-50 rounded-xl border border-neutral-200 p-1">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-200 transition-colors"
+                  aria-label="کاهش تعداد"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <span className="w-10 text-center text-sm font-bold text-neutral-800 font-num">
+                  {toPersianDigits(quantity)}
+                </span>
+                <button
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-200 transition-colors"
+                  aria-label="افزایش تعداد"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Purchase actions */}
+          <div className="flex gap-3 mt-2">
+            <Button
+              variant="primary"
+              fullWidth
+              size="lg"
+              disabled={!inStock}
+              onClick={handleAddToCart}
+            >
+              <ShoppingCart className="w-5 h-5" />
+              افزودن به سبد خرید
+            </Button>
+          </div>
+
+          {/* Back link */}
+          <Link
+            to="/market"
+            className="inline-flex items-center gap-1.5 text-sm text-neutral-400 hover:text-primary-600 transition-colors mt-1"
+          >
+            <ArrowRight className="w-4 h-4" />
+            بازگشت به بازار
+          </Link>
+        </div>
+      </div>
+
+      {/* Trust banner */}
+      <TrustBanner />
     </div>
   );
 }
