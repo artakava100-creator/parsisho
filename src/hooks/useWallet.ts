@@ -54,6 +54,18 @@ export function useCreatePaymentOrder() {
   });
 }
 
+export function useCreateCustomPaymentOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ amount, idempotencyKey }: { amount: number; idempotencyKey: string }) =>
+      walletService.createCustomPaymentOrder(amount, idempotencyKey),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['payment-orders'] });
+    },
+  });
+}
+
 export function useConfirmPayment() {
   const queryClient = useQueryClient();
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Wallet as WalletIcon,
+  ArrowDownToLine,
   ArrowUpFromLine,
   Lock,
   TrendingUp,
@@ -21,6 +22,7 @@ import {
   useWalletTransactions,
   useParsiPackages,
   useCreatePaymentOrder,
+  useCreateCustomPaymentOrder,
   useConfirmPayment,
   useCancelPaymentOrder,
   usePaymentOrders,
@@ -28,9 +30,10 @@ import {
 import { useToast } from '@/providers/useToast';
 import { normalizeError } from '@/services/api-error';
 import { isGatewayConfigured, gatewayNotConfiguredMessage } from '@/lib/payment-gateway';
-import { formatCurrency, formatNumber, toPersianDigits } from '@/lib/persian';
+import { formatCurrency, formatNumber, toPersianDigits, parsePersianNumber } from '@/lib/persian';
 import { formatJalaliShort, formatTime } from '@/lib/jalali';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -597,9 +600,267 @@ function RecentPaymentOrders() {
   );
 }
 
+const CUSTOM_MIN_AMOUNT = 10_000;
+const CUSTOM_QUICK_AMOUNTS = [50_000, 100_000, 200_000, 500_000];
+
+type CustomTopUpState = 'idle' | 'creating_order' | 'order_created' | 'gateway_redirect' | 'confirming' | 'success' | 'gateway_not_configured' | 'error';
+
+function CustomTopUpModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [amount, setAmount] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [paymentState, setPaymentState] = useState<CustomTopUpState>('idle');
+  const [activeOrder, setActiveOrder] = useState<PaymentOrder | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const createOrder = useCreateCustomPaymentOrder();
+  const confirmPayment = useConfirmPayment();
+  const cancelOrder = useCancelPaymentOrder();
+  const toast = useToast();
+
+  const resetModal = () => {
+    setPaymentState('idle');
+    setActiveOrder(null);
+    setErrorMsg(null);
+    setAmount('');
+    setError(null);
+  };
+
+  const handleClose = () => {
+    resetModal();
+    onClose();
+  };
+
+  const handleCreateOrder = async () => {
+    setError(null);
+    const value = parsePersianNumber(amount);
+    if (isNaN(value) || value <= 0) {
+      setError('مبلغ نامعتبر است');
+      return;
+    }
+    if (value < CUSTOM_MIN_AMOUNT) {
+      setError(`حداقل مبلغ شارژ ${toPersianDigits(CUSTOM_MIN_AMOUNT.toLocaleString('en-US'))} پارسی است`);
+      return;
+    }
+    if (!Number.isInteger(value)) {
+      setError('مبلغ باید عدد صحیح باشد');
+      return;
+    }
+
+    setPaymentState('creating_order');
+    setErrorMsg(null);
+
+    const idempotencyKey = crypto.randomUUID();
+
+    try {
+      const result = await createOrder.mutateAsync({ amount: value, idempotencyKey });
+
+      if (!result.success || !result.paymentOrder) {
+        setErrorMsg(result.error ?? 'خطا در ایجاد سفارش پرداخت');
+        setPaymentState('error');
+        return;
+      }
+
+      setActiveOrder(result.paymentOrder);
+      setPaymentState('order_created');
+
+      if (!isGatewayConfigured()) {
+        setPaymentState('gateway_not_configured');
+        return;
+      }
+
+      setPaymentState('gateway_redirect');
+    } catch (err) {
+      const normalized = normalizeError(err);
+      setErrorMsg(normalized.message);
+      setPaymentState('error');
+    }
+  };
+
+  const handleConfirm = async () => {
+    if (!activeOrder) return;
+    setPaymentState('confirming');
+    setErrorMsg(null);
+
+    try {
+      const result = await confirmPayment.mutateAsync(activeOrder.id);
+
+      if (result.success) {
+        setPaymentState('success');
+        toast.success('پرداخت موفق', `${formatCurrency(activeOrder.amount)} به کیف پول شما اضافه شد`);
+      } else if (result.code === 'gateway_not_configured') {
+        setPaymentState('gateway_not_configured');
+        setErrorMsg(result.error ?? gatewayNotConfiguredMessage);
+      } else {
+        setErrorMsg(result.error ?? 'خطا در تأیید پرداخت');
+        setPaymentState('error');
+      }
+    } catch (err) {
+      const normalized = normalizeError(err);
+      setErrorMsg(normalized.message);
+      setPaymentState('error');
+    }
+  };
+
+  const handleCancel = async () => {
+    if (!activeOrder) return;
+    try {
+      await cancelOrder.mutateAsync(activeOrder.id);
+      toast.info('سفارش لغو شد', 'سفارش پرداخت لغو شد');
+    } catch {
+      // ignore
+    }
+    handleClose();
+  };
+
+  return (
+    <Modal open={open} onClose={handleClose} title="شارژ مبلغ دلخواه" size="sm">
+      <div className="space-y-5">
+        {paymentState === 'idle' && (
+          <>
+            <div className="w-14 h-14 rounded-xl bg-primary-50 border border-primary-500/20 flex items-center justify-center mx-auto mb-4">
+              <ArrowDownToLine className="w-7 h-7 text-primary-600" />
+            </div>
+
+            <Input
+              label="مبلغ شارژ (پارسی)"
+              type="text"
+              inputMode="numeric"
+              placeholder="مثلاً ۱۰۰٬۰۰۰"
+              dir="ltr"
+              value={amount}
+              onChange={(e) => {
+                setAmount(e.target.value);
+                if (error) setError(null);
+              }}
+              error={error ?? undefined}
+              hint={`حداقل مبلغ: ${toPersianDigits(CUSTOM_MIN_AMOUNT.toLocaleString('en-US'))} پارسی`}
+            />
+
+            <div className="grid grid-cols-4 gap-2">
+              {CUSTOM_QUICK_AMOUNTS.map((amt) => (
+                <button
+                  key={amt}
+                  onClick={() => {
+                    setAmount(toPersianDigits(amt.toLocaleString('en-US')));
+                    if (error) setError(null);
+                  }}
+                  className="px-2 py-2 rounded-lg bg-surface-overlay border border-neutral-300 hover:border-primary-400 text-sm text-neutral-600 hover:text-primary-700 transition-colors font-num"
+                >
+                  {toPersianDigits((amt / 1000).toFixed(0))} ه
+                </button>
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <Button variant="primary" fullWidth onClick={handleCreateOrder} loading={createOrder.isPending}>
+                {!createOrder.isPending && <CreditCard className="w-4 h-4" />}
+                ادامه پرداخت
+              </Button>
+              <Button variant="ghost" onClick={handleClose}>
+                انصراف
+              </Button>
+            </div>
+          </>
+        )}
+
+        {paymentState === 'creating_order' && (
+          <div className="py-4">
+            <div className="w-12 h-12 rounded-full border-2 border-primary-400 border-t-transparent animate-spin mx-auto mb-4" />
+            <p className="text-sm text-neutral-500 text-center">در حال ایجاد سفارش پرداخت...</p>
+          </div>
+        )}
+
+        {paymentState === 'order_created' && (
+          <div className="py-4 text-center">
+            <CheckCircle2 className="w-12 h-12 text-success-600 mx-auto mb-4" />
+            <p className="text-sm text-neutral-500 mb-4">سفارش پرداخت ایجاد شد</p>
+            <Button variant="primary" fullWidth onClick={handleConfirm}>
+              تأیید پرداخت
+            </Button>
+          </div>
+        )}
+
+        {paymentState === 'gateway_redirect' && (
+          <div className="py-4 text-center">
+            <div className="w-12 h-12 rounded-xl bg-primary-50 border border-primary-500/20 flex items-center justify-center mx-auto mb-4">
+              <CreditCard className="w-6 h-6 text-primary-600" />
+            </div>
+            <p className="text-sm text-neutral-500 mb-4">در حال انتقال به درگاه پرداخت...</p>
+            <Button variant="primary" fullWidth onClick={handleConfirm} loading={confirmPayment.isPending}>
+              تأیید بازگشت از درگاه
+            </Button>
+          </div>
+        )}
+
+        {paymentState === 'confirming' && (
+          <div className="py-4 text-center">
+            <div className="w-12 h-12 rounded-full border-2 border-primary-400 border-t-transparent animate-spin mx-auto mb-4" />
+            <p className="text-sm text-neutral-500">در حال تأیید پرداخت...</p>
+          </div>
+        )}
+
+        {paymentState === 'success' && (
+          <div className="py-4 text-center">
+            <CheckCircle2 className="w-16 h-16 text-success-600 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-neutral-800 mb-2">پرداخت موفق</h3>
+            <p className="text-sm text-neutral-500 mb-4">
+              {activeOrder && formatCurrency(activeOrder.amount)} به کیف پول شما اضافه شد
+            </p>
+            <Button variant="primary" fullWidth onClick={handleClose}>باشه</Button>
+          </div>
+        )}
+
+        {paymentState === 'gateway_not_configured' && (
+          <div className="py-4 text-center">
+            <div className="w-14 h-14 rounded-xl bg-warning-50 border border-warning-500/20 flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-7 h-7 text-warning-600" />
+            </div>
+            <h3 className="text-base font-bold text-neutral-800 mb-2">درگاه پرداخت فعال نیست</h3>
+            <p className="text-sm text-neutral-500 mb-2">
+              سفارش پرداخت با موفقیت ایجاد شد، اما درگاه پرداخت هنوز فعال نشده است.
+            </p>
+            <p className="text-xs text-neutral-500 mb-4">
+              پس از فعال‌سازی درگاه، می‌توانید پرداخت را تکمیل کنید.
+            </p>
+            {activeOrder && (
+              <div className="p-3 rounded-lg bg-neutral-100/50 border border-neutral-300/50 mb-4 text-right">
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-neutral-500">شناسه سفارش</span>
+                  <span className="text-neutral-600 font-num" dir="ltr">{activeOrder.id.slice(0, 8)}</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-neutral-500">وضعیت</span>
+                  <Badge tone="warning" variant="soft">{PAYMENT_STATUS_LABELS[activeOrder.status]}</Badge>
+                </div>
+              </div>
+            )}
+            <div className="flex gap-3">
+              <Button variant="ghost" fullWidth onClick={handleCancel} loading={cancelOrder.isPending}>
+                لغو سفارش
+              </Button>
+              <Button variant="outline" onClick={handleClose}>بستن</Button>
+            </div>
+          </div>
+        )}
+
+        {paymentState === 'error' && (
+          <div className="py-4 text-center">
+            <div className="w-14 h-14 rounded-xl bg-error-50 border border-error-500/20 flex items-center justify-center mx-auto mb-4">
+              <XCircle className="w-7 h-7 text-error-600" />
+            </div>
+            <h3 className="text-base font-bold text-neutral-800 mb-2">خطا</h3>
+            <p className="text-sm text-error-700 mb-4">{errorMsg}</p>
+            <Button variant="primary" fullWidth onClick={() => { setPaymentState('idle'); setErrorMsg(null); }}>تلاش مجدد</Button>
+          </div>
+        )}
+      </div>
+    </Modal>
+  );
+}
+
 export function WalletPage() {
   const { data: wallet, isLoading: walletLoading } = useWallet();
   const { data: transactions, isLoading: txLoading } = useWalletTransactions();
+  const [showCustomTopUp, setShowCustomTopUp] = useState(false);
   return (
     <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in">
       <Link
@@ -625,6 +886,10 @@ export function WalletPage() {
       </div>
 
       <div className="flex gap-3 mb-8">
+        <Button variant="outline" size="sm" onClick={() => setShowCustomTopUp(true)}>
+          <ArrowDownToLine className="w-4 h-4" />
+          شارژ مبلغ دلخواه
+        </Button>
         <Button variant="ghost" size="sm" disabled>
           <ArrowUpFromLine className="w-4 h-4" />
           برداشت
@@ -690,6 +955,7 @@ export function WalletPage() {
         </p>
       </div>
 
+      <CustomTopUpModal open={showCustomTopUp} onClose={() => setShowCustomTopUp(false)} />
     </div>
   );
 }
