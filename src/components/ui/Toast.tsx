@@ -11,10 +11,10 @@ const iconMap: Record<NotificationType, typeof CheckCircle2> = {
 };
 
 const styleMap: Record<NotificationType, string> = {
-  success: 'border-success-300 text-success-700',
-  error: 'border-error-300 text-error-700',
-  warning: 'border-warning-300 text-warning-700',
-  info: 'border-secondary-300 text-secondary-700',
+  success: 'border-success-200 text-success-700',
+  error: 'border-error-200 text-error-700',
+  warning: 'border-warning-200 text-warning-700',
+  info: 'border-info-200 text-info-700',
 };
 
 export function ToastContainer() {
@@ -36,7 +36,7 @@ export function ToastContainer() {
           <div
             key={toast.id}
             className={cn(
-              'glass border rounded-lg p-4 shadow-lg animate-scale-in flex items-start gap-3',
+              'bg-surface border rounded-lg p-4 shadow-lg animate-scale-in flex items-start gap-3',
               styleMap[toast.type],
             )}
             role="alert"
@@ -45,12 +45,12 @@ export function ToastContainer() {
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-neutral-800">{toast.title}</p>
               {toast.message && (
-                <p className="mt-1 text-sm text-neutral-500">{toast.message}</p>
+                <p className="mt-1 text-sm text-neutral-600">{toast.message}</p>
               )}
             </div>
             <button
               onClick={() => dismiss(toast.id)}
-              className="text-neutral-500 hover:text-neutral-700 transition-colors shrink-0"
+              className="flex items-center justify-center w-6 h-6 rounded text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 transition-colors shrink-0"
               aria-label="بستن"
             >
               <X className="w-4 h-4" />

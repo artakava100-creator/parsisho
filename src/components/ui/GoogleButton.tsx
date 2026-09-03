@@ -10,7 +10,7 @@ export function GoogleButton({ onClick, loading, disabled }: GoogleButtonProps) 
       type="button"
       onClick={onClick}
       disabled={disabled || loading}
-      className="w-full h-11 flex items-center justify-center gap-3 rounded-lg bg-white hover:bg-neutral-50 text-neutral-800 font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full h-11 flex items-center justify-center gap-3 rounded-lg bg-surface hover:bg-neutral-50 border border-neutral-300 text-neutral-800 font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {loading ? (
         <span className="w-4 h-4 border-2 border-neutral-400 border-t-transparent rounded-full animate-spin" />

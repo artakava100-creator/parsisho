@@ -1,7 +1,7 @@
 import type { HTMLAttributes } from 'react';
 import { cn } from '@/lib/cn';
 
-type Tone = 'primary' | 'secondary' | 'accent' | 'success' | 'warning' | 'error' | 'neutral';
+type Tone = 'primary' | 'accent' | 'success' | 'warning' | 'error' | 'info' | 'neutral' | 'local';
 type Variant = 'solid' | 'soft' | 'outline';
 
 interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
@@ -11,34 +11,39 @@ interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 
 const toneStyles: Record<Tone, Record<Variant, string>> = {
   primary: {
-    solid: 'bg-primary-700 text-neutral-800',
+    solid: 'bg-primary-700 text-white',
     soft: 'bg-primary-50 text-primary-700',
     outline: 'border border-primary-300 text-primary-700',
   },
-  secondary: {
-    solid: 'bg-secondary-600 text-neutral-800',
-    soft: 'bg-secondary-50 text-secondary-700',
-    outline: 'border border-secondary-300 text-secondary-700',
-  },
   accent: {
-    solid: 'bg-accent-600 text-neutral-800',
+    solid: 'bg-accent-500 text-neutral-900',
     soft: 'bg-accent-50 text-accent-700',
     outline: 'border border-accent-300 text-accent-700',
   },
   success: {
-    solid: 'bg-success-500 text-neutral-800',
+    solid: 'bg-success-600 text-white',
     soft: 'bg-success-50 text-success-700',
     outline: 'border border-success-300 text-success-700',
   },
   warning: {
-    solid: 'bg-warning-500 text-neutral-800',
+    solid: 'bg-warning-500 text-neutral-900',
     soft: 'bg-warning-50 text-warning-700',
     outline: 'border border-warning-300 text-warning-700',
   },
   error: {
-    solid: 'bg-error-500 text-neutral-800',
+    solid: 'bg-error-600 text-white',
     soft: 'bg-error-50 text-error-700',
     outline: 'border border-error-300 text-error-700',
+  },
+  info: {
+    solid: 'bg-info-500 text-white',
+    soft: 'bg-info-50 text-info-700',
+    outline: 'border border-info-300 text-info-700',
+  },
+  local: {
+    solid: 'bg-local-600 text-white',
+    soft: 'bg-local-50 text-local-700',
+    outline: 'border border-local-300 text-local-700',
   },
   neutral: {
     solid: 'bg-neutral-200 text-neutral-800',

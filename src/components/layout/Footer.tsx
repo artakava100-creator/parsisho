@@ -32,14 +32,14 @@ const footerSections = [
 
 export function Footer() {
   return (
-    <footer className="hidden lg:block border-t border-neutral-200 bg-surface-sunken/50 mt-16">
+    <footer className="hidden lg:block border-t border-neutral-200 bg-neutral-100 mt-16">
       <div className="max-w-7xl mx-auto px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="md:col-span-1">
             <div className="flex items-center gap-2.5 mb-4">
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center">
-                <span className="text-neutral-800 font-extrabold text-lg">پ</span>
+                <span className="text-white font-extrabold text-lg">پ</span>
               </div>
               <span className="text-xl font-extrabold text-neutral-800">پارسیشو</span>
             </div>
@@ -51,7 +51,7 @@ export function Footer() {
           {/* Link sections */}
           {footerSections.map((section) => (
             <div key={section.title}>
-              <h4 className="text-sm font-bold text-neutral-700 mb-4">{section.title}</h4>
+              <h4 className="text-sm font-bold text-neutral-800 mb-4">{section.title}</h4>
               <ul className="space-y-2.5">
                 {section.links.map((link) => (
                   <li key={link.to}>

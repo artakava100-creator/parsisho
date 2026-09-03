@@ -11,7 +11,7 @@ export function Card({ className, hover = false, glass = true, ...props }: CardP
     <div
       className={cn(
         'rounded-xl overflow-hidden',
-        glass ? 'glass' : 'bg-surface-raised border border-neutral-200',
+        glass ? 'glass' : 'bg-surface border border-neutral-200',
         hover && 'glass-hover cursor-pointer',
         className,
       )}

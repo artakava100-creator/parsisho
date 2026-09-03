@@ -27,12 +27,12 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             id={inputId}
             className={cn(
               'w-full h-11 pl-11 pr-4 rounded-lg',
-              'bg-white border border-neutral-300',
-              'text-neutral-800 placeholder:text-neutral-500',
+              'bg-surface border border-neutral-300',
+              'text-neutral-800 placeholder:text-neutral-400',
               'transition-colors duration-normal',
-              'focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
-              error && 'border-error-500 focus:border-error-500 focus:ring-error-500',
+              'focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20',
+              'disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-neutral-100',
+              error && 'border-error-500 focus:border-error-500 focus:ring-error-500/20',
               className,
             )}
             {...props}

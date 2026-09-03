@@ -1,7 +1,7 @@
 import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/cn';
 
-type Variant = 'primary' | 'secondary' | 'accent' | 'ghost' | 'outline' | 'danger';
+type Variant = 'primary' | 'secondary' | 'accent' | 'ghost' | 'outline' | 'danger' | 'success' | 'link';
 type Size = 'sm' | 'md' | 'lg' | 'icon';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -13,17 +13,21 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantStyles: Record<Variant, string> = {
   primary:
-    'bg-primary-700 hover:bg-primary-600 text-neutral-800 font-semibold shadow-glow-primary',
+    'bg-primary-700 hover:bg-primary-600 active:bg-primary-800 text-white font-semibold shadow-glow-primary',
   secondary:
-    'bg-secondary-600 hover:bg-secondary-500 text-neutral-800 font-semibold',
+    'bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 text-neutral-800 font-semibold',
   accent:
-    'bg-accent-600 hover:bg-accent-500 text-neutral-800 font-semibold shadow-glow-accent',
+    'bg-accent-500 hover:bg-accent-400 active:bg-accent-600 text-neutral-900 font-semibold shadow-glow-accent',
   ghost:
-    'bg-transparent hover:bg-surface-overlay text-neutral-600 hover:text-neutral-800',
+    'bg-transparent hover:bg-neutral-100 text-neutral-600 hover:text-neutral-800',
   outline:
-    'border border-neutral-300 hover:border-primary-500 text-neutral-700 hover:text-primary-700 bg-transparent',
+    'border border-neutral-300 hover:border-primary-500 hover:bg-primary-50 text-neutral-700 hover:text-primary-700 bg-transparent',
   danger:
-    'bg-error-600 hover:bg-error-500 text-neutral-800 font-semibold',
+    'bg-error-600 hover:bg-error-500 active:bg-error-700 text-white font-semibold',
+  success:
+    'bg-success-600 hover:bg-success-500 active:bg-success-700 text-white font-semibold',
+  link:
+    'bg-transparent text-primary-700 hover:text-primary-600 hover:underline font-medium',
 };
 
 const sizeStyles: Record<Size, string> = {

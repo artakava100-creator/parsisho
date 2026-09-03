@@ -3,107 +3,144 @@
 @tailwind utilities;
 
 /* ============================================================
-   PARSISHO — DESIGN TOKENS
-   Color direction: warm light, petroleum blue + light brick
+   PARSISHO — GLOBAL DESIGN SYSTEM
+   Blue core brand · Orange accent · Warm neutral background
+   Deep navy depth · Olive for Local · Semantic system states
    ============================================================ */
 @layer base {
   :root {
-    /* ---- Color: Primary (Petroleum Blue) ---- */
-    --color-primary-50: #f2f6f8;
-    --color-primary-100: #dde9ee;
-    --color-primary-200: #bcd3dd;
-    --color-primary-300: #8fb5c6;
-    --color-primary-400: #5d90aa;
-    --color-primary-500: #3a7090;
-    --color-primary-600: #255775;
-    --color-primary-700: #173B4A;
-    --color-primary-800: #122e3a;
-    --color-primary-900: #0e2229;
-    --color-primary-950: #08151b;
+    /* ---- Primary (Blue) ---- */
+    --color-primary-50: #F4FAFE;
+    --color-primary-100: #E8F3FC;
+    --color-primary-200: #BFD9F9;
+    --color-primary-300: #8FC0F5;
+    --color-primary-400: #4FA0EF;
+    --color-primary-500: #2196F3;
+    --color-primary-600: #1976C9;
+    --color-primary-700: #155A8A;
+    --color-primary-800: #123A5A;
+    --color-primary-900: #0B1F33;
+    --color-primary-950: #07121F;
 
-    /* ---- Color: Secondary (Blue-Gray) ---- */
-    --color-secondary-50: #f3f5f7;
-    --color-secondary-100: #e3e9ed;
-    --color-secondary-200: #c7d4dc;
-    --color-secondary-300: #a0b5c4;
-    --color-secondary-400: #7a91a5;
-    --color-secondary-500: #5a728a;
-    --color-secondary-600: #43596e;
-    --color-secondary-700: #36475a;
-    --color-secondary-800: #2d3a48;
-    --color-secondary-900: #26303b;
-    --color-secondary-950: #1a2129;
+    /* ---- Accent (Orange) ---- */
+    --color-accent-50: #FFF8EE;
+    --color-accent-100: #FFF0DC;
+    --color-accent-200: #FFD9A8;
+    --color-accent-300: #FFC275;
+    --color-accent-400: #FFAB42;
+    --color-accent-500: #FF8A00;
+    --color-accent-600: #E87500;
+    --color-accent-700: #D96500;
+    --color-accent-800: #B05400;
+    --color-accent-900: #8A4200;
+    --color-accent-950: #4A2300;
 
-    /* ---- Color: Accent (Light Brick) ---- */
-    --color-accent-50: #fdf5f2;
-    --color-accent-100: #fae6df;
-    --color-accent-200: #f4cdbf;
-    --color-accent-300: #ecab94;
-    --color-accent-400: #e08568;
-    --color-accent-500: #d26e4d;
-    --color-accent-600: #C65D3A;
-    --color-accent-700: #a14a2e;
-    --color-accent-800: #7e3a24;
-    --color-accent-900: #5e2c1c;
-    --color-accent-950: #331610;
+    /* ---- Local (Olive) ---- */
+    --color-local-50: #F7F8F1;
+    --color-local-100: #EEF0E2;
+    --color-local-200: #DDE1C5;
+    --color-local-300: #C5CBA5;
+    --color-local-400: #A8AF85;
+    --color-local-500: #8B9265;
+    --color-local-600: #737A45;
+    --color-local-700: #5E6438;
+    --color-local-800: #4A4E2C;
+    --color-local-900: #3A3D23;
+    --color-local-950: #1F2012;
 
-    /* ---- Color: Success (Green) ---- */
-    --color-success-50: #f0fdf4;
-    --color-success-100: #dcfce7;
-    --color-success-200: #bbf7d0;
-    --color-success-300: #86efac;
-    --color-success-400: #4ade80;
-    --color-success-500: #22c55e;
-    --color-success-600: #16a34a;
-    --color-success-700: #15803d;
-    --color-success-800: #166534;
-    --color-success-900: #14532d;
-    --color-success-950: #052e16;
+    /* ---- Neutral ---- */
+    --color-neutral-50: #F8F7F4;
+    --color-neutral-100: #F3F5F7;
+    --color-neutral-200: #E2E7EC;
+    --color-neutral-300: #CDD5DC;
+    --color-neutral-400: #8A949E;
+    --color-neutral-500: #5F6B76;
+    --color-neutral-600: #475158;
+    --color-neutral-700: #2D373F;
+    --color-neutral-800: #17212B;
+    --color-neutral-900: #0F1619;
+    --color-neutral-950: #080C0E;
 
-    /* ---- Color: Warning (Orange) ---- */
-    --color-warning-50: #fff7ed;
-    --color-warning-100: #ffedd5;
-    --color-warning-200: #fed7aa;
-    --color-warning-300: #fdba74;
-    --color-warning-400: #fb923c;
-    --color-warning-500: #f97316;
-    --color-warning-600: #ea580c;
-    --color-warning-700: #c2410c;
-    --color-warning-800: #9a3412;
-    --color-warning-900: #7c2d12;
-    --color-warning-950: #431407;
+    /* ---- Success ---- */
+    --color-success-50: #E8F6F0;
+    --color-success-100: #C9EAD9;
+    --color-success-200: #A8DCC0;
+    --color-success-300: #7CCDA1;
+    --color-success-400: #3FAA7E;
+    --color-success-500: #16845B;
+    --color-success-600: #137050;
+    --color-success-700: #0F5C42;
+    --color-success-800: #0B4836;
+    --color-success-900: #073526;
+    --color-success-950: #04231A;
 
-    /* ---- Color: Error (Red) ---- */
-    --color-error-50: #fef2f2;
-    --color-error-100: #fee2e2;
-    --color-error-200: #fecaca;
-    --color-error-300: #fca5a5;
-    --color-error-400: #f87171;
-    --color-error-500: #ef4444;
-    --color-error-600: #dc2626;
-    --color-error-700: #b91c1c;
-    --color-error-800: #991b1b;
-    --color-error-900: #7f1d1d;
-    --color-error-950: #450a0a;
+    /* ---- Warning ---- */
+    --color-warning-50: #FFF6DF;
+    --color-warning-100: #FFEAB8;
+    --color-warning-200: #FDD984;
+    --color-warning-300: #FAC54A;
+    --color-warning-400: #E8B020;
+    --color-warning-500: #B77900;
+    --color-warning-600: #9E6800;
+    --color-warning-700: #825500;
+    --color-warning-800: #664200;
+    --color-warning-900: #4D3300;
+    --color-warning-950: #2A1B00;
 
-    /* ---- Neutral (Slate — standard ramp, works for light theme) ---- */
-    --color-neutral-50: #f8fafc;
-    --color-neutral-100: #f1f5f9;
-    --color-neutral-200: #e2e8f0;
-    --color-neutral-300: #cbd5e1;
-    --color-neutral-400: #94a3b8;
-    --color-neutral-500: #64748b;
-    --color-neutral-600: #475569;
-    --color-neutral-700: #334155;
-    --color-neutral-800: #1e293b;
-    --color-neutral-900: #0f172a;
-    --color-neutral-950: #020617;
+    /* ---- Error ---- */
+    --color-error-50: #FDECEC;
+    --color-error-100: #FAD5D5;
+    --color-error-200: #F5B5B5;
+    --color-error-300: #EE8E8E;
+    --color-error-400: #E56969;
+    --color-error-500: #D64545;
+    --color-error-600: #C03A3A;
+    --color-error-700: #A02E2E;
+    --color-error-800: #822626;
+    --color-error-900: #651D1D;
+    --color-error-950: #420F0F;
 
-    /* ---- Surface (warm light app shell) ---- */
-    --color-surface: #F7F4EE;
-    --color-surface-raised: #FFFFFF;
+    /* ---- Info (shares blue with primary) ---- */
+    --color-info-50: #EAF4FD;
+    --color-info-100: #D0E5FA;
+    --color-info-200: #A5CCF5;
+    --color-info-300: #6FAEEF;
+    --color-info-400: #3A8FE0;
+    --color-info-500: #1976C9;
+    --color-info-600: #155A8A;
+    --color-info-700: #123A5A;
+    --color-info-800: #0B1F33;
+    --color-info-900: #07121F;
+    --color-info-950: #040A14;
+
+    /* ---- Semantic surface tokens ---- */
+    --color-background: #F8F7F4;
+    --color-surface: #FFFFFF;
+    --color-surface-soft: #F3F5F7;
     --color-surface-overlay: #F0EBE0;
     --color-surface-sunken: #EDE7DA;
+    --color-border: #E2E7EC;
+
+    /* ---- Semantic text tokens ---- */
+    --color-text-primary: #17212B;
+    --color-text-secondary: #5F6B76;
+    --color-text-muted: #8A949E;
+
+    /* ---- Semantic action tokens ---- */
+    --color-primary: #155A8A;
+    --color-primary-hover: #1976C9;
+    --color-primary-active: #123A5A;
+    --color-primary-soft: #E8F3FC;
+
+    --color-accent: #D96500;
+    --color-accent-hover: #E87500;
+    --color-accent-active: #B05400;
+    --color-accent-soft: #FFF0DC;
+
+    --color-success-soft: #E8F6F0;
+    --color-error-soft: #FDECEC;
+    --color-warning-soft: #FFF6DF;
+    --color-info-soft: #EAF4FD;
 
     /* ---- Typography ---- */
     --font-sans: 'Vazirmatn', system-ui, -apple-system, sans-serif;
@@ -117,28 +154,28 @@
     --radius-full: 9999px;
 
     /* ---- Shadows ---- */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.10);
-    --shadow-glow-primary: 0 0 24px rgba(23, 59, 74, 0.18);
-    --shadow-glow-accent: 0 0 24px rgba(198, 93, 58, 0.20);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+    --shadow-glow-primary: 0 0 20px rgba(21, 90, 138, 0.15);
+    --shadow-glow-accent: 0 0 20px rgba(255, 138, 0, 0.18);
 
     /* ---- Motion ---- */
     --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
     --dur-fast: 150ms;
-    --dur-normal: 250ms;
+    --dur-normal: 200ms;
     --dur-slow: 400ms;
   }
 
   * {
-    border-color: var(--color-neutral-200);
+    border-color: var(--color-border);
   }
 
   html {
     font-family: var(--font-sans);
-    background-color: var(--color-surface);
-    color: var(--color-neutral-800);
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
@@ -146,6 +183,7 @@
   body {
     margin: 0;
     min-height: 100vh;
+    background-color: var(--color-background);
   }
 
   /* Persian number rendering helpers */
@@ -160,7 +198,7 @@
     height: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: var(--color-surface);
+    background: var(--color-background);
   }
   ::-webkit-scrollbar-thumb {
     background: var(--color-neutral-300);
@@ -178,8 +216,33 @@
 
   /* Selection */
   ::selection {
-    background: var(--color-primary-700);
+    background: var(--color-primary-600);
     color: white;
+  }
+
+  /* ---- Typography hierarchy ---- */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-text-primary);
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  h1 { font-size: 1.875rem; font-weight: 800; }
+  h2 { font-size: 1.5rem; font-weight: 700; }
+  h3 { font-size: 1.25rem; font-weight: 700; }
+  h4 { font-size: 1.125rem; font-weight: 600; }
+
+  p, body {
+    line-height: 1.6;
+  }
+
+  /* Links */
+  a {
+    color: var(--color-primary-700);
+    transition: color var(--dur-normal) var(--ease-out);
+  }
+  a:hover {
+    color: var(--color-primary-600);
   }
 }
 
@@ -187,11 +250,11 @@
    PARSISHO — COMPONENT LAYER
    ============================================================ */
 @layer components {
-  /* Glass surface used across cards */
+  /* Glass surface used across cards and navigation */
   .glass {
-    background: rgba(255, 255, 255, 0.80);
+    background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(226, 231, 236, 0.6);
   }
 
   .glass-hover {
@@ -200,7 +263,7 @@
       transform var(--dur-normal) var(--ease-out);
   }
   .glass-hover:hover {
-    border-color: rgba(23, 59, 74, 0.25);
+    border-color: rgba(21, 90, 138, 0.25);
     box-shadow: var(--shadow-glow-primary);
     transform: translateY(-2px);
   }
@@ -218,6 +281,28 @@
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+
+  /* Consistent card surface */
+  .card-surface {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  /* Soft section background */
+  .section-soft {
+    background: var(--color-surface-soft);
+  }
+
+  /* Primary soft section */
+  .section-primary-soft {
+    background: var(--color-primary-50);
+  }
+
+  /* Accent soft section */
+  .section-accent-soft {
+    background: var(--color-accent-50);
   }
 }
 
@@ -237,9 +322,9 @@
   .animate-shimmer {
     background: linear-gradient(
       90deg,
-      var(--color-surface-raised) 25%,
-      var(--color-surface-overlay) 50%,
-      var(--color-surface-raised) 75%
+      var(--color-surface) 25%,
+      var(--color-surface-soft) 50%,
+      var(--color-surface) 75%
     );
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite;
@@ -262,8 +347,8 @@
     100% { background-position: -200% 0; }
   }
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 12px rgba(23, 59, 74, 0.20); }
-    50% { box-shadow: 0 0 24px rgba(23, 59, 74, 0.35); }
+    0%, 100% { box-shadow: 0 0 12px rgba(21, 90, 138, 0.15); }
+    50% { box-shadow: 0 0 24px rgba(21, 90, 138, 0.30); }
   }
   .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;

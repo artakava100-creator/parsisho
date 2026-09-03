@@ -41,12 +41,13 @@ export function Modal({ open, onClose, title, children, size = 'md', className }
       aria-label={title}
     >
       <div
-        className="absolute inset-0 bg-black/30 backdrop-blur-sm animate-fade-in"
+        className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm animate-fade-in"
         onClick={onClose}
       />
       <div
         className={cn(
-          'relative w-full glass rounded-2xl shadow-lg animate-scale-in',
+          'relative w-full bg-surface rounded-2xl shadow-lg animate-scale-in',
+          'border border-neutral-200',
           sizeMap[size],
           className,
         )}
@@ -56,7 +57,7 @@ export function Modal({ open, onClose, title, children, size = 'md', className }
             <h2 className="text-lg font-bold text-neutral-800">{title}</h2>
             <button
               onClick={onClose}
-              className="text-neutral-500 hover:text-neutral-700 transition-colors"
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 transition-colors"
               aria-label="بستن"
             >
               <X className="w-5 h-5" />

@@ -27,7 +27,7 @@ export function Avatar({ src, alt, name, size = 'md', ring = false, className }:
     <div
       className={cn(
         'relative rounded-full overflow-hidden flex items-center justify-center shrink-0',
-        'bg-surface-overlay text-neutral-600 font-semibold',
+        'bg-neutral-100 text-neutral-600 font-semibold',
         sizeStyles[size],
         ring && 'ring-2 ring-primary-500/50 ring-offset-2 ring-offset-surface',
         className,
