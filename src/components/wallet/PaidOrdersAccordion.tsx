@@ -47,7 +47,7 @@ function PaidOrderItem({ order }: { order: PaymentOrder }) {
       <div className="text-left shrink-0">
         <p className="text-sm font-bold text-neutral-700 font-num">
           {formatNumber(order.amount)}
-          <span className="text-xs font-normal text-neutral-500 mr-1">پارسی</span>
+          <span className="text-xs font-normal text-neutral-500 mr-1">تومان</span>
         </p>
       </div>
     </div>
@@ -83,7 +83,7 @@ export function PaidOrdersAccordion({ orders, isLoading, isError }: Props) {
       >
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-lg bg-primary-50 border border-primary-500/20 flex items-center justify-center">
-            <Receipt className="w-4.5 h-4.5 text-primary-600" />
+            <Receipt className="w-5 h-5 text-primary-600" />
           </div>
           <div className="text-right">
             <h2 className="text-base font-bold text-neutral-800">سفارشات پرداختی</h2>

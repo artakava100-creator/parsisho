@@ -113,7 +113,7 @@ export function TransactionHistoryAccordion({ transactions, isLoading, isError }
       >
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-lg bg-accent-50 border border-accent-500/20 flex items-center justify-center">
-            <TrendingUp className="w-4.5 h-4.5 text-accent-600" />
+            <TrendingUp className="w-5 h-5 text-accent-600" />
           </div>
           <div className="text-right">
             <h2 className="text-base font-bold text-neutral-800">تاریخچه تراکنش‌ها</h2>

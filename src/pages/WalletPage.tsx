@@ -197,7 +197,7 @@ function PackageGrid() {
                 </p>
               )}
               <p className="text-sm text-neutral-500 mb-1">
-                مبلغ پرداختی: {formatNumber(confirmPkg?.price ?? 0)} پارسی
+                مبلغ پرداختی: {formatNumber(confirmPkg?.price ?? 0)} تومان
               </p>
               <div className="flex gap-3 mt-6">
                 <Button variant="primary" fullWidth onClick={handlePurchase}>
@@ -341,7 +341,7 @@ function CustomTopUpModal({ open, onClose }: { open: boolean; onClose: () => voi
       return;
     }
     if (value < CUSTOM_MIN_AMOUNT) {
-      setError(`حداقل مبلغ شارژ ${toPersianDigits(CUSTOM_MIN_AMOUNT.toLocaleString('en-US'))} پارسی است`);
+      setError(`حداقل مبلغ شارژ ${toPersianDigits(CUSTOM_MIN_AMOUNT.toLocaleString('en-US'))} تومان است`);
       return;
     }
     if (!Number.isInteger(value)) {
@@ -425,7 +425,7 @@ function CustomTopUpModal({ open, onClose }: { open: boolean; onClose: () => voi
             </div>
 
             <Input
-              label="مبلغ شارژ (پارسی)"
+              label="مبلغ شارژ (تومان)"
               type="text"
               inputMode="numeric"
               placeholder="مثلاً ۱۰۰٬۰۰۰"
@@ -436,7 +436,7 @@ function CustomTopUpModal({ open, onClose }: { open: boolean; onClose: () => voi
                 if (error) setError(null);
               }}
               error={error ?? undefined}
-              hint={`حداقل مبلغ: ${toPersianDigits(CUSTOM_MIN_AMOUNT.toLocaleString('en-US'))} پارسی`}
+              hint={`حداقل مبلغ: ${toPersianDigits(CUSTOM_MIN_AMOUNT.toLocaleString('en-US'))} تومان`}
             />
 
             <div className="grid grid-cols-4 gap-2">
