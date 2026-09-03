@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { productService } from '@/services/product.service';
-import type { Product } from '@/types';
+import type { Product, PublicProductInventory } from '@/types';
 
 export function useProducts(opts?: {
   categoryId?: string;
@@ -65,7 +65,7 @@ export function useProductMedia(productId: string | undefined) {
 }
 
 export function useProductInventory(productId: string | undefined) {
-  return useQuery({
+  return useQuery<PublicProductInventory | null>({
     queryKey: ['product-inventory', productId],
     queryFn: () => {
       if (!productId) return null;

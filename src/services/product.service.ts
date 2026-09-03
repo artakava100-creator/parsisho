@@ -1,6 +1,6 @@
 import { BaseService } from './base.service';
 import { normalizeError } from './api-error';
-import type { Product, ProductVariant, ProductMedia, ProductInventory, ProductPrice, ApiError } from '@/types';
+import type { Product, ProductVariant, ProductMedia, PublicProductInventory, ProductPrice, ApiError } from '@/types';
 
 interface ProductRow {
   id: string;
@@ -51,15 +51,12 @@ interface MediaRow {
   created_at: string;
 }
 
-interface InventoryRow {
-  id: string;
+interface PublicInventoryRow {
   product_id: string;
-  variant_id: string | null;
   stock_quantity: number;
-  reserved_quantity: number;
+  available_quantity: number;
   low_stock_threshold: number;
   allow_backorder: boolean;
-  updated_at: string;
 }
 
 interface PriceRow {
@@ -131,16 +128,13 @@ function mapMedia(row: MediaRow): ProductMedia {
   };
 }
 
-function mapInventory(row: InventoryRow): ProductInventory {
+function mapPublicInventory(row: PublicInventoryRow): PublicProductInventory {
   return {
-    id: row.id,
     productId: row.product_id,
-    variantId: row.variant_id,
     stockQuantity: row.stock_quantity,
-    reservedQuantity: row.reserved_quantity,
+    availableQuantity: row.available_quantity,
     lowStockThreshold: row.low_stock_threshold,
     allowBackorder: row.allow_backorder,
-    updatedAt: row.updated_at,
   };
 }
 
@@ -251,24 +245,27 @@ export class ProductService extends BaseService {
     return (data as MediaRow[]).map(mapMedia);
   }
 
-  async getInventory(productId: string): Promise<ProductInventory | null> {
+  async getInventory(productId: string): Promise<PublicProductInventory | null> {
     const { data, error } = await this.client
-      .from('product_inventory')
+      .from('product_inventory_public')
       .select('*')
       .eq('product_id', productId)
       .maybeSingle();
 
     if (error) throw normalizeError(error);
     if (!data) return null;
-    return mapInventory(data as InventoryRow);
+    return mapPublicInventory(data as PublicInventoryRow);
   }
 
   async getPrices(productId: string): Promise<ProductPrice[]> {
+    const now = new Date().toISOString();
     const { data, error } = await this.client
       .from('product_prices')
       .select('*')
       .eq('product_id', productId)
       .eq('is_active', true)
+      .or(`starts_at.is.null,starts_at.lte.${now}`)
+      .or(`ends_at.is.null,ends_at.gte.${now}`)
       .order('price_type', { ascending: true });
 
     if (error) throw normalizeError(error);

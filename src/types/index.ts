@@ -133,6 +133,14 @@ export interface ProductInventory {
   updatedAt: string;
 }
 
+export interface PublicProductInventory {
+  productId: string;
+  stockQuantity: number;
+  availableQuantity: number;
+  lowStockThreshold: number;
+  allowBackorder: boolean;
+}
+
 export interface ProductPrice {
   id: string;
   productId: string;
