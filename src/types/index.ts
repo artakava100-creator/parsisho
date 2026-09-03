@@ -574,3 +574,38 @@ export interface UpdateBusinessInput {
   isFeatured?: boolean | null;
   displayOrder?: number | null;
 }
+
+export interface AdSlot {
+  id: string;
+  slotKey: string;
+  page: string;
+  placement: string;
+  devices: string[];
+  isActive: boolean;
+}
+
+export interface Advertisement {
+  id: string;
+  title: string;
+  imageUrl: string;
+  destinationUrl: string;
+  isActive: boolean;
+  priority: number;
+  startsAt: string | null;
+  endsAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  slotIds?: string[];
+}
+
+export interface ResolveAdResult {
+  advertisement: Advertisement | null;
+  slot: { id: string; slotKey: string; page: string; placement: string } | null;
+}
+
+export interface AdAnalytics {
+  advertisementId?: string;
+  title?: string;
+  impressions: number;
+  clicks: number;
+}

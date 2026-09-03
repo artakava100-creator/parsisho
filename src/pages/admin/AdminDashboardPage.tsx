@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Gavel, Wallet, CreditCard, Settings, Gamepad2, Building2 } from 'lucide-react';
+import { Gavel, Wallet, CreditCard, Settings, Gamepad2, Building2, Megaphone } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 
 const adminSections = [
@@ -38,6 +38,12 @@ const adminSections = [
     title: 'مدیریت کسب‌وکارها',
     description: 'ایجاد، ویرایش و مدیریت کسب‌وکارهای محلی',
     icon: Building2,
+  },
+  {
+    to: '/admin/ads',
+    title: 'مدیریت تبلیغات',
+    description: 'ایجاد و مدیریت تبلیغات و موقعیت‌های تبلیغاتی',
+    icon: Megaphone,
   },
 ];
 

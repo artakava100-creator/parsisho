@@ -4,7 +4,7 @@ import { Layout } from '@/components/layout/Layout';
 import { ProtectedRoute, PublicOnlyRoute, AdminRoute } from '@/components/guards/RouteGuards';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 import { PlaceholderPage } from '@/pages/PlaceholderPage';
-import { Gavel, Store, Wallet, Trophy, Gamepad2, Users, Building2, Gift, User, Bell, Settings, ShieldCheck } from 'lucide-react';
+import { Gavel, Store, Wallet, Trophy, Gamepad2, Users, Building2, Gift, User, Bell, Settings, ShieldCheck, Megaphone } from 'lucide-react';
 
 const HomePage = lazy(() => import('@/pages/HomePage').then((m) => ({ default: m.HomePage })));
 const SignInPage = lazy(() => import('@/pages/auth/SignInPage').then((m) => ({ default: m.SignInPage })));
@@ -35,6 +35,7 @@ const GuessItPage = lazy(() => import('@/pages/GuessItPage').then((m) => ({ defa
 const BusinessListPage = lazy(() => import('@/pages/business/BusinessListPage').then((m) => ({ default: m.BusinessListPage })));
 const BusinessDetailPage = lazy(() => import('@/pages/business/BusinessDetailPage').then((m) => ({ default: m.BusinessDetailPage })));
 const AdminBusinessPage = lazy(() => import('@/pages/admin/AdminBusinessPage').then((m) => ({ default: m.AdminBusinessPage })));
+const AdminAdPage = lazy(() => import('@/pages/admin/AdminAdPage').then((m) => ({ default: m.AdminAdPage })));
 
 const placeholders = {
   auctions: { title: 'تالار مزایده', description: 'مزایده‌های زنده و مهیج پارسیشو', icon: <Gavel className="w-8 h-8" /> },
@@ -336,6 +337,17 @@ export function AppRoutes() {
             <AdminRoute>
               <Suspense fallback={<FullPageSpinner />}>
                 <AdminBusinessPage />
+              </Suspense>
+            </AdminRoute>
+          }
+        />
+
+        <Route
+          path="/admin/ads"
+          element={
+            <AdminRoute>
+              <Suspense fallback={<FullPageSpinner />}>
+                <AdminAdPage />
               </Suspense>
             </AdminRoute>
           }

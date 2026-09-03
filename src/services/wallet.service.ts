@@ -147,22 +147,6 @@ export class WalletService extends BaseService {
     return (data as ParsiPackageRow[]).map(mapPackage);
   }
 
-  async purchasePackage(packageId: string): Promise<Wallet> {
-    const { data, error } = await this.client.rpc('purchase_parsi_package', {
-      p_package_id: packageId,
-    });
-
-    if (error) throw normalizeError(error);
-
-    const result = data as Record<string, unknown>;
-    if (!result.success) {
-      throw { message: (result.error as string) ?? 'خطا در خرید پکیج' } as ApiError;
-    }
-
-    const walletData = result.wallet as WalletRow;
-    return mapWallet(walletData);
-  }
-
   async createCustomPaymentOrder(amount: number, idempotencyKey: string): Promise<CreatePaymentOrderResult> {
     const { data, error } = await this.client.rpc('create_custom_payment_order', {
       p_amount: amount,

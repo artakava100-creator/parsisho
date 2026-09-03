@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { walletService } from '@/services/wallet.service';
-import type { Wallet } from '@/types';
+
 
 export function useWallet() {
   return useQuery({
@@ -27,18 +27,6 @@ export function usePaymentOrders() {
   return useQuery({
     queryKey: ['payment-orders'],
     queryFn: () => walletService.getPaymentOrders(),
-  });
-}
-
-export function usePurchasePackage() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (packageId: string) => walletService.purchasePackage(packageId),
-    onSuccess: (wallet: Wallet) => {
-      queryClient.setQueryData(['wallet'], wallet);
-      queryClient.invalidateQueries({ queryKey: ['wallet-transactions'] });
-    },
   });
 }
 

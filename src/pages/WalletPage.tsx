@@ -2,20 +2,14 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Wallet as WalletIcon,
-  ArrowDownToLine,
-  ArrowUpFromLine,
-  Lock,
-  TrendingUp,
-  TrendingDown,
   ArrowLeft,
+  ArrowDownToLine,
   CheckCircle2,
   AlertCircle,
-  Receipt,
-  Sparkles,
-  Gift,
-  Clock,
   XCircle,
   CreditCard,
+  Sparkles,
+  Lock,
 } from 'lucide-react';
 import {
   useWallet,
@@ -31,7 +25,6 @@ import { useToast } from '@/providers/useToast';
 import { normalizeError } from '@/services/api-error';
 import { isGatewayConfigured, gatewayNotConfiguredMessage } from '@/lib/payment-gateway';
 import { formatCurrency, formatNumber, toPersianDigits, parsePersianNumber } from '@/lib/persian';
-import { formatJalaliShort, formatTime } from '@/lib/jalali';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
@@ -39,27 +32,13 @@ import { Badge } from '@/components/ui/Badge';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Modal } from '@/components/ui/Modal';
-import type { WalletTransaction, WalletTxType, WalletTxStatus, ParsiPackage, PaymentOrder, PaymentOrderStatus } from '@/types';
-
-const TX_LABELS: Record<WalletTxType, string> = {
-  deposit: 'شارژ',
-  withdrawal: 'برداشت',
-  auction_bid: 'پیشنهاد مزایده',
-  auction_click: 'کلیک مزایده',
-  auction_refund: 'بازگشت مزایده',
-  direct_purchase: 'خرید مستقیم',
-  reward: 'جایزه',
-  daily_reward: 'جایزه روزانه',
-  referral_reward: 'جایزه دعوت',
-  admin_adjustment: 'تنظیم مدیریت',
-};
-
-const TX_STATUS_LABELS: Record<WalletTxStatus, string> = {
-  pending: 'در انتظار',
-  completed: 'تکمیل شده',
-  failed: 'ناموفق',
-  cancelled: 'لغو شده',
-};
+import { ParsishoBankCard } from '@/components/wallet/ParsishoBankCard';
+import { ParsiPackageCard } from '@/components/wallet/ParsiPackageCard';
+import { PaidOrdersAccordion } from '@/components/wallet/PaidOrdersAccordion';
+import { TransactionHistoryAccordion } from '@/components/wallet/TransactionHistoryAccordion';
+import { CustomTopUpCTA } from '@/components/wallet/CustomTopUpCTA';
+import { AdSlot } from '@/components/ads/AdSlot';
+import type { ParsiPackage, PaymentOrder, PaymentOrderStatus } from '@/types';
 
 const PAYMENT_STATUS_LABELS: Record<PaymentOrderStatus, string> = {
   pending: 'در انتظار پرداخت',
@@ -67,177 +46,6 @@ const PAYMENT_STATUS_LABELS: Record<PaymentOrderStatus, string> = {
   failed: 'پرداخت ناموفق',
   cancelled: 'لغو شده',
 };
-
-function getTxIcon(type: WalletTxType) {
-  return type === 'deposit' || type === 'reward' || type === 'daily_reward' ||
-    type === 'referral_reward' || type === 'auction_refund'
-    ? TrendingUp
-    : TrendingDown;
-}
-
-function getTxTone(type: WalletTxType): 'success' | 'error' | 'warning' | 'primary' | 'accent' | 'neutral' {
-  if (type === 'deposit' || type === 'reward' || type === 'daily_reward' || type === 'referral_reward' || type === 'auction_refund')
-    return 'success';
-  if (type === 'auction_bid' || type === 'auction_click' || type === 'direct_purchase' || type === 'withdrawal')
-    return 'error';
-  if (type === 'admin_adjustment') return 'warning';
-  return 'neutral';
-}
-
-function getPaymentStatusTone(status: PaymentOrderStatus): 'warning' | 'success' | 'error' | 'neutral' {
-  switch (status) {
-    case 'pending': return 'warning';
-    case 'success': return 'success';
-    case 'failed': return 'error';
-    case 'cancelled': return 'neutral';
-  }
-}
-
-function getPaymentStatusIcon(status: PaymentOrderStatus) {
-  switch (status) {
-    case 'pending': return Clock;
-    case 'success': return CheckCircle2;
-    case 'failed': return XCircle;
-    case 'cancelled': return XCircle;
-  }
-}
-
-function PremiumBalanceCard({ wallet, isLoading }: { wallet: ReturnType<typeof useWallet>['data']; isLoading: boolean }) {
-  const available = wallet?.availableBalance ?? 0;
-  const locked = wallet?.lockedBalance ?? 0;
-  const total = available + locked;
-
-  return (
-    <div className="relative group">
-      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-surface-raised via-surface-overlay to-surface-raised border border-neutral-300/50 shadow-lg transition-all duration-slow">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-700/8 via-transparent to-primary-700/5" />
-        <div className="absolute -top-20 -right-20 w-72 h-72 bg-primary-50 rounded-full blur-[100px]" />
-        <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-primary-700/8 rounded-full blur-[80px]" />
-
-        <div className="relative p-6 sm:p-8">
-          <div className="flex items-start justify-between mb-8">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center shadow-glow-primary">
-                <span className="text-neutral-800 font-extrabold text-lg">پ</span>
-              </div>
-              <div>
-                <p className="text-sm font-bold text-neutral-800">پارسیشو</p>
-                <p className="text-[10px] text-neutral-500">بانک پارسی</p>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="w-11 h-8 rounded-md bg-gradient-to-br from-primary-300/30 to-primary-500/20 border border-primary-400/30 flex items-center justify-center">
-                <div className="w-7 h-5 rounded-sm border border-primary-400/20 grid grid-cols-3 grid-rows-2 gap-px">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="bg-primary-400/10" />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <div className="flex items-center gap-1.5 mb-2">
-              <WalletIcon className="w-4 h-4 text-primary-600" />
-              <p className="text-xs text-neutral-500">موجودی قابل استفاده</p>
-            </div>
-            {isLoading ? (
-              <Skeleton className="h-10 w-56" />
-            ) : (
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl sm:text-4xl font-extrabold text-neutral-800 font-num tracking-tight">
-                  {formatNumber(available)}
-                </span>
-                <span className="text-sm font-medium text-primary-700">پارسی</span>
-              </div>
-            )}
-          </div>
-
-          <div className="mb-6 flex items-center gap-2 font-num text-sm text-neutral-600 tracking-widest" dir="ltr">
-            <span>۶۲۱۹</span>
-            <span className="text-neutral-700">••••</span>
-            <span className="text-neutral-700">••••</span>
-            <span>پارسی</span>
-          </div>
-
-          <div className="flex items-center gap-3 pt-4 border-t border-neutral-200/40">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-neutral-200/40">
-              <Lock className="w-3.5 h-3.5 text-warning-600" />
-              <div>
-                <p className="text-[10px] text-neutral-500">مسدود</p>
-                {isLoading ? (
-                  <Skeleton className="h-3.5 w-16 mt-0.5" />
-                ) : (
-                  <p className="text-xs font-bold text-neutral-700 font-num">
-                    {formatNumber(locked)} <span className="text-neutral-500 font-normal">پارسی</span>
-                  </p>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-neutral-200/40">
-              <WalletIcon className="w-3.5 h-3.5 text-primary-600" />
-              <div>
-                <p className="text-[10px] text-neutral-500">کل</p>
-                {isLoading ? (
-                  <Skeleton className="h-3.5 w-16 mt-0.5" />
-                ) : (
-                  <p className="text-xs font-bold text-neutral-700 font-num">
-                    {formatNumber(total)} <span className="text-neutral-500 font-normal">پارسی</span>
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function PackageCard({ pkg, onPurchase }: { pkg: ParsiPackage; onPurchase: () => void }) {
-  const hasBonus = pkg.bonusAmount > 0;
-  const totalAmount = pkg.parsiAmount + pkg.bonusAmount;
-
-  return (
-    <Card className="p-5 flex flex-col items-center text-center group transition-all duration-normal hover:border-primary-300" hover>
-      {hasBonus && (
-        <div className="absolute -top-3 right-4">
-          <Badge tone="success" variant="solid" className="text-[10px] px-2.5 py-1 shadow-md">
-            <Gift className="w-3 h-3" />
-            {toPersianDigits(pkg.bonusAmount.toLocaleString('en-US'))} بونوس
-          </Badge>
-        </div>
-      )}
-
-      <div className="w-12 h-12 rounded-xl bg-primary-50 border border-primary-500/20 flex items-center justify-center mb-4 group-hover:bg-primary-50 transition-colors">
-        <WalletIcon className="w-6 h-6 text-primary-600" />
-      </div>
-
-      <p className="text-2xl font-extrabold text-neutral-800 font-num mb-1">
-        {formatNumber(pkg.parsiAmount)}
-      </p>
-      <p className="text-xs text-neutral-500 mb-1">پارسی</p>
-
-      {hasBonus && (
-        <p className="text-xs text-success-600 font-medium mb-2">
-          مجموع: {formatNumber(totalAmount)} پارسی
-        </p>
-      )}
-
-      <div className="w-full my-3 border-t border-neutral-200/50" />
-
-      <p className="text-sm text-neutral-500 mb-1">مبلغ پرداختی</p>
-      <p className="text-base font-bold text-neutral-700 font-num mb-4">
-        {formatNumber(pkg.price)} <span className="text-xs font-normal text-neutral-500">پارسی</span>
-      </p>
-
-      <Button variant="primary" fullWidth size="sm" onClick={onPurchase}>
-        <CreditCard className="w-4 h-4" />
-        شارژ کیف پول
-      </Button>
-    </Card>
-  );
-}
 
 type PaymentState = 'idle' | 'creating_order' | 'order_created' | 'gateway_redirect' | 'confirming' | 'success' | 'gateway_not_configured' | 'error';
 
@@ -334,7 +142,7 @@ function PackageGrid() {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="p-5">
+          <Card key={i} className="p-5" glass={false}>
             <Skeleton className="w-12 h-12 rounded-xl mx-auto mb-4" />
             <Skeleton className="h-8 w-24 mx-auto mb-2" />
             <Skeleton className="h-3 w-12 mx-auto mb-4" />
@@ -347,11 +155,11 @@ function PackageGrid() {
 
   if (!packages || packages.length === 0) {
     return (
-      <Card className="p-8">
+      <Card className="p-8" glass={false}>
         <EmptyState
           icon={<WalletIcon className="w-8 h-8" />}
-          title="پکیجی موجود نیست"
-          description="در حال حاضر پکیج شارژی موجود نیست. بعداً تلاش کنید."
+          title="بسته‌ای موجود نیست"
+          description="در حال حاضر بسته شارژی موجود نیست. بعداً تلاش کنید."
         />
       </Card>
     );
@@ -361,7 +169,7 @@ function PackageGrid() {
     <>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {packages.map((pkg) => (
-          <PackageCard
+          <ParsiPackageCard
             key={pkg.id}
             pkg={pkg}
             onPurchase={() => {
@@ -379,7 +187,7 @@ function PackageGrid() {
               <div className="w-14 h-14 rounded-xl bg-primary-50 border border-primary-500/20 flex items-center justify-center mx-auto mb-4">
                 <CreditCard className="w-7 h-7 text-primary-600" />
               </div>
-              <h3 className="text-lg font-bold text-neutral-800 mb-2">تأیید خرید پکیج</h3>
+              <h3 className="text-lg font-bold text-neutral-800 mb-2">تأیید خرید بسته</h3>
               <p className="text-sm text-neutral-500 mb-1">
                 خرید <span className="font-bold text-primary-700">{formatCurrency(confirmPkg?.parsiAmount ?? 0)}</span>
               </p>
@@ -493,110 +301,6 @@ function PackageGrid() {
         </div>
       </Modal>
     </>
-  );
-}
-
-function TransactionItem({ tx }: { tx: WalletTransaction }) {
-  const Icon = getTxIcon(tx.type);
-  const tone = getTxTone(tx.type);
-  const isCredit = tx.amount > 0;
-  const toneClasses: Record<string, string> = {
-    success: 'bg-success-50 text-success-600',
-    error: 'bg-error-50 text-error-600',
-    warning: 'bg-warning-50 text-warning-600',
-    primary: 'bg-primary-50 text-primary-600',
-    accent: 'bg-accent-50 text-accent-600',
-    neutral: 'bg-neutral-200/40 text-neutral-500',
-  };
-
-  return (
-    <div className="flex items-center gap-3 py-3.5 border-b border-neutral-200/60 last:border-0">
-      <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${toneClasses[tone]}`}>
-        <Icon className="w-5 h-5" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-medium text-neutral-700">{TX_LABELS[tx.type]}</p>
-          <Badge tone={tone} variant="soft" className="text-[10px] px-2 py-0.5">
-            {isCredit ? 'واریز' : 'برداشت'}
-          </Badge>
-          {tx.status !== 'completed' && (
-            <Badge tone="neutral" variant="outline" className="text-[10px] px-2 py-0.5">
-              {TX_STATUS_LABELS[tx.status]}
-            </Badge>
-          )}
-        </div>
-        <p className="text-xs text-neutral-500 mt-0.5 truncate">
-          {tx.description || TX_LABELS[tx.type]}
-          {' — '}
-          {formatJalaliShort(new Date(tx.createdAt))} {toPersianDigits(formatTime(new Date(tx.createdAt)))}
-        </p>
-      </div>
-      <div className="text-left shrink-0">
-        <p className={`text-sm font-bold font-num ${isCredit ? 'text-success-700' : 'text-error-700'}`}>
-          {isCredit ? '+' : ''}{toPersianDigits(Math.abs(tx.amount).toLocaleString('en-US'))}
-          <span className="text-xs font-normal text-neutral-500 mr-1">پارسی</span>
-        </p>
-        <p className="text-xs text-neutral-600 mt-0.5 font-num">
-          موجودی: {toPersianDigits(tx.balanceAfter.toLocaleString('en-US'))}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function RecentPaymentOrders() {
-  const { data: orders, isLoading } = usePaymentOrders();
-
-  if (isLoading || !orders || orders.length === 0) return null;
-
-  return (
-    <Card className="p-6 mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <Receipt className="w-5 h-5 text-neutral-500" />
-          <h2 className="text-lg font-bold text-neutral-800">سفارش‌های پرداخت</h2>
-        </div>
-        <Badge tone="neutral" variant="soft">
-          {toPersianDigits(orders.length)} سفارش
-        </Badge>
-      </div>
-      <div>
-        {orders.slice(0, 5).map((order) => {
-          const StatusIcon = getPaymentStatusIcon(order.status);
-          const tone = getPaymentStatusTone(order.status);
-          const toneClasses: Record<string, string> = {
-            success: 'bg-success-50 text-success-600',
-            error: 'bg-error-50 text-error-600',
-            warning: 'bg-warning-50 text-warning-600',
-            neutral: 'bg-neutral-200/40 text-neutral-500',
-          };
-          return (
-            <div key={order.id} className="flex items-center gap-3 py-3 border-b border-neutral-200/60 last:border-0">
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${toneClasses[tone]}`}>
-                <StatusIcon className="w-4 h-4" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-neutral-700">
-                  {PAYMENT_STATUS_LABELS[order.status]}
-                </p>
-                <p className="text-xs text-neutral-500 mt-0.5">
-                  {formatJalaliShort(new Date(order.createdAt))} {toPersianDigits(formatTime(new Date(order.createdAt)))}
-                  {' — '}
-                  <span className="font-num" dir="ltr">{order.id.slice(0, 8)}</span>
-                </p>
-              </div>
-              <div className="text-left shrink-0">
-                <p className="text-sm font-bold text-neutral-700 font-num">
-                  {formatNumber(order.amount)}
-                  <span className="text-xs font-normal text-neutral-500 mr-1">پارسی</span>
-                </p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </Card>
   );
 }
 
@@ -859,10 +563,12 @@ function CustomTopUpModal({ open, onClose }: { open: boolean; onClose: () => voi
 
 export function WalletPage() {
   const { data: wallet, isLoading: walletLoading } = useWallet();
-  const { data: transactions, isLoading: txLoading } = useWalletTransactions();
+  const { data: transactions, isLoading: txLoading, isError: txError } = useWalletTransactions();
+  const { data: orders, isLoading: ordersLoading, isError: ordersError } = usePaymentOrders();
   const [showCustomTopUp, setShowCustomTopUp] = useState(false);
+
   return (
-    <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in">
+    <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto animate-fade-in">
       <Link
         to="/"
         className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-600 transition-colors mb-6"
@@ -877,82 +583,52 @@ export function WalletPage() {
         </div>
         <div>
           <h1 className="text-2xl font-extrabold text-neutral-800">بانک پارسیشو</h1>
-          <p className="text-sm text-neutral-500">مدیریت موجودی، پکیج‌ها و تراکنش‌ها</p>
+          <p className="text-sm text-neutral-500">مدیریت موجودی، بسته‌ها و تراکنش‌ها</p>
         </div>
       </div>
 
-      <div className="mb-8">
-        <PremiumBalanceCard wallet={wallet} isLoading={walletLoading} />
-      </div>
-
-      <div className="flex gap-3 mb-8">
-        <Button variant="outline" size="sm" onClick={() => setShowCustomTopUp(true)}>
-          <ArrowDownToLine className="w-4 h-4" />
-          شارژ مبلغ دلخواه
-        </Button>
-        <Button variant="ghost" size="sm" disabled>
-          <ArrowUpFromLine className="w-4 h-4" />
-          برداشت
-        </Button>
-      </div>
-
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-5">
-          <Sparkles className="w-5 h-5 text-primary-600" />
-          <h2 className="text-lg font-bold text-neutral-800">پکیج‌های پارسی</h2>
-        </div>
-        <PackageGrid />
-      </div>
-
-      <RecentPaymentOrders />
-
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Receipt className="w-5 h-5 text-neutral-500" />
-            <h2 className="text-lg font-bold text-neutral-800">تاریخچه تراکنش‌ها</h2>
+      {/* Desktop layout: ad rail + main content */}
+      <div className="flex gap-6">
+        {/* Left advertising rail — desktop only */}
+        <aside className="hidden lg:flex flex-col gap-4 w-56 shrink-0">
+          <div className="sticky top-20 flex flex-col gap-4">
+            <AdSlot slotKey="wallet_sidebar_left_top" device="desktop" />
+            <AdSlot slotKey="wallet_sidebar_left_bottom" device="desktop" />
           </div>
-          {transactions && transactions.length > 0 && (
-            <Badge tone="neutral" variant="soft">
-              {toPersianDigits(transactions.length)} تراکنش
-            </Badge>
-          )}
-        </div>
+        </aside>
 
-        {txLoading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3 py-3">
-                <Skeleton className="w-10 h-10 rounded-lg" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-32" />
-                  <Skeleton className="h-3 w-48" />
-                </div>
-                <Skeleton className="h-6 w-24" />
-              </div>
-            ))}
-          </div>
-        ) : !transactions || transactions.length === 0 ? (
-          <EmptyState
-            icon={<Receipt className="w-8 h-8" />}
-            title="تراکنشی وجود ندارد"
-            description="هنوز تراکنشی در کیف پول شما ثبت نشده است. با خرید پکیج پارسی شروع کنید."
-          />
-        ) : (
+        {/* Main content */}
+        <div className="flex-1 min-w-0 space-y-8">
+          {/* Bank card */}
+          <ParsishoBankCard wallet={wallet} isLoading={walletLoading} />
+
+          {/* Custom top-up CTA */}
+          <CustomTopUpCTA onCustomTopUp={() => setShowCustomTopUp(true)} />
+
+          {/* Parsi Packages */}
           <div>
-            {transactions.map((tx) => (
-              <TransactionItem key={tx.id} tx={tx} />
-            ))}
+            <div className="flex items-center gap-2 mb-5">
+              <Sparkles className="w-5 h-5 text-primary-600" />
+              <h2 className="text-lg font-bold text-neutral-800">بسته‌های پارسی</h2>
+            </div>
+            <PackageGrid />
           </div>
-        )}
-      </Card>
 
-      <div className="mt-6 flex items-start gap-2 px-4">
-        <CheckCircle2 className="w-4 h-4 text-success-600 shrink-0 mt-0.5" />
-        <p className="text-xs text-neutral-600">
-          تمام تراکنش‌ها به‌صورت امن و رمزنگاری‌شده ثبت می‌شوند. موجودی مسدود
-          در مزایده‌های فعال شما، پس از پایان مزایده آزاد می‌شود.
-        </p>
+          {/* Paid Orders */}
+          <PaidOrdersAccordion orders={orders} isLoading={ordersLoading} isError={ordersError} />
+
+          {/* Transaction History */}
+          <TransactionHistoryAccordion transactions={transactions} isLoading={txLoading} isError={txError} />
+
+          {/* Security note */}
+          <div className="flex items-start gap-2 px-4">
+            <Lock className="w-4 h-4 text-success-600 shrink-0 mt-0.5" />
+            <p className="text-xs text-neutral-600">
+              تمام تراکنش‌ها به‌صورت امن و رمزنگاری‌شده ثبت می‌شوند. موجودی مسدود
+              در مزایده‌های فعال شما، پس از پایان مزایده آزاد می‌شود.
+            </p>
+          </div>
+        </div>
       </div>
 
       <CustomTopUpModal open={showCustomTopUp} onClose={() => setShowCustomTopUp(false)} />
