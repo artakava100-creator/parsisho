@@ -22,15 +22,15 @@ export function HomeIntro() {
   if (!c.visible) return null;
 
   return (
-    <section className="relative overflow-hidden">
+    <section className="relative overflow-hidden min-h-[220px] sm:min-h-[260px]">
       {/* Tehran skyline — Alborz mountains, Milad Tower, Azadi Tower */}
-      <div className="absolute inset-0 pointer-events-none opacity-30" aria-hidden="true">
+      <div className="absolute inset-0 pointer-events-none opacity-20" aria-hidden="true">
         <svg
           viewBox="0 0 1200 280"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           className="w-full h-full"
-          preserveAspectRatio="xMidYEnd slice"
+          preserveAspectRatio="xMidYMax meet"
         >
           {/* === Alborz mountain range (background) === */}
           <path
@@ -207,7 +207,7 @@ export function HomeIntro() {
         </svg>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <div className="flex flex-col items-center text-center gap-2.5">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-50 border border-primary-100">
             <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
