@@ -18,6 +18,10 @@ export function formatCurrency(value: number): string {
   return formatNumber(value) + ' پارسی';
 }
 
+export function formatToman(value: number): string {
+  return formatNumber(value) + ' تومان';
+}
+
 export function formatPercent(value: number): string {
   return toPersianDigits(value) + '٪';
 }

@@ -1,5 +1,5 @@
 import { Gavel, Crown } from 'lucide-react';
-import { formatCurrency, toPersianDigits } from '@/lib/persian';
+import { formatToman, toPersianDigits } from '@/lib/persian';
 import { formatRelativeTime } from '@/lib/jalali';
 import { EmptyState } from '@/components/ui/EmptyState';
 import type { BidHistoryEntry } from '@/types';
@@ -81,7 +81,7 @@ export function BidHistory({ bids }: BidHistoryProps) {
                       ? 'text-success-700'
                       : 'text-neutral-700'
                 }`}>
-                  {formatCurrency(bid.amount)}
+                  {formatToman(bid.amount)}
                 </span>
                 <span className="text-xs text-neutral-600 w-20 text-left">
                   {formatRelativeTime(new Date(bid.createdAt))}

@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useAuctionDetail, useAuctions, useIranToday, useServerTime, useProcessDirectPurchase } from '@/hooks/useAuction';
 import { useToast } from '@/providers/useToast';
-import { formatCurrency, toPersianDigits } from '@/lib/persian';
+import { formatToman, toPersianDigits } from '@/lib/persian';
 import { formatTime, formatJalaliDate } from '@/lib/jalali';
 import { CountdownTimer } from '@/components/auction/CountdownTimer';
 import { ClickButton } from '@/components/auction/ClickButton';
@@ -47,11 +47,11 @@ function UpcomingAuctionCard({ auction, label }: { auction: Auction; label: stri
           <div className="grid grid-cols-2 gap-2 pt-1">
             <div>
               <p className="text-[10px] text-neutral-600">قیمت شروع</p>
-              <p className="text-xs font-bold text-primary-700">{formatCurrency(auction.startingPrice)}</p>
+              <p className="text-xs font-bold text-primary-700">{formatToman(auction.startingPrice)}</p>
             </div>
             <div>
               <p className="text-[10px] text-neutral-600">هر کلیک</p>
-              <p className="text-xs font-bold text-warning-700">{formatCurrency(auction.clickCost)}</p>
+              <p className="text-xs font-bold text-warning-700">{formatToman(auction.clickCost)}</p>
             </div>
           </div>
         </div>
@@ -230,7 +230,7 @@ export function AuctionDetailPage() {
             <div className="text-center py-3 border-y border-neutral-200 mb-4">
               <p className="text-xs text-neutral-500 mb-1">قیمت فعلی مزایده</p>
               <p className="text-3xl font-extrabold text-primary-700 font-num tracking-tight">
-                {formatCurrency(auction.currentPrice)}
+                {formatToman(auction.currentPrice)}
               </p>
             </div>
 
@@ -285,7 +285,7 @@ export function AuctionDetailPage() {
                 </div>
                 <div className="flex items-center gap-4 text-xs text-neutral-500">
                   <span>کلیک‌های شما: <span className="font-medium text-neutral-600">{toPersianDigits(userClickCount)}</span></span>
-                  <span>مبلغ مصرف‌شده: <span className="font-medium text-neutral-600">{formatCurrency(userTotalSpent)}</span></span>
+                  <span>مبلغ مصرف‌شده: <span className="font-medium text-neutral-600">{formatToman(userTotalSpent)}</span></span>
                 </div>
               </div>
             )}
@@ -316,7 +316,7 @@ export function AuctionDetailPage() {
                 <div className="grid grid-cols-2 gap-3 mb-4">
                   <div className="p-2.5 rounded-lg bg-neutral-100/40">
                     <p className="text-[10px] text-neutral-500 mb-0.5">قیمت نهایی مزایده</p>
-                    <p className="text-sm font-bold text-success-700">{formatCurrency(auction.currentPrice)}</p>
+                    <p className="text-sm font-bold text-success-700">{formatToman(auction.currentPrice)}</p>
                   </div>
                   <div className="p-2.5 rounded-lg bg-neutral-100/40">
                     <p className="text-[10px] text-neutral-500 mb-0.5">زمان پایان</p>
@@ -328,7 +328,7 @@ export function AuctionDetailPage() {
                   </div>
                   <div className="p-2.5 rounded-lg bg-neutral-100/40">
                     <p className="text-[10px] text-neutral-500 mb-0.5">مبلغ پرداختی برای کلیک‌ها</p>
-                    <p className="text-sm font-bold text-neutral-700">{formatCurrency(userTotalSpent)}</p>
+                    <p className="text-sm font-bold text-neutral-700">{formatToman(userTotalSpent)}</p>
                   </div>
                 </div>
                 <div className="p-3 rounded-lg bg-neutral-200/40 border border-neutral-200">
@@ -361,7 +361,7 @@ export function AuctionDetailPage() {
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   <div className="text-center">
                     <p className="text-xs text-neutral-500 mb-0.5">قیمت نهایی</p>
-                    <p className="text-sm font-bold text-success-700">{formatCurrency(auction.currentPrice)}</p>
+                    <p className="text-sm font-bold text-success-700">{formatToman(auction.currentPrice)}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-xs text-neutral-500 mb-0.5">کلیک‌های شما</p>
@@ -369,7 +369,7 @@ export function AuctionDetailPage() {
                   </div>
                   <div className="text-center">
                     <p className="text-xs text-neutral-500 mb-0.5">مبلغ مصرف‌شده</p>
-                    <p className="text-sm font-bold text-neutral-700">{formatCurrency(userTotalSpent)}</p>
+                    <p className="text-sm font-bold text-neutral-700">{formatToman(userTotalSpent)}</p>
                   </div>
                 </div>
 
@@ -386,9 +386,9 @@ export function AuctionDetailPage() {
                           می‌توانید این کالا را مستقیماً خریداری کنید. اعتبار مشارکت شما در خرید اعمال می‌شود.
                         </p>
                         <div className="flex items-center gap-3 mb-3 text-xs">
-                          <span className="text-neutral-500">قیمت اصلی: <span className="font-bold text-neutral-700">{formatCurrency(auction.originalPrice)}</span></span>
-                          <span className="text-neutral-500">اعتبار شما: <span className="font-bold text-primary-700">{formatCurrency(directPurchaseCredit)}</span></span>
-                          <span className="text-neutral-500">باقی‌مانده: <span className="font-bold text-warning-700">{formatCurrency(directPurchaseRemaining)}</span></span>
+                          <span className="text-neutral-500">قیمت اصلی: <span className="font-bold text-neutral-700">{formatToman(auction.originalPrice)}</span></span>
+                          <span className="text-neutral-500">اعتبار شما: <span className="font-bold text-primary-700">{formatToman(directPurchaseCredit)}</span></span>
+                          <span className="text-neutral-500">باقی‌مانده: <span className="font-bold text-warning-700">{formatToman(directPurchaseRemaining)}</span></span>
                         </div>
                         <Button variant="primary" size="sm" onClick={() => { setPurchaseResult(null); setShowDirectPurchase(true); }}>
                           <ShoppingBag className="w-4 h-4" />
@@ -418,7 +418,7 @@ export function AuctionDetailPage() {
                 <div className="grid grid-cols-3 gap-2">
                   <div className="text-center">
                     <p className="text-xs text-neutral-500 mb-0.5">قیمت نهایی</p>
-                    <p className="text-sm font-bold text-success-700">{formatCurrency(auction.currentPrice)}</p>
+                    <p className="text-sm font-bold text-success-700">{formatToman(auction.currentPrice)}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-xs text-neutral-500 mb-0.5">کلیک‌ها</p>
@@ -494,7 +494,7 @@ export function AuctionDetailPage() {
               </div>
               <h3 className="text-lg font-bold text-neutral-800 mb-2">خرید مستقیم با موفقیت انجام شد</h3>
               <p className="text-sm text-neutral-500 mb-4">
-                مبلغ {formatCurrency(purchaseResult.newBalance ?? 0)} باقی‌مانده از کیف پول شما کسر شد.
+                مبلغ {formatToman(purchaseResult.newBalance ?? 0)} باقی‌مانده از کیف پول شما کسر شد.
               </p>
               <Button variant="primary" fullWidth onClick={() => setShowDirectPurchase(false)}>
                 باشه
@@ -520,15 +520,15 @@ export function AuctionDetailPage() {
               <div className="space-y-2 mb-6 text-right">
                 <div className="flex items-center justify-between p-2.5 rounded-lg bg-neutral-100/40">
                   <span className="text-sm text-neutral-500">قیمت اصلی کالا</span>
-                  <span className="text-sm font-bold text-neutral-700">{formatCurrency(auction.originalPrice || 0)}</span>
+                  <span className="text-sm font-bold text-neutral-700">{formatToman(auction.originalPrice || 0)}</span>
                 </div>
                 <div className="flex items-center justify-between p-2.5 rounded-lg bg-neutral-100/40">
                   <span className="text-sm text-neutral-500">اعتبار مشارکت شما</span>
-                  <span className="text-sm font-bold text-primary-700">{formatCurrency(directPurchaseCredit)}</span>
+                  <span className="text-sm font-bold text-primary-700">{formatToman(directPurchaseCredit)}</span>
                 </div>
                 <div className="flex items-center justify-between p-2.5 rounded-lg bg-neutral-100/40 border border-warning-500/20">
                   <span className="text-sm text-neutral-500">مبلغ باقی‌مانده</span>
-                  <span className="text-sm font-bold text-warning-700">{formatCurrency(directPurchaseRemaining)}</span>
+                  <span className="text-sm font-bold text-warning-700">{formatToman(directPurchaseRemaining)}</span>
                 </div>
               </div>
               <p className="text-xs text-neutral-600 mb-6">

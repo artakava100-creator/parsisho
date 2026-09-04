@@ -4,7 +4,7 @@ import {
   Image as ImageIcon, Bell, Zap, MousePointerClick,
 } from 'lucide-react';
 import { useAuctions, useIranToday, useServerTime } from '@/hooks/useAuction';
-import { formatCurrency, toPersianDigits } from '@/lib/persian';
+import { formatToman, toPersianDigits } from '@/lib/persian';
 import { formatJalaliDate, formatTime, formatJalaliShort } from '@/lib/jalali';
 import { CountdownTimer } from '@/components/auction/CountdownTimer';
 import { Card } from '@/components/ui/Card';
@@ -63,7 +63,7 @@ function LiveAuctionHero({ auction, serverTimeOffset }: { auction: Auction; serv
 
                 <div className="flex items-baseline gap-2 mb-3">
                   <p className="text-xs text-neutral-500">قیمت فعلی:</p>
-                  <p className="text-xl font-extrabold text-primary-700">{formatCurrency(auction.currentPrice)}</p>
+                  <p className="text-xl font-extrabold text-primary-700">{formatToman(auction.currentPrice)}</p>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
@@ -133,11 +133,11 @@ function TomorrowAuction({ auction, serverTimeOffset }: { auction: Auction; serv
           <div className="grid grid-cols-2 gap-2">
             <div>
               <p className="text-[10px] text-neutral-600">قیمت شروع</p>
-              <p className="text-sm font-bold text-primary-700">{formatCurrency(auction.startingPrice)}</p>
+              <p className="text-sm font-bold text-primary-700">{formatToman(auction.startingPrice)}</p>
             </div>
             <div>
               <p className="text-[10px] text-neutral-600">هر کلیک</p>
-              <p className="text-sm font-bold text-warning-700">{formatCurrency(auction.clickCost)}</p>
+              <p className="text-sm font-bold text-warning-700">{formatToman(auction.clickCost)}</p>
             </div>
           </div>
           <div className="flex justify-center pt-1">
@@ -181,11 +181,11 @@ function UpcomingAuctionCard({ auction, serverTimeOffset }: { auction: Auction; 
           <div className="grid grid-cols-2 gap-2">
             <div>
               <p className="text-[10px] text-neutral-600">قیمت شروع</p>
-              <p className="text-sm font-bold text-primary-700">{formatCurrency(auction.startingPrice)}</p>
+              <p className="text-sm font-bold text-primary-700">{formatToman(auction.startingPrice)}</p>
             </div>
             <div>
               <p className="text-[10px] text-neutral-600">هر کلیک</p>
-              <p className="text-sm font-bold text-warning-700">{formatCurrency(auction.clickCost)}</p>
+              <p className="text-sm font-bold text-warning-700">{formatToman(auction.clickCost)}</p>
             </div>
           </div>
           <div className="flex justify-center pt-1">
@@ -237,7 +237,7 @@ function EndedAuctionCard({ auction }: { auction: Auction }) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-[10px] text-neutral-600">قیمت نهایی</p>
-              <p className="text-sm font-bold text-neutral-600">{formatCurrency(auction.currentPrice)}</p>
+              <p className="text-sm font-bold text-neutral-600">{formatToman(auction.currentPrice)}</p>
             </div>
             <div className="text-left">
               <p className="text-[10px] text-neutral-600">کلیک‌ها</p>

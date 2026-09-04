@@ -12,7 +12,7 @@ import { FullPageSpinner } from '@/components/ui/Spinner';
 import { useToast } from '@/providers/useToast';
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
-import { formatCurrency, toPersianDigits } from '@/lib/persian';
+import { formatToman, toPersianDigits } from '@/lib/persian';
 import { formatJalaliDate, formatTime } from '@/lib/jalali';
 import type { Auction, AuctionStatus } from '@/types';
 
@@ -229,11 +229,11 @@ function AuctionRow({ auction, onEdit }: { auction: Auction; onEdit: () => void 
               <Clock className="w-3 h-3" />
               {formatTime(new Date(auction.startsAt))} - {formatTime(new Date(auction.endsAt))}
             </span>
-            <span>قیمت شروع: {formatCurrency(auction.startingPrice)}</span>
-            <span>قیمت فعلی: {formatCurrency(auction.currentPrice)}</span>
+            <span>قیمت شروع: {formatToman(auction.startingPrice)}</span>
+            <span>قیمت فعلی: {formatToman(auction.currentPrice)}</span>
             <span>کلیک‌ها: {toPersianDigits(auction.clickCount)}</span>
-            {auction.originalPrice && <span>قیمت اصلی: {formatCurrency(auction.originalPrice)}</span>}
-            <span>هزینه کلیک: {formatCurrency(auction.clickCost)}</span>
+            {auction.originalPrice && <span>قیمت اصلی: {formatToman(auction.originalPrice)}</span>}
+            <span>هزینه کلیک: {formatToman(auction.clickCost)}</span>
             {auction.extensionUsed && <span className='text-warning-600'>تمدید شده</span>}
             {auction.participantCount > 0 && <span>شرکت‌کنندگان: {toPersianDigits(auction.participantCount)}</span>}
           </div>
@@ -457,7 +457,7 @@ function CreateAuctionModal({ open, onClose }: { open: boolean; onClose: () => v
 
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="قیمت شروع (پارسی)"
+            label="قیمت شروع (تومان)"
             type="number"
             inputMode="numeric"
             value={startingPrice}
@@ -466,7 +466,7 @@ function CreateAuctionModal({ open, onClose }: { open: boolean; onClose: () => v
             placeholder="500000"
           />
           <Input
-            label="قیمت اصلی کالا (پارسی)"
+            label="قیمت اصلی کالا (تومان)"
             type="number"
             inputMode="numeric"
             value={originalPrice}
@@ -478,7 +478,7 @@ function CreateAuctionModal({ open, onClose }: { open: boolean; onClose: () => v
 
         <div className="grid grid-cols-2 gap-3">
           <Input
-            label="افزایش قیمت هر کلیک (پارسی)"
+            label="افزایش قیمت هر کلیک (تومان)"
             type="number"
             inputMode="numeric"
             value={minBidIncrement}
@@ -487,7 +487,7 @@ function CreateAuctionModal({ open, onClose }: { open: boolean; onClose: () => v
             placeholder="100000"
           />
           <Input
-            label="هزینه هر کلیک (پارسی)"
+            label="هزینه هر کلیک (تومان)"
             type="number"
             inputMode="numeric"
             value={clickCost}

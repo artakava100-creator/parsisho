@@ -4,7 +4,7 @@ import { useAuth } from '@/providers/useAuth';
 import { useToast } from '@/providers/useToast';
 import { usePlaceClick } from '@/hooks/useAuction';
 import { getIdentityState, getAuctionEligibilityMessage } from '@/lib/eligibility';
-import { formatCurrency } from '@/lib/persian';
+import { formatToman } from '@/lib/persian';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
 import type { Auction } from '@/types';
@@ -72,9 +72,9 @@ export function ClickButton({ auction }: ClickButtonProps) {
       const result = await placeClick.mutateAsync({ auctionId: auction.id });
       if (result.success) {
         if (result.extensionApplied) {
-          toast.success('کلیک ثبت شد + تمدید زمان!', `قیمت: ${formatCurrency(result.newCurrentPrice!)} — زمان مزایده ۱۰ ثانیه تمدید شد`);
+          toast.success('کلیک ثبت شد + تمدید زمان!', `قیمت: ${formatToman(result.newCurrentPrice!)} — زمان مزایده ۱۰ ثانیه تمدید شد`);
         } else {
-          toast.success('کلیک شما ثبت شد', `قیمت جدید: ${formatCurrency(result.newCurrentPrice!)}`);
+          toast.success('کلیک شما ثبت شد', `قیمت جدید: ${formatToman(result.newCurrentPrice!)}`);
         }
       } else if (result.error) {
         setServerError(result.error);
@@ -114,7 +114,7 @@ export function ClickButton({ auction }: ClickButtonProps) {
 
       <div className="flex items-center justify-center gap-1.5 text-xs text-neutral-500">
         <Wallet className="w-3.5 h-3.5" />
-        <span>هزینه هر کلیک: {formatCurrency(auction.clickCost)}</span>
+        <span>هزینه هر کلیک: {formatToman(auction.clickCost)}</span>
       </div>
 
       {serverError && serverError.includes('موجودی') && (

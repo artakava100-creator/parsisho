@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { formatCurrency } from '@/lib/persian';
+import { formatToman } from '@/lib/persian';
 import { formatTime } from '@/lib/jalali';
 import { useAuctions, useIranToday } from '@/hooks/useAuction';
 import { useSiteSetting } from '@/hooks/useSiteSettings';
@@ -117,11 +117,11 @@ function AuctionMiniCard({ auction, isSelected }: { auction: Auction; isSelected
           <div className="flex items-center justify-between pt-1.5 border-t border-neutral-100">
             <div>
               <p className="text-[10px] text-neutral-500">قیمت شروع</p>
-              <p className="text-sm font-bold text-primary-700">{formatCurrency(auction.startingPrice)}</p>
+              <p className="text-sm font-bold text-primary-700">{formatToman(auction.startingPrice)}</p>
             </div>
             <div className="text-left">
               <p className="text-[10px] text-neutral-500">هر کلیک</p>
-              <p className="text-sm font-bold text-accent-700">{formatCurrency(auction.clickCost)}</p>
+              <p className="text-sm font-bold text-accent-700">{formatToman(auction.clickCost)}</p>
             </div>
           </div>
         </div>

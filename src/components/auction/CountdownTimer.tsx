@@ -153,9 +153,53 @@ export function CountdownTimer({
   }
 
   // Hero variant — large, prominent display
-  const baseClass = variant === 'hero'
-    ? 'inline-flex items-center gap-2 px-5 py-4 rounded-2xl'
-    : 'inline-flex items-center gap-2 px-4 py-2 rounded-lg';
+  if (variant === 'hero') {
+    let heroStateClass = 'bg-primary-50 border border-primary-200';
+    let heroIconColor = 'text-primary-600';
+    let heroTextColor = 'text-primary-700';
+    let heroUnitBg = 'bg-white/60';
+
+    if (isFinalTen) {
+      heroStateClass = 'bg-error-50 border border-error-300';
+      heroIconColor = 'text-error-600';
+      heroTextColor = 'text-error-700';
+      heroUnitBg = 'bg-error-100/40';
+    } else if (isFinalMinute) {
+      heroStateClass = 'bg-accent-50 border border-accent-200';
+      heroIconColor = 'text-accent-600';
+      heroTextColor = 'text-accent-700';
+      heroUnitBg = 'bg-accent-100/40';
+    }
+
+    return (
+      <div
+        className={`inline-flex items-center gap-3 px-5 py-4 rounded-2xl ${heroStateClass}`}
+        role="timer"
+        aria-live={isFinalTen ? 'assertive' : 'polite'}
+        aria-label={`زمان باقیمانده: ${parts.days} روز ${parts.hours} ساعت ${parts.minutes} دقیقه ${parts.seconds} ثانیه`}
+      >
+        <Clock className={`w-5 h-5 shrink-0 ${heroIconColor}`} />
+        <div className="flex items-center gap-1.5">
+          {timeUnits.filter((u) => u.show).map((unit, idx, arr) => (
+            <div key={idx} className="flex items-center gap-1.5">
+              <div className={`flex flex-col items-center px-2 py-1 rounded-lg ${heroUnitBg} min-w-[3rem]`}>
+                <span className={`text-2xl sm:text-3xl font-extrabold tabular-nums leading-none ${heroTextColor}`}>
+                  {toPersianDigits(String(unit.value).padStart(2, '0'))}
+                </span>
+                <span className="text-[10px] text-neutral-500 mt-1 font-medium">{unit.label}</span>
+              </div>
+              {idx < arr.length - 1 && (
+                <span className={`text-xl font-bold ${heroTextColor} opacity-40`}>:</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  // Default variant
+  const baseClass = 'inline-flex items-center gap-2 px-4 py-2 rounded-lg';
 
   let stateClass = 'bg-primary-50 border border-primary-300';
   let iconColor = 'text-primary-600';
