@@ -45,6 +45,7 @@ const AdminCategoryPage = lazy(() => import('@/pages/admin/AdminCategoryPage').t
 const AdminBrandPage = lazy(() => import('@/pages/admin/AdminBrandPage').then((m) => ({ default: m.AdminBrandPage })));
 const AdminAttributePage = lazy(() => import('@/pages/admin/AdminAttributePage').then((m) => ({ default: m.AdminAttributePage })));
 const AdminMarketplaceDashboardPage = lazy(() => import('@/pages/admin/AdminMarketplaceDashboardPage').then((m) => ({ default: m.AdminMarketplaceDashboardPage })));
+const AdminHomepagePage = lazy(() => import('@/pages/admin/AdminHomepagePage').then((m) => ({ default: m.AdminHomepagePage })));
 
 const placeholders = {
   auctions: { title: 'تالار مزایده', description: 'مزایده‌های زنده و مهیج پارسیشو', icon: <Gavel className="w-8 h-8" /> },
@@ -258,6 +259,11 @@ export function AppRoutes() {
         <Route path="/admin/marketplace/ads" element={
           <AdminRoute permission="manage_content">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminAdPage /></Suspense></AdminLayout>
+          </AdminRoute>
+        } />
+        <Route path="/admin/marketplace/homepage" element={
+          <AdminRoute permission="manage_content">
+            <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminHomepagePage /></Suspense></AdminLayout>
           </AdminRoute>
         } />
 

@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom';
-import { Gavel, Wallet, CreditCard, Settings, Gamepad2, Building2, Megaphone, Store, ShieldCheck } from 'lucide-react';
+import { Gavel, Wallet, CreditCard, Settings, Gamepad2, Building2, Megaphone, Store, ShieldCheck, Home } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 
 const marketplaceSections = [
+  { to: '/admin/marketplace/homepage', title: 'مدیریت صفحه اصلی', description: 'تنظیمات و پیکربندی صفحه اصلی', icon: Home },
   { to: '/admin/marketplace/auctions', title: 'مدیریت مزایده‌ها', description: 'ایجاد، برنامه‌ریزی و مدیریت مزایده‌ها', icon: Gavel },
   { to: '/admin/marketplace/engagement', title: 'مدیریت سرزمین هیجان', description: 'ایجاد و مدیریت دورهای بازی حدس بزن', icon: Gamepad2 },
   { to: '/admin/marketplace/businesses', title: 'مدیریت کسب‌وکارها', description: 'ایجاد، ویرایش و مدیریت کسب‌وکارهای محلی', icon: Building2 },

@@ -10,65 +10,85 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { formatCurrency } from '@/lib/persian';
 import { formatTime } from '@/lib/jalali';
 import { useAuctions, useIranToday } from '@/hooks/useAuction';
+import { useSiteSetting } from '@/hooks/useSiteSettings';
 import { SectionEmptyState } from './SectionEmptyState';
 import { cn } from '@/lib/cn';
 import type { LucideIcon } from 'lucide-react';
 import type { Auction } from '@/types';
 
-interface AuctionCategory {
+interface CategoryConfig {
   id: string;
   label: string;
-  icon: LucideIcon;
-  color: string;
-  activeColor: string;
-  filterFn: (auction: Auction, todayStr: string, tomorrowStr: string, dayAfterStr: string) => boolean;
+  icon: string;
+  visible: boolean;
+  sort_order: number;
 }
 
-const categories: AuctionCategory[] = [
-  {
-    id: 'today',
-    label: 'مزایده امروز',
-    icon: Flame,
-    color: 'bg-accent-50 text-accent-700 border-accent-200/60',
-    activeColor: 'bg-accent-600 text-white border-accent-600 shadow-md',
-    filterFn: (a, todayStr) => a.auctionDate === todayStr,
-  },
-  {
-    id: 'tomorrow',
-    label: 'مزایده فردا',
-    icon: Calendar,
-    color: 'bg-primary-50 text-primary-700 border-primary-200/60',
-    activeColor: 'bg-primary-700 text-white border-primary-700 shadow-md',
-    filterFn: (a, _t, tomorrowStr) => a.auctionDate === tomorrowStr,
-  },
-  {
-    id: 'day-after',
-    label: 'مزایده پس‌فردا',
-    icon: Star,
-    color: 'bg-warning-50 text-warning-700 border-warning-200/60',
-    activeColor: 'bg-warning-500 text-white border-warning-500 shadow-md',
-    filterFn: (a, _t, _tm, dayAfterStr) => a.auctionDate === dayAfterStr,
-  },
-  {
-    id: 'all',
-    label: 'همه مزایده‌ها',
-    icon: Sparkles,
-    color: 'bg-neutral-50 text-neutral-600 border-neutral-200/60',
-    activeColor: 'bg-neutral-700 text-white border-neutral-700 shadow-md',
-    filterFn: () => true,
-  },
-];
+interface HallConfig {
+  categories: CategoryConfig[];
+}
 
-function AuctionMiniCard({ auction }: { auction: Auction }) {
+const defaultHallConfig: HallConfig = {
+  categories: [
+    { id: 'today', label: 'مزایده امروز', icon: 'flame', visible: true, sort_order: 1 },
+    { id: 'tomorrow', label: 'مزایده فردا', icon: 'calendar', visible: true, sort_order: 2 },
+    { id: 'day-after', label: 'مزایده پس‌فردا', icon: 'star', visible: true, sort_order: 3 },
+    { id: 'all', label: 'همه مزایده‌ها', icon: 'sparkles', visible: true, sort_order: 4 },
+  ],
+};
+
+const iconMap: Record<string, LucideIcon> = {
+  flame: Flame,
+  calendar: Calendar,
+  star: Star,
+  sparkles: Sparkles,
+  gavel: Gavel,
+  clock: Clock,
+};
+
+const colorMap: Record<string, { normal: string; active: string }> = {
+  today: {
+    normal: 'bg-accent-50 text-accent-700 border-accent-200/60',
+    active: 'bg-accent-600 text-white border-accent-600 shadow-md',
+  },
+  tomorrow: {
+    normal: 'bg-primary-50 text-primary-700 border-primary-200/60',
+    active: 'bg-primary-700 text-white border-primary-700 shadow-md',
+  },
+  'day-after': {
+    normal: 'bg-warning-50 text-warning-700 border-warning-200/60',
+    active: 'bg-warning-500 text-white border-warning-500 shadow-md',
+  },
+  all: {
+    normal: 'bg-neutral-50 text-neutral-600 border-neutral-200/60',
+    active: 'bg-neutral-700 text-white border-neutral-700 shadow-md',
+  },
+};
+
+const defaultColors = {
+  normal: 'bg-neutral-50 text-neutral-600 border-neutral-200/60',
+  active: 'bg-neutral-700 text-white border-neutral-700 shadow-md',
+};
+
+function getFilterFn(catId: string) {
+  return (a: Auction, todayStr: string, tomorrowStr: string, dayAfterStr: string) => {
+    if (catId === 'today') return a.auctionDate === todayStr;
+    if (catId === 'tomorrow') return a.auctionDate === tomorrowStr;
+    if (catId === 'day-after') return a.auctionDate === dayAfterStr;
+    return true;
+  };
+}
+
+function AuctionMiniCard({ auction, isSelected }: { auction: Auction; isSelected?: boolean }) {
   return (
     <Link to={`/auctions/${auction.id}`} className="block group">
-      <Card hover className="p-0 overflow-hidden h-full">
+      <Card hover className={cn('p-0 overflow-hidden h-full transition-all', isSelected === false && 'opacity-60')}>
         <div className="aspect-[16/9] bg-gradient-to-br from-neutral-100 to-neutral-200 relative overflow-hidden">
           {auction.imageUrl ? (
             <img
               src={auction.imageUrl}
               alt={auction.productName || auction.title}
-              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-slow"
+              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
               loading="lazy"
             />
           ) : (
@@ -110,20 +130,24 @@ function AuctionMiniCard({ auction }: { auction: Auction }) {
   );
 }
 
-function LoadingCards() {
+function EmptySlotCard() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="rounded-xl overflow-hidden">
-          <Skeleton className="w-full h-[220px]" />
-        </div>
-      ))}
+    <div className="aspect-[16/9] rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50/40 flex flex-col items-center justify-center gap-2">
+      <Gavel className="w-7 h-7 text-neutral-300" />
+      <p className="text-xs text-neutral-400 font-medium">جایگاه مزایده</p>
     </div>
   );
 }
 
 export function AuctionHall() {
-  const [activeCategory, setActiveCategory] = useState('today');
+  const { data: hallConfig } = useSiteSetting<HallConfig>('auction_hall_categories', defaultHallConfig);
+  const config = hallConfig ?? defaultHallConfig;
+  const visibleCategories = useMemo(
+    () => config.categories.filter((c) => c.visible).sort((a, b) => a.sort_order - b.sort_order),
+    [config.categories],
+  );
+
+  const [activeCategory, setActiveCategory] = useState(visibleCategories[0]?.id ?? 'today');
   const { data: auctions, isLoading, isError } = useAuctions();
   const { data: todayDateStr } = useIranToday();
 
@@ -143,15 +167,13 @@ export function AuctionHall() {
 
   const filtered = useMemo(() => {
     if (!auctions) return [];
-    const cat = categories.find((c) => c.id === activeCategory);
-    if (!cat) return [];
-    return auctions.filter((a) => cat.filterFn(a, todayStr, tomorrowStr, dayAfterStr));
+    const filterFn = getFilterFn(activeCategory);
+    return auctions.filter((a) => filterFn(a, todayStr, tomorrowStr, dayAfterStr));
   }, [auctions, activeCategory, todayStr, tomorrowStr, dayAfterStr]);
 
   return (
     <section className="py-8 sm:py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-primary-100 flex items-center justify-center">
@@ -168,11 +190,12 @@ export function AuctionHall() {
           </Link>
         </div>
 
-        {/* Category cards — horizontal scrollable */}
+        {/* Visual category cards */}
         <div className="flex gap-2.5 mb-6 overflow-x-auto scrollbar-hide pb-1" role="tablist">
-          {categories.map((cat) => {
-            const Icon = cat.icon;
+          {visibleCategories.map((cat) => {
+            const Icon = iconMap[cat.icon] ?? Sparkles;
             const isActive = activeCategory === cat.id;
+            const colors = colorMap[cat.id] ?? defaultColors;
             return (
               <button
                 key={cat.id}
@@ -180,13 +203,13 @@ export function AuctionHall() {
                 aria-selected={isActive}
                 onClick={() => setActiveCategory(cat.id)}
                 className={cn(
-                  'flex items-center gap-2 px-4 py-2.5 rounded-xl border whitespace-nowrap',
-                  'transition-all duration-normal font-semibold text-sm',
-                  isActive ? cat.activeColor : cat.color,
+                  'flex items-center gap-2 px-5 py-3 rounded-xl border whitespace-nowrap',
+                  'transition-all duration-200 font-bold text-sm',
+                  isActive ? colors.active : colors.normal,
                   !isActive && 'hover:shadow-sm hover:-translate-y-px',
                 )}
               >
-                <Icon className="w-4.5 h-4.5" />
+                <Icon className="w-5 h-5" />
                 {cat.label}
               </button>
             );
@@ -195,7 +218,11 @@ export function AuctionHall() {
 
         {/* Auction grid */}
         {isLoading ? (
-          <LoadingCards />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3].map((i) => (
+              <Skeleton key={i} className="w-full h-[240px] rounded-xl" />
+            ))}
+          </div>
         ) : isError ? (
           <Card className="p-0">
             <SectionEmptyState
@@ -204,27 +231,13 @@ export function AuctionHall() {
               description="لطفاً صفحه را مجدداً بارگذاری کنید"
             />
           </Card>
-        ) : filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map((auction) => (
-              <AuctionMiniCard key={auction.id} auction={auction} />
-            ))}
-          </div>
         ) : (
-          <Card className="p-0">
-            <SectionEmptyState
-              icon={<Calendar className="w-6 h-6" />}
-              title="در حال حاضر مزایده‌ای در این بازه وجود ندارد"
-              description="مزایده‌های جدید به‌زودی اضافه می‌شوند"
-              action={
-                <Link to="/auctions">
-                  <Button variant="outline" size="sm">
-                    مشاهده همه مزایده‌ها <ArrowLeft className="w-4 h-4" />
-                  </Button>
-                </Link>
-              }
-            />
-          </Card>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filtered.length > 0
+              ? filtered.map((auction) => <AuctionMiniCard key={auction.id} auction={auction} />)
+              : [0, 1, 2].map((i) => <EmptySlotCard key={i} />)
+            }
+          </div>
         )}
       </div>
     </section>

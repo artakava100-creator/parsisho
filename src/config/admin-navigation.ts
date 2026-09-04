@@ -3,7 +3,7 @@ import {
   GalleryHorizontalEnd, Sparkles, Boxes, DollarSign, Search, Percent,
   ShoppingCart, Users, Star, Truck, BarChart3, Gavel, Gamepad2, Building2,
   Megaphone, ShieldCheck, KeyRound, ScrollText, Lock, Settings, Activity,
-  Crown, Wallet, CreditCard,
+  Crown, Wallet, CreditCard, Home,
 } from 'lucide-react';
 import type { Permission } from '@/types';
 
@@ -49,6 +49,7 @@ export const adminNavGroups: AdminNavGroup[] = [
       { label: 'سرزمین هیجان', to: '/admin/marketplace/engagement', icon: Gamepad2, permission: 'manage_missions' },
       { label: 'کسب‌وکارها', to: '/admin/marketplace/businesses', icon: Building2, permission: 'manage_businesses' },
       { label: 'تبلیغات', to: '/admin/marketplace/ads', icon: Megaphone, permission: 'manage_content' },
+      { label: 'صفحه اصلی', to: '/admin/marketplace/homepage', icon: Home, permission: 'manage_content' },
     ],
   },
   {
