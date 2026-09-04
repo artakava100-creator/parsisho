@@ -50,26 +50,36 @@ export const storeSettingsService = {
     input: Omit<StoreSettings, 'updatedAt'>,
   ): Promise<{ data: StoreSettings | null; error: string | null }> {
     try {
-      const { data, error } = await supabase
-        .from('store_settings')
-        .update({
-          shipping_mode: input.shippingMode,
-          fixed_shipping_fee: input.fixedShippingFee,
-          shipping_provider: input.shippingProvider,
-          payment_fee_type: input.paymentFeeType,
-          payment_fee_percentage: input.paymentFeePercentage,
-          payment_fee_fixed_amount: input.paymentFeeFixedAmount,
-        })
-        .eq('id', 1)
-        .select()
-        .single();
+      const { data, error } = await supabase.rpc('admin_update_store_settings', {
+        p_shipping_mode: input.shippingMode,
+        p_fixed_shipping_fee: input.fixedShippingFee,
+        p_shipping_provider: input.shippingProvider,
+        p_payment_fee_type: input.paymentFeeType,
+        p_payment_fee_percentage: input.paymentFeePercentage,
+        p_payment_fee_fixed_amount: input.paymentFeeFixedAmount,
+      });
 
       if (error) {
         logger.error('[storeSettingsService.updateSettings]', error);
         return { data: null, error: 'به‌روزرسانی تنظیمات ناموفق بود' };
       }
 
-      return { data: mapSettingsRow(data as Record<string, unknown>), error: null };
+      const result = data as Record<string, unknown>;
+      if (!result.success) {
+        return { data: null, error: (result.error as string) ?? 'به‌روزرسانی ناموفق بود' };
+      }
+
+      const { data: settingsData, error: fetchError } = await supabase
+        .from('store_settings')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
+
+      if (fetchError || !settingsData) {
+        return { data: null, error: null };
+      }
+
+      return { data: mapSettingsRow(settingsData as Record<string, unknown>), error: null };
     } catch {
       return { data: null, error: 'خطای غیرمنتظره' };
     }

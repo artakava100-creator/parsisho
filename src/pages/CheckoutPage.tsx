@@ -179,6 +179,10 @@ export function CheckoutPage() {
         total: priceCalc.total,
       };
 
+      // The server recalculates all monetary values from trusted DB data.
+      // Client-supplied financial fields are ignored by the RPC — only
+      // customer info and product IDs + quantities are used.
+
       const result = await orderService.createOrder(orderInput);
       if (!result.success || !result.order) {
         toast.error('خطا در ثبت سفارش', result.error);

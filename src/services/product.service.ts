@@ -24,6 +24,7 @@ interface ProductRow {
   is_special_offer: boolean;
   is_discounted: boolean;
   sort_order: number;
+  publish_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -96,6 +97,7 @@ function mapProduct(row: ProductRow): Product {
     isSpecialOffer: row.is_special_offer,
     isDiscounted: row.is_discounted,
     sortOrder: row.sort_order,
+    publishAt: row.publish_at,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

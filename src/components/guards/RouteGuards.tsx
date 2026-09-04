@@ -2,7 +2,7 @@ import { type ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/providers/useAuth';
 import { FullPageSpinner } from '@/components/ui/Spinner';
-import { hasPermission, isAdmin } from '@/lib/permissions';
+import { hasPermission, hasAnyPermission, isAdmin } from '@/lib/permissions';
 import type { Permission, UserRole } from '@/types';
 
 interface GuardProps {
@@ -45,11 +45,19 @@ export function RoleRoute({ children, permission, role }: RoleGuardProps) {
   return <>{children}</>;
 }
 
-export function AdminRoute({ children }: GuardProps) {
+interface AdminRouteProps extends GuardProps {
+  permission?: Permission;
+  anyOf?: Permission[];
+}
+
+export function AdminRoute({ children, permission, anyOf }: AdminRouteProps) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) return <FullPageSpinner label="در حال بررسی دسترسی..." />;
   if (!user || !isAdmin(user.role)) return <Navigate to="/" replace />;
+
+  if (permission && !hasPermission(user.role, permission)) return <Navigate to="/admin" replace />;
+  if (anyOf && !hasAnyPermission(user.role, anyOf)) return <Navigate to="/admin" replace />;
 
   return <>{children}</>;
 }

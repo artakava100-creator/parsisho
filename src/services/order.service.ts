@@ -7,12 +7,6 @@ import type {
   StoreOrderItem,
 } from '@/types';
 
-function generateOrderNumber(): string {
-  const ts = Date.now().toString().slice(-8);
-  const rand = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-  return `PS-${ts}${rand}`;
-}
-
 function mapOrderRow(row: Record<string, unknown>): StoreOrder {
   return {
     id: row.id as string,
@@ -52,56 +46,51 @@ function mapItemRow(row: Record<string, unknown>): StoreOrderItem {
 export const orderService = {
   async createOrder(input: CreateOrderInput): Promise<CreateOrderResult> {
     try {
-      const orderNumber = generateOrderNumber();
+      const { data, error } = await supabase.rpc('create_store_order', {
+        p_customer_name: input.customerName,
+        p_mobile_number: input.mobileNumber,
+        p_province: input.province,
+        p_city: input.city,
+        p_address: input.address,
+        p_postal_code: input.postalCode,
+        p_delivery_note: input.deliveryNote ?? null,
+        p_items: input.items.map((item) => ({
+          product_id: item.productId,
+          quantity: item.quantity,
+        })),
+      });
 
-      const { data: orderRow, error: orderError } = await supabase
-        .from('store_orders')
-        .insert({
-          order_number: orderNumber,
-          status: 'pending',
-          subtotal: input.subtotal,
-          discount: input.discount,
-          shipping_cost: input.shippingCost,
-          payment_fee: input.paymentFee,
-          total: input.total,
-          customer_name: input.customerName,
-          mobile_number: input.mobileNumber,
-          province: input.province,
-          city: input.city,
-          address: input.address,
-          postal_code: input.postalCode,
-          delivery_note: input.deliveryNote ?? null,
-          payment_status: 'unpaid',
-        })
-        .select()
-        .single();
-
-      if (orderError || !orderRow) {
-        logger.error('[orderService.createOrder] insert failed', orderError);
+      if (error) {
+        logger.error('[orderService.createOrder] RPC failed', error);
         return { success: false, error: 'ثبت سفارش ناموفق بود' };
       }
 
-      const order = mapOrderRow(orderRow as Record<string, unknown>);
-
-      const itemRows = input.items.map((item) => ({
-        order_id: order.id,
-        product_id: item.productId,
-        product_name: item.productName,
-        product_image: item.productImage,
-        unit_price: item.unitPrice,
-        quantity: item.quantity,
-        subtotal: item.subtotal,
-      }));
-
-      const { error: itemsError } = await supabase
-        .from('store_order_items')
-        .insert(itemRows);
-
-      if (itemsError) {
-        logger.error('[orderService.createOrder] items insert failed', itemsError);
-        await supabase.from('store_orders').delete().eq('id', order.id);
-        return { success: false, error: 'ثبت اقلام سفارش ناموفق بود' };
+      const result = data as Record<string, unknown>;
+      if (!result.success) {
+        return { success: false, error: (result.error as string) ?? 'ثبت سفارش ناموفق بود' };
       }
+
+      const orderData = result.order as Record<string, unknown>;
+      const order: StoreOrder = {
+        id: orderData.id as string,
+        orderNumber: orderData.order_number as string,
+        status: orderData.status as StoreOrder['status'],
+        subtotal: orderData.subtotal as number,
+        discount: (orderData.discount as number) ?? 0,
+        shippingCost: orderData.shipping_cost as number,
+        paymentFee: (orderData.payment_fee as number) ?? 0,
+        total: orderData.total as number,
+        customerName: input.customerName,
+        mobileNumber: input.mobileNumber,
+        province: input.province,
+        city: input.city,
+        address: input.address,
+        postalCode: input.postalCode,
+        deliveryNote: input.deliveryNote ?? null,
+        paymentStatus: orderData.payment_status as StoreOrder['paymentStatus'],
+        createdAt: orderData.created_at as string,
+        updatedAt: orderData.created_at as string,
+      };
 
       return { success: true, order };
     } catch (err) {

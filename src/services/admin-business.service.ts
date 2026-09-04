@@ -32,6 +32,7 @@ interface AdminListResult {
     short_description: string | null;
     category_id: string;
     category_name: string;
+    category_slug: string;
     city: string | null;
     locality: string | null;
     status: string;
@@ -68,6 +69,7 @@ function mapAdminRow(row: AdminListResult['businesses'] extends (infer T)[] | un
     shortDescription: row.short_description,
     categoryId: row.category_id,
     categoryName: row.category_name,
+    categorySlug: row.category_slug,
     city: row.city,
     locality: row.locality,
     logoPath: row.logo_path,

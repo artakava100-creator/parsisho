@@ -18,11 +18,35 @@ export type Permission =
   | 'manage_store_media'
   | 'manage_store_attributes'
   | 'manage_store_inventory'
-  | 'manage_store_pricing';
+  | 'manage_store_pricing'
+  | 'manage_store_orders'
+  | 'manage_store_sellers'
+  | 'manage_store_customers'
+  | 'manage_store_reviews'
+  | 'manage_store_shipping'
+  | 'manage_store_analytics'
+  | 'storefront.manage'
+  | 'manage_store_merchandising'
+  | 'manage_store_search'
+  | 'manage_store_promotions'
+  | 'manage_store_brands'
+  | 'manage_store_slideshow'
+  | 'manage_system_admins'
+  | 'manage_system_roles'
+  | 'manage_system_audit'
+  | 'manage_system_security'
+  | 'manage_system_health'
+  | 'manage_system_packages'
+  | 'manage_system_payments'
+  | 'products.manage'
+  | 'categories.manage'
+  | 'brands.manage'
+  | 'attributes.manage'
+  | 'variants.manage';
 
 // ─── Marketplace Foundation Types ─────────────────────────────────
 
-export type ProductStatus = 'draft' | 'published' | 'archived';
+export type ProductStatus = 'draft' | 'review' | 'scheduled' | 'published' | 'paused' | 'archived';
 
 export type AttributeType = 'text' | 'number' | 'boolean' | 'select' | 'multi_select';
 
@@ -72,6 +96,7 @@ export interface Product {
   isSpecialOffer: boolean;
   isDiscounted: boolean;
   sortOrder: number;
+  publishAt: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -102,12 +127,14 @@ export interface ProductMedia {
 export interface ProductAttributeDefinition {
   id: string;
   categoryId: string | null;
+  categoryName: string | null;
   name: string;
   slug: string;
   attributeType: AttributeType;
   options: Record<string, unknown> | null;
   isFilterable: boolean;
   isRequired: boolean;
+  isActive: boolean;
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
@@ -750,4 +777,257 @@ export interface AdAnalytics {
   title?: string;
   impressions: number;
   clicks: number;
+}
+
+// ─── Storefront Section Types ──────────────────────────────────────
+
+export type StorefrontSectionType =
+  | 'hero'
+  | 'auction_spotlight'
+  | 'product_collection'
+  | 'category_grid'
+  | 'campaign_banner'
+  | 'custom_html'
+  | 'slideshow'
+  | 'trust_badges'
+  | 'navigation_cards';
+
+export type StorefrontSectionStatus = 'active' | 'draft' | 'archived';
+export type StorefrontVisibility = 'all' | 'logged_in' | 'logged_out';
+
+export interface StorefrontSection {
+  id: string;
+  sectionKey: string;
+  title: string;
+  subtitle: string | null;
+  sectionType: StorefrontSectionType;
+  isEnabled: boolean;
+  status: StorefrontSectionStatus;
+  displayOrder: number;
+  visibility: StorefrontVisibility;
+  config: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateStorefrontSectionInput {
+  sectionKey: string;
+  title: string;
+  subtitle?: string | null;
+  sectionType: StorefrontSectionType;
+  isEnabled?: boolean;
+  status?: StorefrontSectionStatus;
+  displayOrder?: number;
+  visibility?: StorefrontVisibility;
+  config?: Record<string, unknown>;
+}
+
+export interface UpdateStorefrontSectionInput {
+  title?: string;
+  subtitle?: string | null;
+  sectionType?: StorefrontSectionType;
+  isEnabled?: boolean;
+  status?: StorefrontSectionStatus;
+  displayOrder?: number;
+  visibility?: StorefrontVisibility;
+  config?: Record<string, unknown>;
+}
+
+// ─── Phase 3: Catalog Control Types ───────────────────────────────
+
+export interface ProductBrand {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  isActive: boolean;
+  sortOrder: number;
+  productCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminProductListItem {
+  id: string;
+  name: string;
+  slug: string;
+  sku: string | null;
+  status: ProductStatus;
+  categoryId: string;
+  categoryName: string | null;
+  brandId: string | null;
+  brandName: string | null;
+  isPublished: boolean;
+  isActive: boolean;
+  sortOrder: number;
+  publishAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminProductDetail {
+  id: string;
+  name: string;
+  slug: string;
+  sku: string | null;
+  status: ProductStatus;
+  categoryId: string;
+  categoryName: string | null;
+  brandId: string | null;
+  brandName: string | null;
+  shortDescription: string | null;
+  description: string | null;
+  sellerId: string | null;
+  producerId: string | null;
+  isPublished: boolean;
+  isActive: boolean;
+  isNew: boolean;
+  isSelected: boolean;
+  isEconomic: boolean;
+  isBestSeller: boolean;
+  isPopular: boolean;
+  isSpecialOffer: boolean;
+  isDiscounted: boolean;
+  sortOrder: number;
+  publishAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateProductInput {
+  name: string;
+  slug: string;
+  categoryId: string;
+  sku?: string | null;
+  shortDescription?: string | null;
+  description?: string | null;
+  brandId?: string | null;
+  status?: ProductStatus;
+  sortOrder?: number;
+}
+
+export interface UpdateProductInput {
+  name?: string;
+  slug?: string;
+  categoryId?: string;
+  sku?: string | null;
+  shortDescription?: string | null;
+  description?: string | null;
+  brandId?: string | null;
+  sortOrder?: number;
+  isNew?: boolean;
+  isSelected?: boolean;
+  isEconomic?: boolean;
+  isBestSeller?: boolean;
+  isPopular?: boolean;
+  isSpecialOffer?: boolean;
+  isDiscounted?: boolean;
+  isActive?: boolean;
+}
+
+export interface CreateCategoryInput {
+  name: string;
+  slug: string;
+  parentId?: string | null;
+  shortDescription?: string | null;
+  description?: string | null;
+  icon?: string | null;
+  sortOrder?: number;
+  isActive?: boolean;
+  showOnHome?: boolean;
+  showInNavigation?: boolean;
+}
+
+export interface UpdateCategoryInput {
+  name?: string;
+  slug?: string;
+  parentId?: string | null;
+  shortDescription?: string | null;
+  description?: string | null;
+  icon?: string | null;
+  sortOrder?: number;
+  isActive?: boolean;
+  showOnHome?: boolean;
+  showInNavigation?: boolean;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+}
+
+export interface CreateBrandInput {
+  name: string;
+  slug: string;
+  description?: string | null;
+  sortOrder?: number;
+}
+
+export interface UpdateBrandInput {
+  name?: string;
+  slug?: string;
+  description?: string | null;
+  isActive?: boolean;
+  sortOrder?: number;
+}
+
+export interface CreateAttributeDefinitionInput {
+  name: string;
+  slug: string;
+  attributeType: AttributeType;
+  categoryId?: string | null;
+  options?: Record<string, unknown> | null;
+  isFilterable?: boolean;
+  isRequired?: boolean;
+  sortOrder?: number;
+}
+
+export interface UpdateAttributeDefinitionInput {
+  name?: string;
+  slug?: string;
+  attributeType?: AttributeType;
+  categoryId?: string | null;
+  options?: Record<string, unknown> | null;
+  isFilterable?: boolean;
+  isRequired?: boolean;
+  isActive?: boolean;
+  sortOrder?: number;
+}
+
+export interface CreateVariantInput {
+  productId: string;
+  name: string;
+  attributes?: Record<string, unknown>;
+  sku?: string | null;
+  sortOrder?: number;
+}
+
+export interface UpdateVariantInput {
+  name?: string;
+  sku?: string | null;
+  attributes?: Record<string, unknown>;
+  isActive?: boolean;
+  sortOrder?: number;
+}
+
+export interface RpcResult {
+  success: boolean;
+  error?: string;
+}
+
+export interface RpcIdResult extends RpcResult {
+  product_id?: string;
+  category_id?: string;
+  brand_id?: string;
+  definition_id?: string;
+  variant_id?: string;
+}
+
+export interface AttributeValueItem {
+  id: string;
+  productId: string;
+  productName: string;
+  attributeDefinitionId: string;
+  definitionName: string;
+  definitionSlug: string;
+  value: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
 }
