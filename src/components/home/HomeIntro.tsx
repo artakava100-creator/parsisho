@@ -8,6 +8,10 @@ interface IntroConfig {
   visible: boolean;
 }
 
+interface IntroBgConfig {
+  image_url: string | null;
+}
+
 const fallback: IntroConfig = {
   title: `سرزمین ${BRAND_NAME}`,
   subtitle: `پلتفرم مزایده آنلاین، خرید مستقیم، سرگرمی و اقتصاد محلی`,
@@ -17,15 +21,26 @@ const fallback: IntroConfig = {
 
 export function HomeIntro() {
   const { data: config } = useSiteSetting<IntroConfig>('homepage_intro', fallback);
+  const { data: bgConfig } = useSiteSetting<IntroBgConfig>('homepage_intro_bg', { image_url: null });
   const c = config ?? fallback;
+  const bgUrl = bgConfig?.image_url ?? null;
 
   if (!c.visible) return null;
 
   return (
     <section className="relative overflow-hidden min-h-[220px] sm:min-h-[260px]">
-      {/* Tehran skyline — Alborz mountains, Milad Tower, Azadi Tower */}
-      <div className="absolute inset-0 pointer-events-none opacity-20" aria-hidden="true">
-        <svg
+      {/* Custom background image OR Tehran skyline SVG fallback */}
+      {bgUrl ? (
+        <div className="absolute inset-0 pointer-events-none opacity-20" aria-hidden="true">
+          <img
+            src={bgUrl}
+            alt=""
+            className="w-full h-full object-cover object-center"
+          />
+        </div>
+      ) : (
+        <div className="absolute inset-0 pointer-events-none opacity-20" aria-hidden="true">
+          <svg
           viewBox="0 0 1200 280"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -205,7 +220,8 @@ export function HomeIntro() {
           <rect x="1100" y="148" width="36" height="110" rx="2" fill="#A5C2E0" />
           <rect x="1144" y="133" width="40" height="125" rx="2" fill="#D5DDE5" />
         </svg>
-      </div>
+        </div>
+      )}
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         <div className="flex flex-col items-center text-center gap-2.5">

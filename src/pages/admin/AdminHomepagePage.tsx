@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
-import { Home, Save, Loader2, Eye, EyeOff } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Home, Save, Loader2, Eye, EyeOff, Upload, Trash2, ImageIcon } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useSiteSettings, useUpdateSiteSetting } from '@/hooks/useSiteSettings';
 import { useToast } from '@/providers/useToast';
+import { supabase } from '@/lib/supabase';
 
 const SETTINGS_KEYS = [
   'homepage_intro',
+  'homepage_intro_bg',
   'homepage_auction_title',
   'footer_copyright',
   'footer_social_links',
@@ -20,6 +22,10 @@ interface IntroConfig {
   subtitle: string;
   description: string;
   visible: boolean;
+}
+
+interface IntroBgConfig {
+  image_url: string | null;
 }
 
 interface AuctionTitleConfig {
@@ -92,6 +98,9 @@ export function AdminHomepagePage() {
   const toast = useToast();
 
   const [intro, setIntro] = useState<IntroConfig>({ title: '', subtitle: '', description: '', visible: true });
+  const [introBg, setIntroBg] = useState<IntroBgConfig>({ image_url: null });
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [auctionTitle, setAuctionTitle] = useState<AuctionTitleConfig>({ title: '' });
   const [copyright, setCopyright] = useState<CopyrightConfig>({ text: '', version: '' });
   const [social, setSocial] = useState<SocialConfig>({ links: [] });
@@ -105,6 +114,7 @@ export function AdminHomepagePage() {
   useEffect(() => {
     if (!allSettings) return;
     if (allSettings.homepage_intro) setIntro(allSettings.homepage_intro as IntroConfig);
+    if (allSettings.homepage_intro_bg) setIntroBg(allSettings.homepage_intro_bg as IntroBgConfig);
     if (allSettings.homepage_auction_title) setAuctionTitle(allSettings.homepage_auction_title as AuctionTitleConfig);
     if (allSettings.footer_copyright) setCopyright(allSettings.footer_copyright as CopyrightConfig);
     if (allSettings.footer_social_links) setSocial(allSettings.footer_social_links as SocialConfig);
@@ -112,11 +122,41 @@ export function AdminHomepagePage() {
     if (allSettings.auction_hall_categories) setHall(allSettings.auction_hall_categories as HallConfig);
   }, [allSettings]);
 
+  const handleUploadBg = async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('فقط فایل تصویری مجاز است');
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const fileName = `intro-bg-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('homepage-images')
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage
+        .from('homepage-images')
+        .getPublicUrl(fileName);
+      setIntroBg({ image_url: pub.publicUrl });
+      toast.success('تصویر پس‌زمینه آپلود شد');
+    } catch {
+      toast.error('خطا در آپلود تصویر');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveBg = () => {
+    setIntroBg({ image_url: null });
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
       await Promise.all([
         updateSetting.mutateAsync({ key: 'homepage_intro', value: intro }),
+        updateSetting.mutateAsync({ key: 'homepage_intro_bg', value: introBg }),
         updateSetting.mutateAsync({ key: 'homepage_auction_title', value: auctionTitle }),
         updateSetting.mutateAsync({ key: 'footer_copyright', value: copyright }),
         updateSetting.mutateAsync({ key: 'footer_social_links', value: social }),
@@ -172,6 +212,55 @@ export function AdminHomepagePage() {
           <Field label="عنوان" value={intro.title} onChange={(v) => setIntro((p) => ({ ...p, title: v }))} />
           <Field label="زیرعنوان" value={intro.subtitle} onChange={(v) => setIntro((p) => ({ ...p, subtitle: v }))} />
           <Field label="توضیحات" value={intro.description} onChange={(v) => setIntro((p) => ({ ...p, description: v }))} />
+
+          {/* Background image upload */}
+          <div className="mt-4 pt-4 border-t border-neutral-100">
+            <label className="text-sm font-medium text-neutral-600">تصویر پس‌زمینه بخش معرفی</label>
+            <p className="text-xs text-neutral-400 mt-1 mb-3">
+              ابعاد پیشنهادی: ۱۲۰۰×۲۸۰ پیکسل (نسبت ۳۰:۷). تصویر با حفظ نسبت ابعاد اصلی نمایش داده می‌شود.
+            </p>
+
+            {/* Preview */}
+            <div className="mb-3 rounded-xl border border-neutral-200 overflow-hidden bg-neutral-50">
+              {introBg.image_url ? (
+                <img src={introBg.image_url} alt="پیش‌نمایش پس‌زمینه" className="w-full h-28 object-cover object-center" />
+              ) : (
+                <div className="w-full h-28 flex flex-col items-center justify-center text-neutral-300 gap-1">
+                  <ImageIcon className="w-8 h-8" />
+                  <span className="text-xs">تصویر پیش‌فرض ( Skylines تهران )</span>
+                </div>
+              )}
+            </div>
+
+            {/* Upload / Remove buttons */}
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleUploadBg(file);
+                  e.target.value = '';
+                }}
+              />
+              <Button
+                variant="secondary"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                {uploading ? 'در حال آپلود...' : 'آپلود تصویر'}
+              </Button>
+              {introBg.image_url && (
+                <Button variant="ghost" onClick={handleRemoveBg} disabled={uploading}>
+                  <Trash2 className="w-4 h-4" />
+                  حذف
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
       </SectionCard>
 
