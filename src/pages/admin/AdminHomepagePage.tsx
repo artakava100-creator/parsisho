@@ -7,6 +7,12 @@ import { AdminSlideshow } from '@/components/admin/AdminSlideshow';
 import { useSiteSettings, useUpdateSiteSetting } from '@/hooks/useSiteSettings';
 import { useToast } from '@/providers/useToast';
 import { supabase } from '@/lib/supabase';
+import {
+  quickAccessIconOptions,
+  defaultQuickAccessItems,
+  type QuickAccessConfig,
+  type QuickAccessConfigItem,
+} from '@/config/home-sections';
 
 const SETTINGS_KEYS = [
   'homepage_intro',
@@ -16,6 +22,7 @@ const SETTINGS_KEYS = [
   'footer_social_links',
   'footer_credentials',
   'auction_hall_categories',
+  'homepage_quick_access',
 ];
 
 interface IntroConfig {
@@ -73,6 +80,8 @@ interface HallConfig {
   categories: HallCategory[];
 }
 
+
+
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <Card className="p-5">
@@ -110,6 +119,7 @@ export function AdminHomepagePage() {
     business_license: { image_url: '', link: '', visible: true },
   });
   const [hall, setHall] = useState<HallConfig>({ categories: [] });
+  const [quickAccess, setQuickAccess] = useState<QuickAccessConfig>({ items: defaultQuickAccessItems });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -121,6 +131,7 @@ export function AdminHomepagePage() {
     if (allSettings.footer_social_links) setSocial(allSettings.footer_social_links as SocialConfig);
     if (allSettings.footer_credentials) setCredentials(allSettings.footer_credentials as CredentialsConfig);
     if (allSettings.auction_hall_categories) setHall(allSettings.auction_hall_categories as HallConfig);
+    if (allSettings.homepage_quick_access) setQuickAccess(allSettings.homepage_quick_access as QuickAccessConfig);
   }, [allSettings]);
 
   const handleUploadBg = async (file: File) => {
@@ -163,6 +174,7 @@ export function AdminHomepagePage() {
         updateSetting.mutateAsync({ key: 'footer_social_links', value: social }),
         updateSetting.mutateAsync({ key: 'footer_credentials', value: credentials }),
         updateSetting.mutateAsync({ key: 'auction_hall_categories', value: hall }),
+        updateSetting.mutateAsync({ key: 'homepage_quick_access', value: quickAccess }),
       ]);
       toast.success('تنظیمات صفحه اصلی ذخیره شد');
     } catch {
@@ -316,6 +328,71 @@ export function AdminHomepagePage() {
               </button>
             </div>
           ))}
+        </div>
+      </SectionCard>
+
+      {/* QUICK ACCESS STRIP */}
+      <SectionCard title="دسترسی سریع صفحه اصلی">
+        <p className="text-xs text-neutral-400 mb-3">
+          مدیریت آیتم‌های نوار دسترسی سریع زیر اسلایدر. ترتیب نمایش بر اساس شماره ردیف است.
+        </p>
+        <div className="space-y-3">
+          {quickAccess.items
+            .slice()
+            .sort((a, b) => a.sort_order - b.sort_order)
+            .map((item, idx) => (
+              <div key={item.id} className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 border border-neutral-100">
+                <span className="text-sm font-bold text-neutral-500 w-6 text-center">{idx + 1}</span>
+                <input
+                  value={item.label}
+                  onChange={(e) => {
+                    const updated = [...quickAccess.items];
+                    const i = updated.findIndex((q) => q.id === item.id);
+                    updated[i] = { ...item, label: e.target.value };
+                    setQuickAccess({ items: updated });
+                  }}
+                  className="flex-1 h-9 px-3 rounded-lg border border-neutral-200 bg-white text-sm"
+                  placeholder="عنوان"
+                />
+                <input
+                  value={item.link}
+                  onChange={(e) => {
+                    const updated = [...quickAccess.items];
+                    const i = updated.findIndex((q) => q.id === item.id);
+                    updated[i] = { ...item, link: e.target.value };
+                    setQuickAccess({ items: updated });
+                  }}
+                  className="w-32 h-9 px-3 rounded-lg border border-neutral-200 bg-white text-sm"
+                  placeholder="/مسیر"
+                  dir="ltr"
+                />
+                <select
+                  value={item.icon}
+                  onChange={(e) => {
+                    const updated = [...quickAccess.items];
+                    const i = updated.findIndex((q) => q.id === item.id);
+                    updated[i] = { ...item, icon: e.target.value };
+                    setQuickAccess({ items: updated });
+                  }}
+                  className="h-9 px-2 rounded-lg border border-neutral-200 bg-white text-sm"
+                >
+                  {quickAccessIconOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  ))}
+                </select>
+                <button
+                  onClick={() => {
+                    const updated = [...quickAccess.items];
+                    const i = updated.findIndex((q) => q.id === item.id);
+                    updated[i] = { ...item, active: !item.active };
+                    setQuickAccess({ items: updated });
+                  }}
+                  className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors ${item.active ? 'bg-success-50 border-success-300 text-success-600' : 'bg-neutral-50 border-neutral-200 text-neutral-400'}`}
+                >
+                  {item.active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+            ))}
         </div>
       </SectionCard>
 

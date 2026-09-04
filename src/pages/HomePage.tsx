@@ -30,6 +30,11 @@ export function HomePage() {
       {/* Slideshow */}
       <HeroSlider />
 
+      {/* Quick Access */}
+      <HomeSection title="دسترسی سریع" className="py-6 sm:py-8">
+        <QuickAccessGrid />
+      </HomeSection>
+
       {/* Auction hero + ads */}
       <section className="relative overflow-hidden auction-hero-bg">
         <div className="absolute top-0 left-1/4 w-[300px] h-[200px] bg-accent-200/20 rounded-full blur-[80px] pointer-events-none" aria-hidden="true" />
@@ -63,11 +68,6 @@ export function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Quick Access */}
-      <HomeSection title="دسترسی سریع" className="py-6 sm:py-8">
-        <QuickAccessGrid />
-      </HomeSection>
 
       {/* Auction Hall */}
       <div className="bg-white/60">
