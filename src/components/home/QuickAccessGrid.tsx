@@ -23,7 +23,7 @@ export function QuickAccessGrid() {
   if (items.length === 0) return null;
 
   return (
-    <div className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-1 sm:pb-0 sm:overflow-visible">
+    <div className="grid grid-cols-2 gap-2.5 sm:gap-4 sm:flex sm:flex-row sm:overflow-visible">
       {items.map((item, idx) => {
         const Icon = quickAccessIconMap[item.icon] ?? quickAccessIconMap.gavel;
         return (
@@ -34,8 +34,8 @@ export function QuickAccessGrid() {
             className={cn(
               'group flex items-center gap-3 px-4 py-3 rounded-2xl bg-white border border-neutral-200/80',
               'hover:border-primary-200 hover:shadow-md hover:-translate-y-0.5',
-              'transition-all duration-normal shrink-0',
-              'sm:flex-1 sm:shrink',
+              'transition-all duration-normal',
+              'sm:flex-1',
               'animate-quick-access-glow',
             )}
           >

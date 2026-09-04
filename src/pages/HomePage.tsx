@@ -30,8 +30,8 @@ export function HomePage() {
       {/* Slideshow */}
       <HeroSlider />
 
-      {/* Quick Access */}
-      <HomeSection title="دسترسی سریع" className="pt-3 pb-4 sm:pt-4 sm:pb-5">
+      {/* Quick Access — heading hidden on public homepage, managed via Admin */}
+      <HomeSection className="pt-1 pb-1 sm:pt-2 sm:pb-2">
         <QuickAccessGrid />
       </HomeSection>
 
