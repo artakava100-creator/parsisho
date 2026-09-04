@@ -167,7 +167,7 @@ function SlideEditor({
         <div>
           <label className="text-sm font-medium text-neutral-600">تصویر دسکتاپ</label>
           <p className="text-xs text-neutral-400 mt-0.5 mb-2">
-            ابعاد پیشنهادی: ۱۲۸۰×۵۴۹ پیکسل (نسبت ۲۱:۹)
+            ابعاد پیشنهادی: ۱۲۸۰×۳۶۶ پیکسل (نسبت ۷:۲)
           </p>
           <div className="flex items-start gap-3">
             <div className="w-32 h-16 rounded-lg border border-neutral-200 overflow-hidden bg-neutral-50 flex-shrink-0">
@@ -208,7 +208,7 @@ function SlideEditor({
         <div>
           <label className="text-sm font-medium text-neutral-600">تصویر موبایل (اختیاری)</label>
           <p className="text-xs text-neutral-400 mt-0.5 mb-2">
-            ابعاد پیشنهادی: ۷۶۸×۲۵۶ پیکسل (نسبت ۳:۱) — در صورت خالی بودن، تصویر دسکتاپ استفاده می‌شود
+            ابعاد پیشنهادی: ۷۶۸×۱۷۱ پیکسل (نسبت ۹:۲) — در صورت خالی بودن، تصویر دسکتاپ استفاده می‌شود
           </p>
           <div className="flex items-start gap-3">
             <div className="w-20 h-16 rounded-lg border border-neutral-200 overflow-hidden bg-neutral-50 flex-shrink-0">

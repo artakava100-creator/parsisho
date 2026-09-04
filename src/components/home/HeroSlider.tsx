@@ -5,7 +5,7 @@ import type { Slide } from '@/services/slideshow.service';
 
 const AUTOPLAY_INTERVAL = 5000;
 
-function SlideContent({ slide, isMobile }: { slide: Slide; isMobile: boolean }) {
+function SlideContent({ slide, isMobile, eager }: { slide: Slide; isMobile: boolean; eager: boolean }) {
   const imageUrl = isMobile && slide.mobile_image_url
     ? slide.mobile_image_url
     : slide.desktop_image_url;
@@ -25,9 +25,11 @@ function SlideContent({ slide, isMobile }: { slide: Slide; isMobile: boolean }) 
       {imageUrl ? (
         <img
           src={imageUrl}
-          alt={slide.title ?? ''}
+          alt={slide.title ?? slide.subtitle ?? 'اسلاید'}
           className="absolute inset-0 w-full h-full object-cover"
-          loading="lazy"
+          loading={eager ? 'eager' : 'lazy'}
+          decoding={eager ? 'sync' : 'async'}
+          fetchPriority={eager ? 'high' : 'auto'}
         />
       ) : (
         <div className="absolute inset-0 w-full h-full bg-gradient-to-br from-primary-700 via-primary-600 to-primary-800" />
@@ -119,7 +121,7 @@ export function HeroSlider() {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-        <div className="rounded-2xl bg-neutral-100 animate-pulse aspect-[21/9] sm:aspect-[21/9]" />
+        <div className="rounded-2xl bg-neutral-100 animate-pulse aspect-[9/2] sm:aspect-[7/2]" />
       </div>
     );
   }
@@ -137,8 +139,8 @@ export function HeroSlider() {
           }
         }}
       >
-        {/* Slides container */}
-        <div className="relative aspect-[3/1] sm:aspect-[21/9]">
+        {/* Slides container — reduced by 1/3: desktop 7:2, mobile 9:2 */}
+        <div className="relative aspect-[9/2] sm:aspect-[7/2]">
           {activeSlides.map((slide, idx) => (
             <div
               key={slide.id}
@@ -146,7 +148,7 @@ export function HeroSlider() {
                 idx === current ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
               }`}
             >
-              <SlideContent slide={slide} isMobile={isMobile} />
+              <SlideContent slide={slide} isMobile={isMobile} eager={idx === 0} />
             </div>
           ))}
         </div>
