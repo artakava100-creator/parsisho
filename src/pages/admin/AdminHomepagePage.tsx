@@ -217,7 +217,7 @@ export function AdminHomepagePage() {
           <div className="mt-4 pt-4 border-t border-neutral-100">
             <label className="text-sm font-medium text-neutral-600">تصویر پس‌زمینه بخش معرفی</label>
             <p className="text-xs text-neutral-400 mt-1 mb-3">
-              ابعاد پیشنهادی: ۱۲۰۰×۲۸۰ پیکسل (نسبت ۳۰:۷). تصویر با حفظ نسبت ابعاد اصلی نمایش داده می‌شود.
+              ابعاد پیشنهادی: ۱۲۰۰×۱۸۷ پیکسل (نسبت ۴۵:۷). تصویر با حفظ نسبت ابعاد اصلی نمایش داده می‌شود.
             </p>
 
             {/* Preview */}

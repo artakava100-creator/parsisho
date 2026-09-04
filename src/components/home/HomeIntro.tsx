@@ -28,7 +28,7 @@ export function HomeIntro() {
   if (!c.visible) return null;
 
   return (
-    <section className="relative overflow-hidden min-h-[220px] sm:min-h-[260px]">
+    <section className="relative overflow-hidden min-h-[147px] sm:min-h-[173px]">
       {/* Custom background image OR Tehran skyline SVG fallback */}
       {bgUrl ? (
         <div className="absolute inset-0 pointer-events-none opacity-20" aria-hidden="true">
@@ -223,7 +223,7 @@ export function HomeIntro() {
         </div>
       )}
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7">
         <div className="flex flex-col items-center text-center gap-2.5">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-50 border border-primary-100">
             <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
