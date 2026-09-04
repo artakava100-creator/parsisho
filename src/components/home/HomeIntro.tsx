@@ -30,7 +30,7 @@ export function HomeIntro() {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           className="w-full h-full"
-          preserveAspectRatio="xMidYEnd meet"
+          preserveAspectRatio="xMidYEnd slice"
         >
           {/* === Alborz mountain range (background) === */}
           <path
