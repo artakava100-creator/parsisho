@@ -1,4 +1,5 @@
 import { HomeIntro } from '@/components/home/HomeIntro';
+import { HeroSlider } from '@/components/home/HeroSlider';
 import { HomeHeroAuction } from '@/components/home/HomeHeroAuction';
 import { HomeAdRail } from '@/components/home/HomeAdRail';
 import { QuickAccessGrid } from '@/components/home/QuickAccessGrid';
@@ -25,6 +26,9 @@ export function HomePage() {
     <div className="animate-fade-in">
       {/* Intro */}
       <HomeIntro />
+
+      {/* Slideshow */}
+      <HeroSlider />
 
       {/* Auction hero + ads */}
       <section className="relative overflow-hidden auction-hero-bg">

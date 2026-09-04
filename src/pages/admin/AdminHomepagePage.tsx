@@ -3,6 +3,7 @@ import { Home, Save, Loader2, Eye, EyeOff, Upload, Trash2, ImageIcon } from 'luc
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { AdminSlideshow } from '@/components/admin/AdminSlideshow';
 import { useSiteSettings, useUpdateSiteSetting } from '@/hooks/useSiteSettings';
 import { useToast } from '@/providers/useToast';
 import { supabase } from '@/lib/supabase';
@@ -263,6 +264,9 @@ export function AdminHomepagePage() {
           </div>
         </div>
       </SectionCard>
+
+      {/* SLIDESHOW */}
+      <AdminSlideshow />
 
       {/* AUCTION TITLE */}
       <SectionCard title="عنوان مزایده صفحه اصلی">
