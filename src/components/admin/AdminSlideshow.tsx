@@ -1,5 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
-import { Loader2, Upload, Trash2, ImageIcon, Eye, EyeOff, ArrowUp, ArrowDown, Plus, X } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  Loader2, Upload, Trash2, ImageIcon, Eye, EyeOff,
+  ArrowUp, ArrowDown, Plus, X, Pencil, Check, AlertCircle,
+} from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -16,121 +19,374 @@ const ROUTE_OPTIONS = [
   { label: 'صفحه اصلی', value: '/' },
 ];
 
-function SlideEditor({
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+
+interface SlideForm {
+  title: string;
+  subtitle: string;
+  desktop_image_url: string;
+  mobile_image_url: string;
+  cta_text: string;
+  destination_url: string;
+  is_active: boolean;
+  sort_order: number;
+  start_at: string;
+  end_at: string;
+}
+
+function emptyForm(sortOrder: number): SlideForm {
+  return {
+    title: '',
+    subtitle: '',
+    desktop_image_url: '',
+    mobile_image_url: '',
+    cta_text: '',
+    destination_url: '',
+    is_active: true,
+    sort_order: sortOrder,
+    start_at: '',
+    end_at: '',
+  };
+}
+
+function slideToForm(s: Slide): SlideForm {
+  return {
+    title: s.title ?? '',
+    subtitle: s.subtitle ?? '',
+    desktop_image_url: s.desktop_image_url ?? '',
+    mobile_image_url: s.mobile_image_url ?? '',
+    cta_text: s.cta_text ?? '',
+    destination_url: s.destination_url ?? '',
+    is_active: s.is_active,
+    sort_order: s.sort_order,
+    start_at: s.start_at ? s.start_at.slice(0, 16) : '',
+    end_at: s.end_at ? s.end_at.slice(0, 16) : '',
+  };
+}
+
+function validateFile(file: File): string | null {
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return 'فقط فرمت‌های JPEG، PNG، WebP و AVIF مجاز هستند';
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    return 'حجم فایل نباید بیشتر از ۵ مگابایت باشد';
+  }
+  return null;
+}
+
+/* ─── Image Upload Field ─── */
+function ImageUploadField({
+  label,
+  hint,
+  imageUrl,
+  onUploaded,
+  onRemoved,
+  uploadType,
+  previewClass,
+}: {
+  label: string;
+  hint: string;
+  imageUrl: string;
+  onUploaded: (url: string) => void;
+  onRemoved: () => void;
+  uploadType: 'desktop' | 'mobile';
+  previewClass: string;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const toast = useToast();
+
+  const handleFile = async (file: File) => {
+    setUploadError(null);
+    const validationError = validateFile(file);
+    if (validationError) {
+      setUploadError(validationError);
+      return;
+    }
+    setUploading(true);
+    try {
+      const { url, error } = await slideshowService.uploadImage(file, uploadType);
+      if (url) {
+        onUploaded(url);
+        toast.success(`تصویر ${uploadType === 'desktop' ? 'دسکتاپ' : 'موبایل'} آپلود شد`);
+      } else {
+        setUploadError(error ?? 'تصویر آپلود نشد');
+      }
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div>
+      <label className="text-sm font-medium text-neutral-600">{label}</label>
+      <p className="text-xs text-neutral-400 mt-0.5 mb-2">{hint}</p>
+      <div className="flex items-start gap-3">
+        <div className={`rounded-lg border border-neutral-200 overflow-hidden bg-neutral-50 flex-shrink-0 ${previewClass}`}>
+          {imageUrl ? (
+            <img src={imageUrl} alt={label} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-neutral-300">
+              <ImageIcon className="w-6 h-6" />
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/avif"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFile(f);
+              e.target.value = '';
+            }}
+          />
+          <Button variant="secondary" size="sm" onClick={() => inputRef.current?.click()} disabled={uploading}>
+            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+            {uploading ? 'آپلود...' : imageUrl ? 'تغییر' : 'آپلود'}
+          </Button>
+          {imageUrl && (
+            <Button variant="ghost" size="sm" onClick={onRemoved} disabled={uploading}>
+              <X className="w-3.5 h-3.5" /> حذف
+            </Button>
+          )}
+          {uploadError && (
+            <p className="text-xs text-error-600 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" /> {uploadError}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Slide Form (used for both Create and Edit) ─── */
+function SlideFormPanel({
+  form,
+  onChange,
+  onSave,
+  onCancel,
+  saving,
+  saveLabel,
+  errors,
+}: {
+  form: SlideForm;
+  onChange: (patch: Partial<SlideForm>) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  saving: boolean;
+  saveLabel: string;
+  errors: Record<string, string>;
+}) {
+  return (
+    <div className="p-4 space-y-3">
+      {/* Desktop image */}
+      <ImageUploadField
+        label="تصویر دسکتاپ"
+        hint="ابعاد پیشنهادی: ۱۲۸۰×۳۶۶ پیکسل (نسبت ۷:۲)"
+        imageUrl={form.desktop_image_url}
+        onUploaded={(url) => onChange({ desktop_image_url: url })}
+        onRemoved={() => onChange({ desktop_image_url: '' })}
+        uploadType="desktop"
+        previewClass="w-32 h-16"
+      />
+
+      {/* Mobile image */}
+      <ImageUploadField
+        label="تصویر موبایل (اختیاری)"
+        hint="ابعاد پیشنهادی: ۷۶۸×۱۷۱ پیکسل (نسبت ۹:۲) — در صورت خالی بودن، تصویر دسکتاپ استفاده می‌شود"
+        imageUrl={form.mobile_image_url}
+        onUploaded={(url) => onChange({ mobile_image_url: url })}
+        onRemoved={() => onChange({ mobile_image_url: '' })}
+        uploadType="mobile"
+        previewClass="w-20 h-16"
+      />
+
+      {/* Title */}
+      <div className="space-y-1">
+        <label className="text-sm font-medium text-neutral-600">عنوان</label>
+        <Input
+          value={form.title}
+          onChange={(e) => onChange({ title: e.target.value })}
+          placeholder="عنوان اسلاید"
+        />
+        {errors.title && <p className="text-xs text-error-600">{errors.title}</p>}
+      </div>
+
+      {/* Subtitle */}
+      <div className="space-y-1">
+        <label className="text-sm font-medium text-neutral-600">توضیحات (اختیاری)</label>
+        <Input
+          value={form.subtitle}
+          onChange={(e) => onChange({ subtitle: e.target.value })}
+          placeholder="توضیحات اسلاید"
+        />
+      </div>
+
+      {/* CTA + destination */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-neutral-600">متن دکمه (اختیاری)</label>
+          <Input
+            value={form.cta_text}
+            onChange={(e) => onChange({ cta_text: e.target.value })}
+            placeholder="مشاهده"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-neutral-600">مقصد لینک</label>
+          <select
+            value={ROUTE_OPTIONS.some((r) => r.value === form.destination_url) ? form.destination_url : '__custom__'}
+            onChange={(e) => {
+              if (e.target.value === '__custom__') return;
+              onChange({ destination_url: e.target.value });
+            }}
+            className="w-full h-10 px-3 rounded-lg border border-neutral-200 bg-white text-sm"
+          >
+            <option value="">— بدون لینک —</option>
+            {ROUTE_OPTIONS.map((r) => (
+              <option key={r.value} value={r.value}>{r.label}</option>
+            ))}
+            {form.destination_url && !ROUTE_OPTIONS.some((r) => r.value === form.destination_url) && (
+              <option value="__custom__">لینک سفارشی: {form.destination_url}</option>
+            )}
+          </select>
+          {form.destination_url && !ROUTE_OPTIONS.some((r) => r.value === form.destination_url) && (
+            <Input
+              value={form.destination_url}
+              onChange={(e) => onChange({ destination_url: e.target.value })}
+              placeholder="/path"
+              dir="ltr"
+              className="mt-1"
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Status */}
+      <div className="flex items-center gap-3">
+        <label className="text-sm font-medium text-neutral-600">وضعیت</label>
+        <button
+          type="button"
+          onClick={() => onChange({ is_active: !form.is_active })}
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
+            form.is_active
+              ? 'bg-success-50 border-success-300 text-success-700'
+              : 'bg-neutral-50 border-neutral-200 text-neutral-500'
+          }`}
+        >
+          {form.is_active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+          {form.is_active ? 'فعال' : 'غیرفعال'}
+        </button>
+      </div>
+
+      {/* Scheduling */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-neutral-600">تاریخ شروع (اختیاری)</label>
+          <input
+            type="datetime-local"
+            value={form.start_at}
+            onChange={(e) => onChange({ start_at: e.target.value })}
+            className="w-full h-10 px-3 rounded-lg border border-neutral-200 bg-white text-sm"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-sm font-medium text-neutral-600">تاریخ پایان (اختیاری)</label>
+          <input
+            type="datetime-local"
+            value={form.end_at}
+            onChange={(e) => onChange({ end_at: e.target.value })}
+            className="w-full h-10 px-3 rounded-lg border border-neutral-200 bg-white text-sm"
+          />
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-2 pt-2 border-t border-neutral-100">
+        <Button variant="primary" onClick={onSave} disabled={saving}>
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+          {saveLabel}
+        </Button>
+        <Button variant="ghost" onClick={onCancel} disabled={saving}>
+          انصراف
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Slide Row (collapsed view in list) ─── */
+function SlideRow({
   slide,
   index,
   total,
+  onEdit,
   onMove,
+  onToggleActive,
   onDelete,
 }: {
   slide: Slide;
   index: number;
   total: number;
-  onMove: (id: string, dir: -1 | 1) => void;
-  onDelete: (id: string) => void;
+  onEdit: () => void;
+  onMove: (dir: -1 | 1) => void;
+  onToggleActive: () => void;
+  onDelete: () => void;
 }) {
-  const upsert = useUpsertSlide();
-  const toast = useToast();
-  const desktopInputRef = useRef<HTMLInputElement>(null);
-  const mobileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadingDesktop, setUploadingDesktop] = useState(false);
-  const [uploadingMobile, setUploadingMobile] = useState(false);
-
-  const [form, setForm] = useState({
-    title: slide.title ?? '',
-    subtitle: slide.subtitle ?? '',
-    desktop_image_url: slide.desktop_image_url ?? '',
-    mobile_image_url: slide.mobile_image_url ?? '',
-    cta_text: slide.cta_text ?? '',
-    destination_url: slide.destination_url ?? '',
-    is_active: slide.is_active,
-    sort_order: slide.sort_order,
-    start_at: slide.start_at ? slide.start_at.slice(0, 16) : '',
-    end_at: slide.end_at ? slide.end_at.slice(0, 16) : '',
-  });
-
-  useEffect(() => {
-    setForm({
-      title: slide.title ?? '',
-      subtitle: slide.subtitle ?? '',
-      desktop_image_url: slide.desktop_image_url ?? '',
-      mobile_image_url: slide.mobile_image_url ?? '',
-      cta_text: slide.cta_text ?? '',
-      destination_url: slide.destination_url ?? '',
-      is_active: slide.is_active,
-      sort_order: slide.sort_order,
-      start_at: slide.start_at ? slide.start_at.slice(0, 16) : '',
-      end_at: slide.end_at ? slide.end_at.slice(0, 16) : '',
-    });
-  }, [slide]);
-
-  const update = async (patch: Partial<typeof form>) => {
-    const next = { ...form, ...patch };
-    setForm(next);
-    try {
-      await upsert.mutateAsync({
-        id: slide.id,
-        title: next.title || null,
-        subtitle: next.subtitle || null,
-        desktop_image_url: next.desktop_image_url || undefined,
-        mobile_image_url: next.mobile_image_url || null,
-        cta_text: next.cta_text || null,
-        destination_url: next.destination_url || null,
-        is_active: next.is_active,
-        sort_order: next.sort_order,
-        start_at: next.start_at ? new Date(next.start_at).toISOString() : null,
-        end_at: next.end_at ? new Date(next.end_at).toISOString() : null,
-      });
-    } catch {
-      toast.error('خطا در ذخیره اسلاید');
-    }
-  };
-
-  const handleUploadDesktop = async (file: File) => {
-    setUploadingDesktop(true);
-    try {
-      const { url, error } = await slideshowService.uploadImage(file, 'desktop');
-      if (url) {
-        update({ desktop_image_url: url });
-        toast.success('تصویر دسکتاپ آپلود شد');
-      } else {
-        toast.error(error ?? 'خطا در آپلود');
-      }
-    } finally {
-      setUploadingDesktop(false);
-    }
-  };
-
-  const handleUploadMobile = async (file: File) => {
-    setUploadingMobile(true);
-    try {
-      const { url, error } = await slideshowService.uploadImage(file, 'mobile');
-      if (url) {
-        update({ mobile_image_url: url });
-        toast.success('تصویر موبایل آپلود شد');
-      } else {
-        toast.error(error ?? 'خطا در آپلود');
-      }
-    } finally {
-      setUploadingMobile(false);
-    }
-  };
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   return (
     <div className="rounded-xl border border-neutral-200 bg-white overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-neutral-50 border-b border-neutral-100">
-        <div className="flex items-center gap-2">
-          <span className="w-6 h-6 rounded-lg bg-primary-100 text-primary-700 text-xs font-bold flex items-center justify-center">
-            {index + 1}
-          </span>
-          <span className="text-sm font-bold text-neutral-700">
-            اسلاید {index + 1}
-          </span>
+      <div className="flex items-center gap-3 px-4 py-3">
+        {/* Thumbnail */}
+        <div className="w-20 h-12 rounded-lg border border-neutral-200 overflow-hidden bg-neutral-50 flex-shrink-0">
+          {slide.desktop_image_url ? (
+            <img src={slide.desktop_image_url} alt={slide.title ?? ''} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-neutral-300">
+              <ImageIcon className="w-5 h-5" />
+            </div>
+          )}
         </div>
-        <div className="flex items-center gap-1">
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="w-5 h-5 rounded bg-primary-100 text-primary-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+              {index + 1}
+            </span>
+            <h4 className="text-sm font-bold text-neutral-800 truncate">
+              {slide.title || 'بدون عنوان'}
+            </h4>
+            <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold flex-shrink-0 ${
+              slide.is_active
+                ? 'bg-success-50 text-success-700'
+                : 'bg-neutral-100 text-neutral-400'
+            }`}>
+              {slide.is_active ? 'فعال' : 'غیرفعال'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 mt-0.5 text-xs text-neutral-400">
+            {slide.cta_text && <span>{slide.cta_text}</span>}
+            {slide.destination_url && (
+              <>
+                <span className="text-neutral-200">|</span>
+                <span dir="ltr">{slide.destination_url}</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-1 flex-shrink-0">
           <button
-            onClick={() => onMove(slide.id, -1)}
+            onClick={() => onMove(-1)}
             disabled={index === 0}
             className="w-7 h-7 rounded-lg border border-neutral-200 flex items-center justify-center text-neutral-500 hover:bg-neutral-100 disabled:opacity-30 disabled:cursor-not-allowed"
             aria-label="بالا"
@@ -138,7 +394,7 @@ function SlideEditor({
             <ArrowUp className="w-3.5 h-3.5" />
           </button>
           <button
-            onClick={() => onMove(slide.id, 1)}
+            onClick={() => onMove(1)}
             disabled={index === total - 1}
             className="w-7 h-7 rounded-lg border border-neutral-200 flex items-center justify-center text-neutral-500 hover:bg-neutral-100 disabled:opacity-30 disabled:cursor-not-allowed"
             aria-label="پایین"
@@ -146,232 +402,202 @@ function SlideEditor({
             <ArrowDown className="w-3.5 h-3.5" />
           </button>
           <button
-            onClick={() => update({ is_active: !form.is_active })}
-            className={`w-7 h-7 rounded-lg border flex items-center justify-center transition-colors ${form.is_active ? 'bg-success-50 border-success-300 text-success-600' : 'bg-neutral-50 border-neutral-200 text-neutral-400'}`}
+            onClick={onToggleActive}
+            className={`w-7 h-7 rounded-lg border flex items-center justify-center transition-colors ${
+              slide.is_active
+                ? 'bg-success-50 border-success-300 text-success-600'
+                : 'bg-neutral-50 border-neutral-200 text-neutral-400'
+            }`}
             aria-label="فعال/غیرفعال"
           >
-            {form.is_active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+            {slide.is_active ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
           </button>
           <button
-            onClick={() => onDelete(slide.id)}
-            className="w-7 h-7 rounded-lg border border-error-200 flex items-center justify-center text-error-500 hover:bg-error-50"
-            aria-label="حذف"
+            onClick={onEdit}
+            className="w-7 h-7 rounded-lg border border-primary-200 flex items-center justify-center text-primary-600 hover:bg-primary-50"
+            aria-label="ویرایش"
           >
-            <Trash2 className="w-3.5 h-3.5" />
+            <Pencil className="w-3.5 h-3.5" />
           </button>
-        </div>
-      </div>
-
-      <div className="p-4 space-y-3">
-        {/* Desktop image upload */}
-        <div>
-          <label className="text-sm font-medium text-neutral-600">تصویر دسکتاپ</label>
-          <p className="text-xs text-neutral-400 mt-0.5 mb-2">
-            ابعاد پیشنهادی: ۱۲۸۰×۳۶۶ پیکسل (نسبت ۷:۲)
-          </p>
-          <div className="flex items-start gap-3">
-            <div className="w-32 h-16 rounded-lg border border-neutral-200 overflow-hidden bg-neutral-50 flex-shrink-0">
-              {form.desktop_image_url ? (
-                <img src={form.desktop_image_url} alt="دسکتاپ" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-neutral-300">
-                  <ImageIcon className="w-6 h-6" />
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <input
-                ref={desktopInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) handleUploadDesktop(f);
-                  e.target.value = '';
-                }}
-              />
-              <Button variant="secondary" size="sm" onClick={() => desktopInputRef.current?.click()} disabled={uploadingDesktop}>
-                {uploadingDesktop ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                {uploadingDesktop ? 'آپلود...' : 'آپلود'}
-              </Button>
-              {form.desktop_image_url && (
-                <Button variant="ghost" size="sm" onClick={() => update({ desktop_image_url: '' })}>
-                  <X className="w-3.5 h-3.5" /> حذف
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile image upload */}
-        <div>
-          <label className="text-sm font-medium text-neutral-600">تصویر موبایل (اختیاری)</label>
-          <p className="text-xs text-neutral-400 mt-0.5 mb-2">
-            ابعاد پیشنهادی: ۷۶۸×۱۷۱ پیکسل (نسبت ۹:۲) — در صورت خالی بودن، تصویر دسکتاپ استفاده می‌شود
-          </p>
-          <div className="flex items-start gap-3">
-            <div className="w-20 h-16 rounded-lg border border-neutral-200 overflow-hidden bg-neutral-50 flex-shrink-0">
-              {form.mobile_image_url ? (
-                <img src={form.mobile_image_url} alt="موبایل" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-neutral-300">
-                  <ImageIcon className="w-5 h-5" />
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <input
-                ref={mobileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) handleUploadMobile(f);
-                  e.target.value = '';
-                }}
-              />
-              <Button variant="secondary" size="sm" onClick={() => mobileInputRef.current?.click()} disabled={uploadingMobile}>
-                {uploadingMobile ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-                {uploadingMobile ? 'آپلود...' : 'آپلود'}
-              </Button>
-              {form.mobile_image_url && (
-                <Button variant="ghost" size="sm" onClick={() => update({ mobile_image_url: '' })}>
-                  <X className="w-3.5 h-3.5" /> حذف
-                </Button>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Title */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-neutral-600">عنوان (اختیاری)</label>
-          <Input
-            value={form.title}
-            onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
-            onBlur={() => update({ title: form.title })}
-            placeholder="عنوان اسلاید"
-          />
-        </div>
-
-        {/* Subtitle */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-neutral-600">زیرعنوان (اختیاری)</label>
-          <Input
-            value={form.subtitle}
-            onChange={(e) => setForm((p) => ({ ...p, subtitle: e.target.value }))}
-            onBlur={() => update({ subtitle: form.subtitle })}
-            placeholder="توضیحات اسلاید"
-          />
-        </div>
-
-        {/* CTA text + destination */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-neutral-600">متن دکمه (اختیاری)</label>
-            <Input
-              value={form.cta_text}
-              onChange={(e) => setForm((p) => ({ ...p, cta_text: e.target.value }))}
-              onBlur={() => update({ cta_text: form.cta_text })}
-              placeholder="مشاهده"
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-neutral-600">مقصد لینک</label>
-            <select
-              value={form.destination_url}
-              onChange={(e) => update({ destination_url: e.target.value })}
-              className="w-full h-10 px-3 rounded-lg border border-neutral-200 bg-white text-sm"
+          {!confirmDelete ? (
+            <button
+              onClick={() => setConfirmDelete(true)}
+              className="w-7 h-7 rounded-lg border border-error-200 flex items-center justify-center text-error-500 hover:bg-error-50"
+              aria-label="حذف"
             >
-              <option value="">— بدون لینک —</option>
-              {ROUTE_OPTIONS.map((r) => (
-                <option key={r.value} value={r.value}>{r.label}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Scheduling */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-neutral-600">تاریخ شروع (اختیاری)</label>
-            <input
-              type="datetime-local"
-              value={form.start_at}
-              onChange={(e) => setForm((p) => ({ ...p, start_at: e.target.value }))}
-              onBlur={() => update({ start_at: form.start_at })}
-              className="w-full h-10 px-3 rounded-lg border border-neutral-200 bg-white text-sm"
-            />
-          </div>
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-neutral-600">تاریخ پایان (اختیاری)</label>
-            <input
-              type="datetime-local"
-              value={form.end_at}
-              onChange={(e) => setForm((p) => ({ ...p, end_at: e.target.value }))}
-              onBlur={() => update({ end_at: form.end_at })}
-              className="w-full h-10 px-3 rounded-lg border border-neutral-200 bg-white text-sm"
-            />
-          </div>
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => { onDelete(); setConfirmDelete(false); }}
+                className="h-7 px-2 rounded-lg bg-error-600 text-white text-xs font-bold hover:bg-error-700"
+              >
+                تایید حذف
+              </button>
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="h-7 px-2 rounded-lg border border-neutral-200 text-xs text-neutral-500 hover:bg-neutral-50"
+              >
+                لغو
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
+/* ─── Main AdminSlideshow ─── */
 export function AdminSlideshow() {
-  const { data: slides, isLoading } = useAdminSlides();
-  const upsert = useUpsertSlide();
-  const del = useDeleteSlide();
+  const { data: slides, isLoading, error: fetchError } = useAdminSlides();
+  const upsertMutation = useUpsertSlide();
+  const deleteMutation = useDeleteSlide();
   const toast = useToast();
 
-  const handleMove = async (id: string, dir: -1 | 1) => {
-    const all = slides ?? [];
-    const idx = all.findIndex((s) => s.id === id);
-    if (idx < 0) return;
-    const target = idx + dir;
-    if (target < 0 || target >= all.length) return;
+  const [mode, setMode] = useState<'list' | 'create' | 'edit'>('list');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [form, setForm] = useState<SlideForm>(emptyForm(0));
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-    const currentSlide = all[idx];
-    const targetSlide = all[target];
+  const allSlides = slides ?? [];
 
+  const patchForm = useCallback((patch: Partial<SlideForm>) => {
+    setForm((prev) => ({ ...prev, ...patch }));
+    setFormErrors((prev) => {
+      const next = { ...prev };
+      for (const key of Object.keys(patch)) delete next[key];
+      return next;
+    });
+  }, []);
+
+  const resetToList = useCallback(() => {
+    setMode('list');
+    setEditingId(null);
+    setForm(emptyForm(0));
+    setFormErrors({});
+  }, []);
+
+  const validate = (): boolean => {
+    const errs: Record<string, string> = {};
+    if (!form.title.trim()) errs.title = 'عنوان اسلاید الزامی است';
+    setFormErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const formToPayload = (id?: string): Partial<Slide> & { id?: string } => ({
+    ...(id ? { id } : {}),
+    title: form.title.trim() || null,
+    subtitle: form.subtitle.trim() || null,
+    desktop_image_url: form.desktop_image_url || undefined,
+    mobile_image_url: form.mobile_image_url || null,
+    cta_text: form.cta_text.trim() || null,
+    destination_url: form.destination_url || null,
+    is_active: form.is_active,
+    sort_order: form.sort_order,
+    start_at: form.start_at ? new Date(form.start_at).toISOString() : null,
+    end_at: form.end_at ? new Date(form.end_at).toISOString() : null,
+  });
+
+  /* ─ Create ─ */
+  const handleCreate = async () => {
+    if (!validate()) return;
     try {
-      await Promise.all([
-        upsert.mutateAsync({ id: currentSlide.id, sort_order: targetSlide.sort_order }),
-        upsert.mutateAsync({ id: targetSlide.id, sort_order: currentSlide.sort_order }),
-      ]);
-      toast.success('ترتیب اسلایدها به‌روزرسانی شد');
-    } catch {
-      toast.error('خطا در تغییر ترتیب');
+      await upsertMutation.mutateAsync(formToPayload());
+      toast.success('اسلاید جدید ایجاد شد');
+      resetToList();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('unauthorized')) {
+        toast.error('دسترسی لازم برای ایجاد اسلاید وجود ندارد');
+      } else {
+        toast.error('ذخیره اسلاید انجام نشد. دوباره تلاش کنید.');
+      }
     }
   };
 
+  /* ─ Edit ─ */
+  const startEdit = (slide: Slide) => {
+    setEditingId(slide.id);
+    setForm(slideToForm(slide));
+    setFormErrors({});
+    setMode('edit');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId || !validate()) return;
+    try {
+      await upsertMutation.mutateAsync(formToPayload(editingId));
+      toast.success('اسلاید به‌روزرسانی شد');
+      resetToList();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('unauthorized')) {
+        toast.error('دسترسی لازم برای ویرایش اسلاید وجود ندارد');
+      } else {
+        toast.error('ذخیره تغییرات انجام نشد. دوباره تلاش کنید.');
+      }
+    }
+  };
+
+  /* ─ Delete ─ */
   const handleDelete = async (id: string) => {
     try {
-      await del.mutateAsync(id);
+      await deleteMutation.mutateAsync(id);
       toast.success('اسلاید حذف شد');
-    } catch {
-      toast.error('خطا در حذف اسلاید');
+      if (editingId === id) resetToList();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      if (msg.includes('unauthorized')) {
+        toast.error('دسترسی لازم برای حذف اسلاید وجود ندارد');
+      } else {
+        toast.error('حذف اسلاید انجام نشد. دوباره تلاش کنید.');
+      }
     }
   };
 
-  const handleAdd = async () => {
+  /* ─ Toggle Active ─ */
+  const handleToggleActive = async (slide: Slide) => {
     try {
-      const maxSort = Math.max(0, ...(slides ?? []).map((s) => s.sort_order));
-      await upsert.mutateAsync({
-        title: 'اسلاید جدید',
-        desktop_image_url: '',
-        is_active: false,
-        sort_order: maxSort + 1,
+      await upsertMutation.mutateAsync({
+        id: slide.id,
+        is_active: !slide.is_active,
       });
-      toast.success('اسلاید جدید اضافه شد');
+      toast.success(slide.is_active ? 'اسلاید غیرفعال شد' : 'اسلاید فعال شد');
     } catch {
-      toast.error('خطا در افزودن اسلاید');
+      toast.error('تغییر وضعیت انجام نشد');
     }
   };
 
+  /* ─ Move (reorder) ─ */
+  const handleMove = async (id: string, dir: -1 | 1) => {
+    const idx = allSlides.findIndex((s) => s.id === id);
+    if (idx < 0) return;
+    const target = idx + dir;
+    if (target < 0 || target >= allSlides.length) return;
+    const a = allSlides[idx];
+    const b = allSlides[target];
+    try {
+      await Promise.all([
+        upsertMutation.mutateAsync({ id: a.id, sort_order: b.sort_order }),
+        upsertMutation.mutateAsync({ id: b.id, sort_order: a.sort_order }),
+      ]);
+    } catch {
+      toast.error('تغییر ترتیب انجام نشد');
+    }
+  };
+
+  /* ─ Start Create ─ */
+  const openCreateForm = () => {
+    const maxSort = allSlides.length > 0 ? Math.max(...allSlides.map((s) => s.sort_order)) : -1;
+    setForm(emptyForm(maxSort + 1));
+    setFormErrors({});
+    setMode('create');
+    setEditingId(null);
+  };
+
+  /* ─ Loading ─ */
   if (isLoading) {
     return (
       <Card className="p-5">
@@ -382,31 +608,83 @@ export function AdminSlideshow() {
     );
   }
 
-  const allSlides = slides ?? [];
+  /* ─ Fetch Error ─ */
+  if (fetchError) {
+    return (
+      <Card className="p-5">
+        <div className="flex flex-col items-center justify-center py-8 text-error-600 gap-2">
+          <AlertCircle className="w-6 h-6" />
+          <p className="text-sm">بارگذاری اسلایدها انجام نشد. صفحه را دوباره بارگذاری کنید.</p>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-5">
       <div className="flex items-center justify-between mb-4 pb-2 border-b border-neutral-100">
         <h3 className="text-base font-bold text-neutral-800">اسلایدشو صفحه اصلی</h3>
-        <Button variant="secondary" size="sm" onClick={handleAdd} disabled={upsert.isPending}>
-          <Plus className="w-4 h-4" />
-          افزودن اسلاید
-        </Button>
+        {mode === 'list' && (
+          <Button variant="secondary" size="sm" onClick={openCreateForm}>
+            <Plus className="w-4 h-4" />
+            افزودن اسلاید
+          </Button>
+        )}
       </div>
-      <div className="space-y-3">
+
+      {/* ─── Create Form ─── */}
+      {mode === 'create' && (
+        <div className="rounded-xl border-2 border-dashed border-primary-300 bg-primary-50/30 mb-4">
+          <div className="px-4 py-2.5 border-b border-primary-200">
+            <span className="text-sm font-bold text-primary-700">اسلاید جدید</span>
+          </div>
+          <SlideFormPanel
+            form={form}
+            onChange={patchForm}
+            onSave={handleCreate}
+            onCancel={resetToList}
+            saving={upsertMutation.isPending}
+            saveLabel="ایجاد اسلاید"
+            errors={formErrors}
+          />
+        </div>
+      )}
+
+      {/* ─── Edit Form ─── */}
+      {mode === 'edit' && editingId && (
+        <div className="rounded-xl border-2 border-primary-300 bg-primary-50/20 mb-4">
+          <div className="px-4 py-2.5 border-b border-primary-200">
+            <span className="text-sm font-bold text-primary-700">ویرایش اسلاید</span>
+          </div>
+          <SlideFormPanel
+            form={form}
+            onChange={patchForm}
+            onSave={handleSaveEdit}
+            onCancel={resetToList}
+            saving={upsertMutation.isPending}
+            saveLabel="ذخیره تغییرات"
+            errors={formErrors}
+          />
+        </div>
+      )}
+
+      {/* ─── Slide List ─── */}
+      <div className="space-y-2">
         {allSlides.map((slide, idx) => (
-          <SlideEditor
+          <SlideRow
             key={slide.id}
             slide={slide}
             index={idx}
             total={allSlides.length}
-            onMove={handleMove}
-            onDelete={handleDelete}
+            onEdit={() => startEdit(slide)}
+            onMove={(dir) => handleMove(slide.id, dir)}
+            onToggleActive={() => handleToggleActive(slide)}
+            onDelete={() => handleDelete(slide.id)}
           />
         ))}
-        {allSlides.length === 0 && (
+        {allSlides.length === 0 && mode === 'list' && (
           <div className="text-center py-8 text-neutral-400 text-sm">
-            هنوز اسلایدی ایجاد نشده است. روی «افزودن اسلاید» کلیک کنید.
+            هنوز اسلایدی وجود ندارد. روی «افزودن اسلاید» کلیک کنید.
           </div>
         )}
       </div>

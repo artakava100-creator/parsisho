@@ -67,7 +67,7 @@ export const slideshowService = {
         p_id: slide.id ?? null,
         p_title: slide.title ?? null,
         p_subtitle: slide.subtitle ?? null,
-        p_desktop_image_url: slide.desktop_image_url ?? null,
+        p_desktop_image_url: slide.desktop_image_url !== undefined ? slide.desktop_image_url : null,
         p_mobile_image_url: slide.mobile_image_url ?? null,
         p_cta_text: slide.cta_text ?? null,
         p_destination_url: slide.destination_url ?? null,
