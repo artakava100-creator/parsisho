@@ -300,40 +300,6 @@
   }
   .animate-border-glow-urgent { animation: border-glow-urgent 1.5s ease-in-out infinite; }
 
-  /* Auction glow — TIGHT radius, BRIGHT core, warm red-orange */
-  @keyframes auction-glow-anim {
-    0%   { box-shadow: 0 0 8px 2px rgba(200, 80, 20, 0.30), 0 0 16px 4px rgba(200, 80, 20, 0.12); }
-    50%  { box-shadow: 0 0 14px 4px rgba(200, 80, 20, 0.50), 0 0 22px 6px rgba(200, 80, 20, 0.18); }
-    100% { box-shadow: 0 0 8px 2px rgba(200, 80, 20, 0.30), 0 0 16px 4px rgba(200, 80, 20, 0.12); }
-  }
-  .auction-glow {
-    animation: auction-glow-anim 2.5s ease-in-out infinite;
-    border-radius: 16px;
-    background: linear-gradient(135deg, rgba(200, 80, 20, 0.10), rgba(200, 80, 20, 0.05));
-  }
-
-  @keyframes auction-glow-urgent-anim {
-    0%   { box-shadow: 0 0 10px 3px rgba(200, 50, 30, 0.35), 0 0 18px 5px rgba(200, 50, 30, 0.14); }
-    50%  { box-shadow: 0 0 18px 5px rgba(200, 50, 30, 0.55), 0 0 26px 8px rgba(200, 50, 30, 0.22); }
-    100% { box-shadow: 0 0 10px 3px rgba(200, 50, 30, 0.35), 0 0 18px 5px rgba(200, 50, 30, 0.14); }
-  }
-  .auction-glow-urgent {
-    animation: auction-glow-urgent-anim 1.5s ease-in-out infinite;
-    border-radius: 16px;
-    background: linear-gradient(135deg, rgba(200, 50, 30, 0.10), rgba(200, 50, 30, 0.05));
-  }
-
-  .auction-glow-upcoming {
-    border-radius: 16px;
-    background: linear-gradient(135deg, rgba(21, 90, 138, 0.08), rgba(21, 90, 138, 0.04));
-    box-shadow: 0 0 12px 2px rgba(21, 90, 138, 0.14);
-  }
-
-  /* Auction hero section — warm brick-orange */
-  .auction-hero-bg {
-    background: linear-gradient(180deg, #FFF0E0 0%, #FFE6CC 35%, #FFDFC0 65%, #FFF4EA 100%);
-  }
-
   /* Support button — rotating glow ring */
   @keyframes support-ring-spin {
     0% { transform: rotate(0deg); }
@@ -383,8 +349,6 @@
     .animate-border-glow,
     .animate-border-glow-urgent,
     .animate-pulse-glow,
-    .auction-glow,
-    .auction-glow-urgent,
     .animate-quick-access-glow,
     .support-glow-ring::before {
       animation: none;

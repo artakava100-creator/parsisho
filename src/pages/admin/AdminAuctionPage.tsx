@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Gavel, Plus, Calendar, Clock, Play, Pause, Trophy, Settings, AlertCircle } from 'lucide-react';
-import { useAdminAuctions, useCreateAuction, useScheduleAuction, useGoLiveAuction, useCancelAuction, useFinalizeAuction } from '@/hooks/useAdminAuction';
+import { useState, useRef } from 'react';
+import { Gavel, Plus, Calendar, Clock, Play, Pause, Trophy, Settings, AlertCircle, Upload, X, Loader2, ImageIcon, Pencil } from 'lucide-react';
+import { useAdminAuctions, useCreateAuction, useUpdateAuction, useScheduleAuction, useGoLiveAuction, useCancelAuction, useFinalizeAuction } from '@/hooks/useAdminAuction';
 import { useIranToday } from '@/hooks/useAuction';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -9,6 +9,9 @@ import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
+import { useToast } from '@/providers/useToast';
+import { supabase } from '@/lib/supabase';
+import { logger } from '@/lib/logger';
 import { formatCurrency, toPersianDigits } from '@/lib/persian';
 import { formatJalaliDate, formatTime } from '@/lib/jalali';
 import type { Auction, AuctionStatus } from '@/types';
@@ -22,9 +25,122 @@ const STATUS_TONE: Record<AuctionStatus, { tone: 'neutral' | 'primary' | 'error'
   cancelled: { tone: 'neutral', label: 'لغوشده' },
 };
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+
+function validateFile(file: File): string | null {
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return 'فقط فرمت‌های JPEG، PNG، WebP و AVIF مجاز هستند';
+  }
+  if (file.size > MAX_FILE_SIZE) {
+    return 'حجم فایل نباید بیشتر از ۵ مگابایت باشد';
+  }
+  return null;
+}
+
+async function uploadAuctionImage(file: File): Promise<{ url: string | null; error: string | null }> {
+  try {
+    const ext = file.name.split('.').pop() || 'jpg';
+    const fileName = `auction-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from('homepage-images')
+      .upload(fileName, file, { cacheControl: '3600', upsert: false });
+    if (upErr) {
+      logger.error('[auction.uploadImage]', upErr);
+      return { url: null, error: upErr.message };
+    }
+    const { data: pub } = supabase.storage.from('homepage-images').getPublicUrl(fileName);
+    return { url: pub.publicUrl, error: null };
+  } catch {
+    return { url: null, error: 'خطای غیرمنتظره' };
+  }
+}
+
+function AuctionImageUploadField({
+  imageUrl,
+  onUploaded,
+  onRemoved,
+}: {
+  imageUrl: string;
+  onUploaded: (url: string) => void;
+  onRemoved: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const toast = useToast();
+
+  const handleFile = async (file: File) => {
+    setUploadError(null);
+    const validationError = validateFile(file);
+    if (validationError) {
+      setUploadError(validationError);
+      return;
+    }
+    setUploading(true);
+    try {
+      const { url, error } = await uploadAuctionImage(file);
+      if (url) {
+        onUploaded(url);
+        toast.success('تصویر مزایده آپلود شد');
+      } else {
+        setUploadError(error ?? 'تصویر آپلود نشد');
+      }
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <div>
+      <label className="text-sm font-medium text-neutral-600">تصویر مزایده</label>
+      <p className="text-xs text-neutral-400 mt-0.5 mb-2">تصویر نمایش‌داده‌شده در صفحه اصلی (نسبت ۱۶:۱۰)</p>
+      <div className="flex items-start gap-3">
+        <div className="w-32 h-20 rounded-lg border border-neutral-200 overflow-hidden bg-neutral-50 flex-shrink-0">
+          {imageUrl ? (
+            <img src={imageUrl} alt="تصویر مزایده" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-neutral-300">
+              <ImageIcon className="w-6 h-6" />
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/avif"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFile(f);
+              e.target.value = '';
+            }}
+          />
+          <Button variant="secondary" size="sm" onClick={() => inputRef.current?.click()} disabled={uploading}>
+            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+            {uploading ? 'آپلود...' : imageUrl ? 'تغییر' : 'آپلود'}
+          </Button>
+          {imageUrl && (
+            <Button variant="ghost" size="sm" onClick={onRemoved} disabled={uploading}>
+              <X className="w-3.5 h-3.5" /> حذف
+            </Button>
+          )}
+          {uploadError && (
+            <p className="text-xs text-error-600 flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" /> {uploadError}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function AdminAuctionPage() {
   const { data: auctions, isLoading, error } = useAdminAuctions();
   const [showCreate, setShowCreate] = useState(false);
+  const [editingAuction, setEditingAuction] = useState<Auction | null>(null);
 
   if (isLoading) return <FullPageSpinner />;
   if (error) {
@@ -68,17 +184,18 @@ export function AdminAuctionPage() {
       ) : (
         <div className="space-y-3">
           {auctions.map((auction) => (
-            <AuctionRow key={auction.id} auction={auction} />
+            <AuctionRow key={auction.id} auction={auction} onEdit={() => setEditingAuction(auction)} />
           ))}
         </div>
       )}
 
       <CreateAuctionModal open={showCreate} onClose={() => setShowCreate(false)} />
+      <EditAuctionModal auction={editingAuction} onClose={() => setEditingAuction(null)} />
     </div>
   );
 }
 
-function AuctionRow({ auction }: { auction: Auction }) {
+function AuctionRow({ auction, onEdit }: { auction: Auction; onEdit: () => void }) {
   const schedule = useScheduleAuction();
   const goLive = useGoLiveAuction();
   const cancel = useCancelAuction();
@@ -124,19 +241,29 @@ function AuctionRow({ auction }: { auction: Auction }) {
 
         <div className="flex items-center gap-2 shrink-0">
           {auction.status === 'draft' && (
-            <Button
-              variant="ghost"
-              size="sm"
-              loading={schedule.isPending}
-              onClick={() => setConfirmAction({
-                type: 'schedule',
-                label: 'برنامه‌ریزی این مزایده',
-                action: () => schedule.mutate(auction.id),
-              })}
-            >
-              <Settings className="w-3.5 h-3.5" />
-              برنامه‌ریزی
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onEdit}
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                ویرایش
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                loading={schedule.isPending}
+                onClick={() => setConfirmAction({
+                  type: 'schedule',
+                  label: 'برنامه‌ریزی این مزایده',
+                  action: () => schedule.mutate(auction.id),
+                })}
+              >
+                <Settings className="w-3.5 h-3.5" />
+                برنامه‌ریزی
+              </Button>
+            </>
           )}
           {auction.status === 'scheduled' && (
             <Button
@@ -217,6 +344,7 @@ function CreateAuctionModal({ open, onClose }: { open: boolean; onClose: () => v
   const [clickCost, setClickCost] = useState('100000');
   const [isOfficial, setIsOfficial] = useState(true);
   const [productName, setProductName] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -243,8 +371,9 @@ function CreateAuctionModal({ open, onClose }: { open: boolean; onClose: () => v
         originalPrice: originalPrice ? parseInt(originalPrice, 10) : undefined,
         clickIncrement: parseInt(minBidIncrement, 10) || 100000,
         clickCost: parseInt(clickCost, 10) || 100000,
+        imageUrl: imageUrl || undefined,
       });
-      setTitle(''); setSlug(''); setDescription(''); setStartingPrice(''); setProductName(''); setOriginalPrice(''); setClickCost('100000');
+      setTitle(''); setSlug(''); setDescription(''); setStartingPrice(''); setProductName(''); setOriginalPrice(''); setClickCost('100000'); setImageUrl('');
       onClose();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'خطا در ایجاد مزایده';
@@ -261,6 +390,12 @@ function CreateAuctionModal({ open, onClose }: { open: boolean; onClose: () => v
             <span>{formError}</span>
           </div>
         )}
+
+        <AuctionImageUploadField
+          imageUrl={imageUrl}
+          onUploaded={(url) => setImageUrl(url)}
+          onRemoved={() => setImageUrl('')}
+        />
 
         <Input
           label="عنوان مزایده"
@@ -375,6 +510,103 @@ function CreateAuctionModal({ open, onClose }: { open: boolean; onClose: () => v
         <div className="flex gap-3 pt-2">
           <Button type="submit" variant="primary" fullWidth loading={createAuction.isPending}>
             ایجاد مزایده
+          </Button>
+          <Button type="button" variant="ghost" onClick={onClose}>انصراف</Button>
+        </div>
+      </form>
+    </Modal>
+  );
+}
+
+function EditAuctionModal({ auction, onClose }: { auction: Auction | null; onClose: () => void }) {
+  const updateAuction = useUpdateAuction();
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [productName, setProductName] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [formError, setFormError] = useState<string | null>(null);
+
+  // Sync form state when auction changes
+  const auctionId = auction?.id;
+  const prevAuctionId = useRef<string | null>(null);
+  if (auctionId && auctionId !== prevAuctionId.current) {
+    prevAuctionId.current = auctionId;
+    setTitle(auction?.title ?? '');
+    setDescription(auction?.description ?? '');
+    setProductName(auction?.productName ?? '');
+    setImageUrl(auction?.imageUrl ?? '');
+    setFormError(null);
+  }
+  if (!auctionId && prevAuctionId.current) {
+    prevAuctionId.current = null;
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!auction) return;
+    setFormError(null);
+
+    try {
+      await updateAuction.mutateAsync({
+        auctionId: auction.id,
+        input: {
+          title: title.trim() || undefined,
+          description: description.trim() || undefined,
+          productName: productName.trim() || undefined,
+          imageUrl: imageUrl || undefined,
+        },
+      });
+      onClose();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'خطا در ویرایش مزایده';
+      setFormError(msg);
+    }
+  };
+
+  return (
+    <Modal open={auction !== null} onClose={onClose} title="ویرایش مزایده" size="lg">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {formError && (
+          <div className="p-3 rounded-lg bg-error-50 border border-error-200 text-error-700 text-sm flex items-start gap-2" role="alert">
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>{formError}</span>
+          </div>
+        )}
+
+        <AuctionImageUploadField
+          imageUrl={imageUrl}
+          onUploaded={(url) => setImageUrl(url)}
+          onRemoved={() => setImageUrl('')}
+        />
+
+        <Input
+          label="عنوان مزایده"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="مثلاً: مزایده ساعت لوکس"
+        />
+
+        <Input
+          label="نام محصول"
+          value={productName}
+          onChange={(e) => setProductName(e.target.value)}
+          placeholder="نام محصول"
+        />
+
+        <div>
+          <label className="block text-sm font-medium text-neutral-600 mb-1.5">توضیحات</label>
+          <textarea
+            className="w-full px-4 py-2.5 rounded-xl bg-neutral-100/60 border border-neutral-300 text-neutral-800 placeholder:text-neutral-600 focus:outline-none focus:border-primary-500 transition-colors text-sm"
+            rows={3}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="توضیحات مزایده..."
+          />
+        </div>
+
+        <div className="flex gap-3 pt-2">
+          <Button type="submit" variant="primary" fullWidth loading={updateAuction.isPending}>
+            ذخیره تغییرات
           </Button>
           <Button type="button" variant="ghost" onClick={onClose}>انصراف</Button>
         </div>

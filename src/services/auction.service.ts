@@ -66,7 +66,58 @@ function mapAuction(row: AuctionRow): Auction {
   };
 }
 
+export interface HomepageAuction {
+  id: string;
+  title: string;
+  slug: string;
+  description: string;
+  status: string;
+  auctionDate: string;
+  startsAt: string;
+  endsAt: string;
+  startingPrice: number;
+  currentPrice: number;
+  originalPrice: number | null;
+  clickIncrement: number;
+  clickCost: number;
+  clickCount: number;
+  participantCount: number;
+  imageUrl: string | null;
+  isOfficial: boolean;
+  extensionUsed: boolean;
+  serverTime: string;
+}
+
 export class AuctionService extends BaseService {
+  async getHomepageAuction(): Promise<HomepageAuction | null> {
+    const { data, error } = await this.client.rpc('get_homepage_auction');
+    if (error) throw normalizeError(error);
+    if (!data) return null;
+
+    const row = data as Record<string, unknown>;
+    return {
+      id: row.id as string,
+      title: row.title as string,
+      slug: row.slug as string,
+      description: row.description as string,
+      status: row.status as string,
+      auctionDate: row.auction_date as string,
+      startsAt: row.starts_at as string,
+      endsAt: row.ends_at as string,
+      startingPrice: row.starting_price as number,
+      currentPrice: row.current_price as number,
+      originalPrice: row.original_price as number | null,
+      clickIncrement: row.click_increment as number,
+      clickCost: row.click_cost as number,
+      clickCount: row.click_count as number,
+      participantCount: row.participant_count as number,
+      imageUrl: row.image_url as string | null,
+      isOfficial: row.is_official as boolean,
+      extensionUsed: row.extension_used as boolean,
+      serverTime: row.server_time as string,
+    };
+  }
+
   async getAll(): Promise<Auction[]> {
     const { data, error } = await this.client
       .from('auctions')

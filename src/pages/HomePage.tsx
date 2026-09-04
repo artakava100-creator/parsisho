@@ -36,15 +36,12 @@ export function HomePage() {
       </HomeSection>
 
       {/* Auction hero + ads */}
-      <section className="relative overflow-hidden auction-hero-bg">
-        <div className="absolute top-0 left-1/4 w-[300px] h-[200px] bg-accent-200/20 rounded-full blur-[80px] pointer-events-none" aria-hidden="true" />
-        <div className="absolute bottom-0 right-1/3 w-[250px] h-[150px] bg-accent-100/15 rounded-full blur-[60px] pointer-events-none" aria-hidden="true" />
-
+      <section className="relative overflow-hidden bg-primary-50/40">
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
           <div className="flex items-center gap-2.5 mb-4">
             <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60 bg-accent-400" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent-600" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60 bg-primary-400" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-600" />
             </span>
             <h1 className="text-base sm:text-lg font-extrabold text-neutral-800">
               {auctionTitle}

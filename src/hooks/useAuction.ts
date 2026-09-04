@@ -1,9 +1,47 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { auctionService } from '@/services/auction.service';
+import type { HomepageAuction } from '@/services/auction.service';
 import { bidService } from '@/services/bid.service';
 import { supabase } from '@/lib/supabase';
 import type { PlaceClickResult } from '@/types';
+
+export function useHomepageAuction() {
+  const queryClient = useQueryClient();
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  const query = useQuery({
+    queryKey: ['homepage-auction'],
+    queryFn: () => auctionService.getHomepageAuction(),
+    staleTime: 30_000,
+  });
+
+  const auctionId = query.data?.id;
+
+  useEffect(() => {
+    if (!auctionId) return;
+
+    channelRef.current = supabase
+      .channel(`homepage-auction-${auctionId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'auctions', filter: `id=eq.${auctionId}` },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['homepage-auction'] });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
+  }, [auctionId, queryClient]);
+
+  return query;
+}
 
 export function useAuctions() {
   return useQuery({
