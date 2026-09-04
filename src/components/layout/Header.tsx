@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import {
-  Gavel, Wallet, Store, LogOut, LogIn,
+  Gavel, Wallet, Store, Gamepad2, LogOut, LogIn,
   ShoppingCart, ShieldCheck, Search, X,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
@@ -18,6 +18,7 @@ const navItems = [
   { to: '/', label: 'خانه', end: true },
   { to: '/auctions', label: 'مزایده', icon: Gavel, end: false },
   { to: '/market', label: 'بازار', icon: Store, end: false },
+  { to: '/excitement', label: 'سرزمین هیجان', icon: Gamepad2, end: false },
 ];
 
 export function Header() {
