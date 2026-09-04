@@ -24,17 +24,19 @@ export function QuickAccessGrid() {
 
   return (
     <div className="flex gap-3 sm:gap-4 overflow-x-auto scrollbar-hide pb-1 sm:pb-0 sm:overflow-visible">
-      {items.map((item) => {
+      {items.map((item, idx) => {
         const Icon = quickAccessIconMap[item.icon] ?? quickAccessIconMap.gavel;
         return (
           <Link
             key={item.id}
             to={item.link}
+            style={{ animationDelay: `${idx * 0.4}s` }}
             className={cn(
               'group flex items-center gap-3 px-4 py-3 rounded-2xl bg-white border border-neutral-200/80',
               'hover:border-primary-200 hover:shadow-md hover:-translate-y-0.5',
               'transition-all duration-normal shrink-0',
               'sm:flex-1 sm:shrink',
+              'animate-quick-access-glow',
             )}
           >
             <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-primary-50 text-primary-700 group-hover:bg-primary-100 transition-colors">

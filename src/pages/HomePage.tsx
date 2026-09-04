@@ -31,7 +31,7 @@ export function HomePage() {
       <HeroSlider />
 
       {/* Quick Access */}
-      <HomeSection title="دسترسی سریع" className="py-6 sm:py-8">
+      <HomeSection title="دسترسی سریع" className="pt-3 pb-4 sm:pt-4 sm:pb-5">
         <QuickAccessGrid />
       </HomeSection>
 
