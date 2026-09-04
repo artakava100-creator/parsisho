@@ -507,7 +507,7 @@ function CreateAuctionModal({ open, onClose }: { open: boolean; onClose: () => v
           <span className="text-sm text-neutral-600">مزایده رسمی روزانه</span>
         </label>
 
-        <div className="flex gap-3 pt-2">
+        <div className="sticky bottom-0 -mx-5 -mb-5 px-5 py-3 mt-2 bg-white border-t border-neutral-200 flex gap-3">
           <Button type="submit" variant="primary" fullWidth loading={createAuction.isPending}>
             ایجاد مزایده
           </Button>
@@ -604,7 +604,7 @@ function EditAuctionModal({ auction, onClose }: { auction: Auction | null; onClo
           />
         </div>
 
-        <div className="flex gap-3 pt-2">
+        <div className="sticky bottom-0 -mx-5 -mb-5 px-5 py-3 mt-2 bg-white border-t border-neutral-200 flex gap-3">
           <Button type="submit" variant="primary" fullWidth loading={updateAuction.isPending}>
             ذخیره تغییرات
           </Button>
