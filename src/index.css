@@ -354,6 +354,32 @@
     animation: pulse-glow 2s ease-in-out infinite;
   }
 
+  @keyframes border-glow {
+    0% { box-shadow: 0 0 8px 1px rgba(21, 90, 138, 0.12), inset 0 0 4px rgba(21, 90, 138, 0.04); }
+    50% { box-shadow: 0 0 16px 2px rgba(21, 90, 138, 0.22), inset 0 0 8px rgba(21, 90, 138, 0.06); }
+    100% { box-shadow: 0 0 8px 1px rgba(21, 90, 138, 0.12), inset 0 0 4px rgba(21, 90, 138, 0.04); }
+  }
+  .animate-border-glow {
+    animation: border-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes border-glow-urgent {
+    0% { box-shadow: 0 0 8px 1px rgba(214, 69, 69, 0.15), inset 0 0 4px rgba(214, 69, 69, 0.05); }
+    50% { box-shadow: 0 0 18px 3px rgba(214, 69, 69, 0.28), inset 0 0 8px rgba(214, 69, 69, 0.08); }
+    100% { box-shadow: 0 0 8px 1px rgba(214, 69, 69, 0.15), inset 0 0 4px rgba(214, 69, 69, 0.05); }
+  }
+  .animate-border-glow-urgent {
+    animation: border-glow-urgent 1.5s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-border-glow,
+    .animate-border-glow-urgent,
+    .animate-pulse-glow {
+      animation: none;
+    }
+  }
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
