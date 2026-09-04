@@ -13,8 +13,8 @@ export function HomeSection({ title, action, children, className, id }: HomeSect
   return (
     <section id={id} className={cn('max-w-7xl mx-auto px-4 sm:px-6 lg:px-8', className)}>
       {(title || action) && (
-        <div className="flex items-center justify-between mb-5">
-          {title && <h2 className="text-lg font-bold text-neutral-800">{title}</h2>}
+        <div className="flex items-center justify-between mb-6">
+          {title && <h2 className="text-lg sm:text-xl font-extrabold text-neutral-800">{title}</h2>}
           {action}
         </div>
       )}

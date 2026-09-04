@@ -1,3 +1,4 @@
+import { HomeIntro } from '@/components/home/HomeIntro';
 import { HomeHeroAuction } from '@/components/home/HomeHeroAuction';
 import { HomeAdRail } from '@/components/home/HomeAdRail';
 import { QuickAccessGrid } from '@/components/home/QuickAccessGrid';
@@ -11,25 +12,29 @@ import { homeAdSlotKeys } from '@/config/home-sections';
 export function HomePage() {
   return (
     <div className="animate-fade-in">
-      {/* ─── HERO: Auction + 3 Ad Placements ─── */}
-      <section className="relative bg-gradient-to-b from-primary-50/60 via-surface to-surface overflow-hidden">
-        <div className="absolute top-0 left-1/3 w-[400px] h-[300px] bg-primary-100/40 rounded-full blur-[100px] pointer-events-none" aria-hidden="true" />
-        <div className="absolute bottom-0 right-1/4 w-[300px] h-[200px] bg-accent-100/20 rounded-full blur-[80px] pointer-events-none" aria-hidden="true" />
+      {/* ─── INTRO ─── */}
+      <HomeIntro />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-8">
+      {/* ─── HERO: Auction + 3 Ad Placements ─── */}
+      <section className="relative overflow-hidden auction-hero-bg">
+        {/* Decorative blurs */}
+        <div className="absolute top-0 left-1/4 w-[350px] h-[250px] bg-accent-200/25 rounded-full blur-[100px] pointer-events-none" aria-hidden="true" />
+        <div className="absolute bottom-0 right-1/3 w-[300px] h-[200px] bg-accent-100/20 rounded-full blur-[80px] pointer-events-none" aria-hidden="true" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
           {/* Section label */}
-          <div className="flex items-center gap-2 mb-4">
-            <span className="relative flex h-2 w-2" aria-hidden="true">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60 bg-primary-400" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-600" />
+          <div className="flex items-center gap-2.5 mb-5">
+            <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60 bg-accent-400" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent-600" />
             </span>
-            <h1 className="text-sm font-bold text-neutral-700">
+            <h1 className="text-base sm:text-lg font-extrabold text-neutral-800">
               مزایده آنلاین {BRAND_NAME}
             </h1>
           </div>
 
           {/* Grid: Auction hero + 3 ad slots */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-5">
             <HomeHeroAuction />
             <div className="hidden lg:block">
               <HomeAdRail />
@@ -37,7 +42,7 @@ export function HomePage() {
           </div>
 
           {/* Mobile ad rail — horizontal scroll */}
-          <div className="lg:hidden mt-4 flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+          <div className="lg:hidden mt-5 flex gap-3 overflow-x-auto scrollbar-hide pb-1">
             {homeAdSlotKeys.map((key) => (
               <div key={key} className="min-w-[140px] flex-shrink-0">
                 <AdSlot slotKey={key} device="mobile" />
@@ -48,12 +53,14 @@ export function HomePage() {
       </section>
 
       {/* ─── QUICK ACCESS ─── */}
-      <HomeSection title="دسترسی سریع" className="py-6">
+      <HomeSection title="دسترسی سریع" className="py-8 sm:py-10">
         <QuickAccessGrid />
       </HomeSection>
 
       {/* ─── AUCTION HALL ─── */}
-      <AuctionHall />
+      <div className="bg-neutral-50/60">
+        <AuctionHall />
+      </div>
 
       {/* ─── SUPPORT ─── */}
       <SupportButton />

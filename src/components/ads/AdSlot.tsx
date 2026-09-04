@@ -42,7 +42,7 @@ export function AdSlot({ slotKey, device = 'desktop' }: Props) {
 
   if (isLoading) {
     return (
-      <div className="w-full aspect-[3/4] rounded-xl overflow-hidden">
+      <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden">
         <Skeleton className="w-full h-full" />
       </div>
     );
@@ -50,9 +50,11 @@ export function AdSlot({ slotKey, device = 'desktop' }: Props) {
 
   if (!advertisement) {
     return (
-      <div className="w-full aspect-[3/4] rounded-xl border border-dashed border-neutral-300 bg-surface-overlay/30 flex flex-col items-center justify-center gap-2 p-4">
-        <Megaphone className="w-6 h-6 text-neutral-300" />
-        <p className="text-[10px] text-neutral-400 text-center">جایگاه تبلیغاتی خالی</p>
+      <div className="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50/60 flex flex-col items-center justify-center gap-2.5 p-4">
+        <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center">
+          <Megaphone className="w-5 h-5 text-neutral-300" />
+        </div>
+        <p className="text-xs text-neutral-400 text-center font-medium">جایگاه تبلیغاتی</p>
       </div>
     );
   }
@@ -60,7 +62,7 @@ export function AdSlot({ slotKey, device = 'desktop' }: Props) {
   return (
     <button
       onClick={handleClick}
-      className="w-full rounded-xl overflow-hidden border border-neutral-200 hover:border-primary-300 transition-colors group block"
+      className="w-full rounded-2xl overflow-hidden border border-neutral-200/80 hover:border-primary-300 hover:shadow-md transition-all duration-normal group block"
       aria-label={advertisement.title}
     >
       <div className="relative w-full aspect-[3/4]">
@@ -70,8 +72,8 @@ export function AdSlot({ slotKey, device = 'desktop' }: Props) {
           className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-slow"
           loading="lazy"
         />
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-          <p className="text-xs font-medium text-white truncate">{advertisement.title}</p>
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent p-3">
+          <p className="text-xs font-semibold text-white truncate">{advertisement.title}</p>
         </div>
       </div>
     </button>
