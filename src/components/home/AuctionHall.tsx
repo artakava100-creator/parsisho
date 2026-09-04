@@ -82,7 +82,7 @@ function getFilterFn(catId: string) {
 function AuctionMiniCard({ auction, isSelected }: { auction: Auction; isSelected?: boolean }) {
   return (
     <Link to={`/auctions/${auction.id}`} className="block group">
-      <Card hover className={cn('p-0 overflow-hidden h-full transition-all', isSelected === false && 'opacity-60')}>
+      <Card hover glass={false} className={cn('p-0 overflow-hidden h-full transition-all rounded-2xl border border-neutral-200', isSelected === false && 'opacity-60')}>
         <div className="aspect-[16/9] bg-gradient-to-br from-neutral-100 to-neutral-200 relative overflow-hidden">
           {auction.imageUrl ? (
             <img
@@ -132,7 +132,7 @@ function AuctionMiniCard({ auction, isSelected }: { auction: Auction; isSelected
 
 function EmptySlotCard() {
   return (
-    <div className="aspect-[16/9] rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50/40 flex flex-col items-center justify-center gap-2">
+    <div className="aspect-[16/9] rounded-2xl border-2 border-dashed border-neutral-200/70 bg-neutral-50/40 flex flex-col items-center justify-center gap-2">
       <Gavel className="w-7 h-7 text-neutral-300" />
       <p className="text-xs text-neutral-400 font-medium">جایگاه مزایده</p>
     </div>
@@ -172,7 +172,7 @@ export function AuctionHall() {
   }, [auctions, activeCategory, todayStr, tomorrowStr, dayAfterStr]);
 
   return (
-    <section className="py-8 sm:py-10">
+    <section className="py-6 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2.5">
@@ -220,7 +220,7 @@ export function AuctionHall() {
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="w-full h-[240px] rounded-xl" />
+              <Skeleton key={i} className="w-full h-[240px] rounded-2xl" />
             ))}
           </div>
         ) : isError ? (

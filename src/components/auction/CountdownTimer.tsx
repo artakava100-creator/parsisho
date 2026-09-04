@@ -179,17 +179,17 @@ export function CountdownTimer({
         aria-label={`زمان باقیمانده: ${parts.days} روز ${parts.hours} ساعت ${parts.minutes} دقیقه ${parts.seconds} ثانیه`}
       >
         <Clock className={`w-5 h-5 shrink-0 ${heroIconColor}`} />
-        <div className="flex items-center gap-1.5">
+        <div dir="ltr" className="flex items-center gap-1.5">
           {timeUnits.filter((u) => u.show).map((unit, idx, arr) => (
             <div key={idx} className="flex items-center gap-1.5">
-              <div className={`flex flex-col items-center px-2 py-1 rounded-lg ${heroUnitBg} min-w-[3rem]`}>
+              <div className={`flex flex-col items-center px-2.5 py-1.5 rounded-lg ${heroUnitBg} min-w-[3rem]`}>
                 <span className={`text-2xl sm:text-3xl font-extrabold tabular-nums leading-none ${heroTextColor}`}>
                   {toPersianDigits(String(unit.value).padStart(2, '0'))}
                 </span>
                 <span className="text-[10px] text-neutral-500 mt-1 font-medium">{unit.label}</span>
               </div>
               {idx < arr.length - 1 && (
-                <span className={`text-xl font-bold ${heroTextColor} opacity-40`}>:</span>
+                <span className={`text-2xl font-bold ${heroTextColor} opacity-30 leading-none`}>:</span>
               )}
             </div>
           ))}

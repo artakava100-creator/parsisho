@@ -134,17 +134,39 @@ export function HomeHeroAuction() {
               <p className="text-sm text-neutral-500 line-clamp-2 mb-3">{auction.description}</p>
             )}
 
-            <div className="flex items-baseline gap-2 mb-4">
-              <span className="text-xs text-neutral-500">
-                {isLive ? 'قیمت فعلی:' : 'قیمت شروع:'}
-              </span>
-              <span className="text-2xl font-extrabold text-primary-700 font-num">
-                {formatToman(isLive ? auction.currentPrice : auction.startingPrice)}
-              </span>
-              {auction.originalPrice && (
-                <span className="text-sm text-neutral-400 line-through">
-                  {formatToman(auction.originalPrice)}
+            {/* Price hierarchy */}
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 p-3.5 sm:p-4 mb-4 space-y-3">
+              {/* Original price — secondary treatment */}
+              {auction.originalPrice != null && auction.originalPrice > 0 && (
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-medium text-neutral-500">قیمت اصلی محصول</span>
+                  <span className="text-sm font-bold text-neutral-400 line-through tabular-nums">
+                    {formatToman(auction.originalPrice)}
+                  </span>
+                </div>
+              )}
+
+              {/* Current auction price — the visual hero */}
+              <div className="flex items-end justify-between gap-2">
+                <span className="text-xs font-semibold text-primary-600 whitespace-nowrap">
+                  {isLive ? 'قیمت فعلی مزایده' : 'قیمت شروع مزایده'}
                 </span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl sm:text-[2rem] font-extrabold text-primary-700 tabular-nums leading-none">
+                    {formatToman(isLive ? auction.currentPrice : auction.startingPrice).replace(' تومان', '')}
+                  </span>
+                  <span className="text-sm font-bold text-primary-600">تومان</span>
+                </div>
+              </div>
+
+              {/* Savings — only when data is valid */}
+              {auction.originalPrice != null && auction.originalPrice > 0 && isLive && auction.currentPrice < auction.originalPrice && (
+                <div className="flex items-center justify-between pt-2.5 border-t border-neutral-200/70">
+                  <span className="text-[11px] font-medium text-neutral-500">صرفه‌جویی شما</span>
+                  <span className="text-sm font-bold text-success-600 tabular-nums">
+                    {formatToman(auction.originalPrice - auction.currentPrice)}
+                  </span>
+                </div>
               )}
             </div>
 
