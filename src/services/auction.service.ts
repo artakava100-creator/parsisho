@@ -194,6 +194,22 @@ export class AuctionService extends BaseService {
     };
   }
 
+  async getAuctionMedia(auctionId: string): Promise<{ id: string; url: string; sortOrder: number; isPrimary: boolean; altText: string | null }[]> {
+    const { data, error } = await this.client
+      .from('auction_media')
+      .select('id, url, sort_order, is_primary, alt_text')
+      .eq('auction_id', auctionId)
+      .order('sort_order', { ascending: true });
+    if (error) throw normalizeError(error);
+    return (data as { id: string; url: string; sort_order: number; is_primary: boolean; alt_text: string | null }[]).map((r) => ({
+      id: r.id,
+      url: r.url,
+      sortOrder: r.sort_order,
+      isPrimary: r.is_primary,
+      altText: r.alt_text,
+    }));
+  }
+
   async getEvents(auctionId: string): Promise<AuctionEvent[]> {
     const { data, error } = await this.client
       .from('auction_events')

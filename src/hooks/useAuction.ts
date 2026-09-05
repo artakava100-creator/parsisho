@@ -119,6 +119,17 @@ export function useAuctionDetail(id: string | undefined) {
   return query;
 }
 
+export function useAuctionMedia(auctionId: string | undefined) {
+  return useQuery({
+    queryKey: ['auction-media', auctionId],
+    queryFn: () => {
+      if (!auctionId) return [];
+      return auctionService.getAuctionMedia(auctionId);
+    },
+    enabled: Boolean(auctionId),
+  });
+}
+
 export function useAuctionEvents(auctionId: string | undefined) {
   return useQuery({
     queryKey: ['auction-events', auctionId],

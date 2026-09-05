@@ -5,11 +5,12 @@ import {
   Users, Zap, ShoppingBag, Crown, Info, MousePointerClick, Wallet,
   Calendar, Clock, CheckCircle, AlertCircle, PartyPopper,
 } from 'lucide-react';
-import { useAuctionDetail, useAuctions, useIranToday, useServerTime, useProcessDirectPurchase } from '@/hooks/useAuction';
+import { useAuctionDetail, useAuctions, useIranToday, useServerTime, useProcessDirectPurchase, useAuctionMedia } from '@/hooks/useAuction';
 import { useToast } from '@/providers/useToast';
 import { formatToman, toPersianDigits } from '@/lib/persian';
 import { formatTime, formatJalaliDate } from '@/lib/jalali';
 import { CountdownTimer } from '@/components/auction/CountdownTimer';
+import { AuctionGallery } from '@/components/auction/AuctionGallery';
 import { ClickButton } from '@/components/auction/ClickButton';
 import { LastFiveClickers } from '@/components/auction/LastFiveClickers';
 import { Card } from '@/components/ui/Card';
@@ -63,6 +64,7 @@ function UpcomingAuctionCard({ auction, label }: { auction: Auction; label: stri
 export function AuctionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { data, isLoading, error } = useAuctionDetail(id);
+  const { data: auctionMedia } = useAuctionMedia(id);
   const { data: auctions } = useAuctions();
   const { data: today } = useIranToday();
   const { data: serverTimeData } = useServerTime();
@@ -184,15 +186,13 @@ export function AuctionDetailPage() {
           </div>
         )}
 
-        {/* Product image — compact banner */}
-        <div className="aspect-[16/7] bg-gradient-to-br from-neutral-200 to-neutral-400 relative shrink-0">
-          {auction.imageUrl ? (
-            <img src={auction.imageUrl} alt={auction.title} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <ImageIcon className="w-12 h-12 text-neutral-700" />
-            </div>
-          )}
+        {/* Product image — auction gallery */}
+        <div className="relative shrink-0">
+          <AuctionGallery
+            media={auctionMedia ?? []}
+            fallbackImageUrl={auction.imageUrl}
+            title={auction.title}
+          />
           {auction.extensionUsed && (
             <div className="absolute bottom-3 right-3">
               <Badge tone="warning" variant="outline">
