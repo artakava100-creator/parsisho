@@ -65,7 +65,7 @@ export function HomeHeroAuction() {
   const isScheduled = auction.status === 'scheduled';
 
   return (
-    <Card className="relative p-0 overflow-hidden border border-neutral-200 rounded-2xl">
+    <Card className="relative p-0 overflow-hidden border border-neutral-200 rounded-2xl self-start">
       {/* Stretched navigation link — covers exactly the card content area */}
       <Link to={`/auctions/${auction.id}`} className="absolute inset-0 z-10" aria-label={auction.title} />
 
@@ -76,7 +76,7 @@ export function HomeHeroAuction() {
 
       <div className="grid grid-cols-1 md:grid-cols-[1.1fr_1fr] gap-0">
         {/* Image side — content-driven height, no forced min-height */}
-        <div className="relative aspect-[16/10] md:h-full bg-gradient-to-br from-primary-900/90 to-primary-800/70 overflow-hidden">
+        <div className="relative aspect-[16/11] bg-gradient-to-br from-primary-900/90 to-primary-800/70 overflow-hidden">
           {auction.imageUrl ? (
             <img
               src={auction.imageUrl}
