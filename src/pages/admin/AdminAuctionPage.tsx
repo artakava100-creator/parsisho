@@ -128,30 +128,28 @@ function AuctionRow({ auction, onEdit }: { auction: Auction; onEdit: () => void 
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onEdit}
+          >
+            <Pencil className="w-3.5 h-3.5" />
+            ویرایش
+          </Button>
           {auction.status === 'draft' && (
-            <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onEdit}
-              >
-                <Pencil className="w-3.5 h-3.5" />
-                ویرایش
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                loading={schedule.isPending}
-                onClick={() => setConfirmAction({
-                  type: 'schedule',
-                  label: 'برنامه‌ریزی این مزایده',
-                  action: () => schedule.mutate(auction.id),
-                })}
-              >
-                <Settings className="w-3.5 h-3.5" />
-                برنامه‌ریزی
-              </Button>
-            </>
+            <Button
+              variant="ghost"
+              size="sm"
+              loading={schedule.isPending}
+              onClick={() => setConfirmAction({
+                type: 'schedule',
+                label: 'برنامه‌ریزی این مزایده',
+                action: () => schedule.mutate(auction.id),
+              })}
+            >
+              <Settings className="w-3.5 h-3.5" />
+              برنامه‌ریزی
+            </Button>
           )}
           {auction.status === 'scheduled' && (
             <Button
