@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { Gavel, Plus, Calendar, Clock, Play, Pause, Trophy, Settings, AlertCircle, Upload, X, Loader2, ImageIcon, Pencil } from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { Gavel, Plus, Calendar, Clock, Play, Pause, Trophy, Settings, AlertCircle, Pencil } from 'lucide-react';
 import { useAdminAuctions, useCreateAuction, useUpdateAuction, useScheduleAuction, useGoLiveAuction, useCancelAuction, useFinalizeAuction } from '@/hooks/useAdminAuction';
 import { useIranToday } from '@/hooks/useAuction';
 import { Card } from '@/components/ui/Card';
@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Modal } from '@/components/ui/Modal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
-import { useToast } from '@/providers/useToast';
+import { AuctionGalleryManager } from '@/components/admin/AuctionGalleryManager';
 import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
 import { formatToman, toPersianDigits } from '@/lib/persian';
@@ -24,118 +24,6 @@ const STATUS_TONE: Record<AuctionStatus, { tone: 'neutral' | 'primary' | 'error'
   ended: { tone: 'success', label: 'پایان‌یافته' },
   cancelled: { tone: 'neutral', label: 'لغوشده' },
 };
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
-
-function validateFile(file: File): string | null {
-  if (!ALLOWED_TYPES.includes(file.type)) {
-    return 'فقط فرمت‌های JPEG، PNG، WebP و AVIF مجاز هستند';
-  }
-  if (file.size > MAX_FILE_SIZE) {
-    return 'حجم فایل نباید بیشتر از ۵ مگابایت باشد';
-  }
-  return null;
-}
-
-async function uploadAuctionImage(file: File): Promise<{ url: string | null; error: string | null }> {
-  try {
-    const ext = file.name.split('.').pop() || 'jpg';
-    const fileName = `auction-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const { error: upErr } = await supabase.storage
-      .from('homepage-images')
-      .upload(fileName, file, { cacheControl: '3600', upsert: false });
-    if (upErr) {
-      logger.error('[auction.uploadImage]', upErr);
-      return { url: null, error: upErr.message };
-    }
-    const { data: pub } = supabase.storage.from('homepage-images').getPublicUrl(fileName);
-    return { url: pub.publicUrl, error: null };
-  } catch {
-    return { url: null, error: 'خطای غیرمنتظره' };
-  }
-}
-
-function AuctionImageUploadField({
-  imageUrl,
-  onUploaded,
-  onRemoved,
-}: {
-  imageUrl: string;
-  onUploaded: (url: string) => void;
-  onRemoved: () => void;
-}) {
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const toast = useToast();
-
-  const handleFile = async (file: File) => {
-    setUploadError(null);
-    const validationError = validateFile(file);
-    if (validationError) {
-      setUploadError(validationError);
-      return;
-    }
-    setUploading(true);
-    try {
-      const { url, error } = await uploadAuctionImage(file);
-      if (url) {
-        onUploaded(url);
-        toast.success('تصویر مزایده آپلود شد');
-      } else {
-        setUploadError(error ?? 'تصویر آپلود نشد');
-      }
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  return (
-    <div>
-      <label className="text-sm font-medium text-neutral-600">تصویر مزایده</label>
-      <p className="text-xs text-neutral-400 mt-0.5 mb-2">تصویر نمایش‌داده‌شده در صفحه اصلی (نسبت ۱۶:۱۰)</p>
-      <div className="flex items-start gap-3">
-        <div className="w-32 h-20 rounded-lg border border-neutral-200 overflow-hidden bg-neutral-50 flex-shrink-0">
-          {imageUrl ? (
-            <img src={imageUrl} alt="تصویر مزایده" className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-neutral-300">
-              <ImageIcon className="w-6 h-6" />
-            </div>
-          )}
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/avif"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleFile(f);
-              e.target.value = '';
-            }}
-          />
-          <Button variant="secondary" size="sm" onClick={() => inputRef.current?.click()} disabled={uploading}>
-            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-            {uploading ? 'آپلود...' : imageUrl ? 'تغییر' : 'آپلود'}
-          </Button>
-          {imageUrl && (
-            <Button variant="ghost" size="sm" onClick={onRemoved} disabled={uploading}>
-              <X className="w-3.5 h-3.5" /> حذف
-            </Button>
-          )}
-          {uploadError && (
-            <p className="text-xs text-error-600 flex items-center gap-1">
-              <AlertCircle className="w-3 h-3" /> {uploadError}
-            </p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export function AdminAuctionPage() {
   const { data: auctions, isLoading, error } = useAdminAuctions();
@@ -329,6 +217,12 @@ function AuctionRow({ auction, onEdit }: { auction: Auction; onEdit: () => void 
   );
 }
 
+interface PendingImage {
+  url: string;
+  sortOrder: number;
+  isPrimary: boolean;
+}
+
 function CreateAuctionModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const createAuction = useCreateAuction();
   const { data: iranToday } = useIranToday();
@@ -344,8 +238,18 @@ function CreateAuctionModal({ open, onClose }: { open: boolean; onClose: () => v
   const [clickCost, setClickCost] = useState('100000');
   const [isOfficial, setIsOfficial] = useState(true);
   const [productName, setProductName] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+
+  const pendingImagesRef = useRef<PendingImage[]>([]);
+  const primaryUrlRef = useRef<(() => string | null)>(() => null);
+
+  const handlePendingImages = useCallback((imgs: PendingImage[]) => {
+    pendingImagesRef.current = imgs;
+  }, []);
+
+  const handlePrimaryUrl = useCallback((fn: () => string | null) => {
+    primaryUrlRef.current = fn;
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -356,8 +260,10 @@ function CreateAuctionModal({ open, onClose }: { open: boolean; onClose: () => v
     if (!startsAt || !endsAt) { setFormError('زمان شروع و پایان الزامی است'); return; }
     if (!startingPrice || parseInt(startingPrice) <= 0) { setFormError('قیمت شروع نامعتبر است'); return; }
 
+    const primaryUrl = primaryUrlRef.current();
+
     try {
-      await createAuction.mutateAsync({
+      const auctionId = await createAuction.mutateAsync({
         title: title.trim(),
         slug: slug.trim(),
         description: description.trim(),
@@ -371,9 +277,29 @@ function CreateAuctionModal({ open, onClose }: { open: boolean; onClose: () => v
         originalPrice: originalPrice ? parseInt(originalPrice, 10) : undefined,
         clickIncrement: parseInt(minBidIncrement, 10) || 100000,
         clickCost: parseInt(clickCost, 10) || 100000,
-        imageUrl: imageUrl || undefined,
+        imageUrl: primaryUrl || undefined,
       });
-      setTitle(''); setSlug(''); setDescription(''); setStartingPrice(''); setProductName(''); setOriginalPrice(''); setClickCost('100000'); setImageUrl('');
+
+      // Persist pending gallery images to auction_media
+      const pending = pendingImagesRef.current;
+      if (pending.length > 0) {
+        for (const img of pending) {
+          const { error } = await supabase.from('auction_media').insert({
+            auction_id: auctionId,
+            url: img.url,
+            sort_order: img.sortOrder,
+            is_primary: img.isPrimary,
+            media_type: 'image',
+          });
+          if (error) {
+            logger.error('[CreateAuction] insert media', error);
+          }
+        }
+      }
+
+      // Reset form
+      setTitle(''); setSlug(''); setDescription(''); setStartingPrice(''); setProductName(''); setOriginalPrice(''); setClickCost('100000');
+      pendingImagesRef.current = [];
       onClose();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'خطا در ایجاد مزایده';
@@ -391,10 +317,11 @@ function CreateAuctionModal({ open, onClose }: { open: boolean; onClose: () => v
           </div>
         )}
 
-        <AuctionImageUploadField
-          imageUrl={imageUrl}
-          onUploaded={(url) => setImageUrl(url)}
-          onRemoved={() => setImageUrl('')}
+        <AuctionGalleryManager
+          auctionId={null}
+          legacyImageUrl={null}
+          getPendingImages={handlePendingImages}
+          getPrimaryUrl={handlePrimaryUrl}
         />
 
         <Input
@@ -523,28 +450,33 @@ function EditAuctionModal({ auction, onClose }: { auction: Auction | null; onClo
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [productName, setProductName] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+  const primaryUrlRef = useRef<(() => string | null)>(() => null);
 
-  // Sync form state when auction changes
-  const auctionId = auction?.id;
+  const auctionId = auction?.id ?? null;
   const prevAuctionId = useRef<string | null>(null);
+
   if (auctionId && auctionId !== prevAuctionId.current) {
     prevAuctionId.current = auctionId;
     setTitle(auction?.title ?? '');
     setDescription(auction?.description ?? '');
     setProductName(auction?.productName ?? '');
-    setImageUrl(auction?.imageUrl ?? '');
     setFormError(null);
   }
   if (!auctionId && prevAuctionId.current) {
     prevAuctionId.current = null;
   }
 
+  const handlePrimaryUrl = useCallback((fn: () => string | null) => {
+    primaryUrlRef.current = fn;
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!auction) return;
     setFormError(null);
+
+    const primaryUrl = primaryUrlRef.current();
 
     try {
       await updateAuction.mutateAsync({
@@ -553,7 +485,7 @@ function EditAuctionModal({ auction, onClose }: { auction: Auction | null; onClo
           title: title.trim() || undefined,
           description: description.trim() || undefined,
           productName: productName.trim() || undefined,
-          imageUrl: imageUrl || undefined,
+          imageUrl: primaryUrl || undefined,
         },
       });
       onClose();
@@ -573,10 +505,10 @@ function EditAuctionModal({ auction, onClose }: { auction: Auction | null; onClo
           </div>
         )}
 
-        <AuctionImageUploadField
-          imageUrl={imageUrl}
-          onUploaded={(url) => setImageUrl(url)}
-          onRemoved={() => setImageUrl('')}
+        <AuctionGalleryManager
+          auctionId={auctionId}
+          legacyImageUrl={auction?.imageUrl ?? null}
+          getPrimaryUrl={handlePrimaryUrl}
         />
 
         <Input

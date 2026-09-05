@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminAuctionService, type CreateAuctionInput, type UpdateAuctionInput } from '@/services/admin-auction.service';
+import { adminAuctionService, auctionMediaService, type CreateAuctionInput, type UpdateAuctionInput } from '@/services/admin-auction.service';
 import { useToast } from '@/providers/useToast';
 
 export function useAdminAuctions() {
@@ -113,6 +113,69 @@ export function useFinalizeAuction() {
     },
     onError: (err: unknown) => {
       const msg = err instanceof Error ? err.message : 'خطا در پایان دادن به مزایده';
+      toast.error('خطا', msg);
+    },
+  });
+}
+
+export function useAuctionMedia(auctionId: string | null) {
+  return useQuery({
+    queryKey: ['auction-media', auctionId],
+    queryFn: () => auctionMediaService.getByAuctionId(auctionId!),
+    enabled: !!auctionId,
+  });
+}
+
+export function useAddAuctionMedia() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: ({ auctionId, url, sortOrder, isPrimary }: { auctionId: string; url: string; sortOrder: number; isPrimary: boolean }) =>
+      auctionMediaService.add(auctionId, url, sortOrder, isPrimary),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['auction-media', variables.auctionId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-auctions'] });
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'خطا در افزودن تصویر';
+      toast.error('خطا', msg);
+    },
+  });
+}
+
+export function useDeleteAuctionMedia() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: ({ mediaId }: { mediaId: string; auctionId: string }) =>
+      auctionMediaService.delete(mediaId),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['auction-media', variables.auctionId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-auctions'] });
+      toast.success('تصویر حذف شد');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'خطا در حذف تصویر';
+      toast.error('خطا', msg);
+    },
+  });
+}
+
+export function useReorderAuctionMedia() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: ({ items }: { items: { id: string; sort_order: number; is_primary: boolean }[]; auctionId: string }) =>
+      auctionMediaService.reorder(items),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['auction-media', variables.auctionId] });
+      queryClient.invalidateQueries({ queryKey: ['admin-auctions'] });
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'خطا در مرتب‌سازی تصاویر';
       toast.error('خطا', msg);
     },
   });

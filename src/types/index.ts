@@ -253,6 +253,17 @@ export interface Auction {
   clickCount: number;
 }
 
+export interface AuctionMedia {
+  id: string;
+  auctionId: string;
+  mediaType: string;
+  url: string;
+  altText: string | null;
+  sortOrder: number;
+  isPrimary: boolean;
+  createdAt: string;
+}
+
 export interface Bid {
   id: string;
   auctionId: string;

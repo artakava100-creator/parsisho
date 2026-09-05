@@ -1,6 +1,7 @@
 import { BaseService } from './base.service';
 import { normalizeError } from './api-error';
-import type { Auction } from '@/types';
+import { supabase } from '@/lib/supabase';
+import type { Auction, AuctionMedia } from '@/types';
 
 interface AuctionRow {
   id: string;
@@ -193,3 +194,89 @@ export class AdminAuctionService extends BaseService {
 }
 
 export const adminAuctionService = new AdminAuctionService();
+
+interface AuctionMediaRow {
+  id: string;
+  auction_id: string;
+  media_type: string;
+  url: string;
+  alt_text: string | null;
+  sort_order: number;
+  is_primary: boolean;
+  created_at: string;
+}
+
+function mapMedia(row: AuctionMediaRow): AuctionMedia {
+  return {
+    id: row.id,
+    auctionId: row.auction_id,
+    mediaType: row.media_type,
+    url: row.url,
+    altText: row.alt_text,
+    sortOrder: row.sort_order,
+    isPrimary: row.is_primary,
+    createdAt: row.created_at,
+  };
+}
+
+export const auctionMediaService = {
+  async getByAuctionId(auctionId: string): Promise<AuctionMedia[]> {
+    const { data, error } = await supabase
+      .from('auction_media')
+      .select('*')
+      .eq('auction_id', auctionId)
+      .order('sort_order', { ascending: true });
+    if (error) throw normalizeError(error);
+    return (data as AuctionMediaRow[]).map(mapMedia);
+  },
+
+  async add(auctionId: string, url: string, sortOrder: number, isPrimary: boolean): Promise<AuctionMedia> {
+    const { data, error } = await supabase
+      .from('auction_media')
+      .insert({
+        auction_id: auctionId,
+        url,
+        sort_order: sortOrder,
+        is_primary: isPrimary,
+        media_type: 'image',
+      })
+      .select('*')
+      .single();
+    if (error) throw normalizeError(error);
+    return mapMedia(data as AuctionMediaRow);
+  },
+
+  async delete(mediaId: string): Promise<void> {
+    const { error } = await supabase
+      .from('auction_media')
+      .delete()
+      .eq('id', mediaId);
+    if (error) throw normalizeError(error);
+  },
+
+  async reorder(mediaItems: { id: string; sort_order: number; is_primary: boolean }[]): Promise<void> {
+    for (const item of mediaItems) {
+      const { error } = await supabase
+        .from('auction_media')
+        .update({ sort_order: item.sort_order, is_primary: item.is_primary })
+        .eq('id', item.id);
+      if (error) throw normalizeError(error);
+    }
+  },
+
+  async setPrimary(auctionId: string, mediaId: string): Promise<void> {
+    const { error: unsetError } = await supabase
+      .from('auction_media')
+      .update({ is_primary: false })
+      .eq('auction_id', auctionId)
+      .eq('is_primary', true)
+      .neq('id', mediaId);
+    if (unsetError) throw normalizeError(unsetError);
+
+    const { error: setError } = await supabase
+      .from('auction_media')
+      .update({ is_primary: true })
+      .eq('id', mediaId);
+    if (setError) throw normalizeError(setError);
+  },
+};
