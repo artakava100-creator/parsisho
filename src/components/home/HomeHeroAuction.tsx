@@ -76,7 +76,7 @@ export function HomeHeroAuction() {
 
       <div className="grid grid-cols-1 md:grid-cols-[1.1fr_1fr] gap-0">
         {/* Image side — content-driven height, no forced min-height */}
-        <div className="relative aspect-[16/10] md:aspect-auto bg-gradient-to-br from-primary-900/90 to-primary-800/70 overflow-hidden">
+        <div className="relative aspect-[16/10] bg-gradient-to-br from-primary-900/90 to-primary-800/70 overflow-hidden">
           {auction.imageUrl ? (
             <img
               src={auction.imageUrl}
