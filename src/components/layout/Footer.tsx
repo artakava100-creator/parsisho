@@ -47,23 +47,23 @@ export function Footer() {
   const cred = credentials ?? defaultCredentials;
 
   return (
-    <footer className="border-t border-neutral-200 bg-neutral-100 mt-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-5">
+    <footer className="border-t border-neutral-200 bg-neutral-100 mt-8 sm:mt-12">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 sm:gap-6 lg:gap-5">
           {/* Brand column */}
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center">
-                <span className="text-white font-extrabold text-lg leading-none">پ</span>
+            <div className="flex items-center gap-2 sm:gap-2.5 mb-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center">
+                <span className="text-white font-extrabold text-base sm:text-lg leading-none">پ</span>
               </div>
-              <span className="text-lg font-extrabold text-neutral-800">{BRAND_NAME}</span>
+              <span className="text-base sm:text-lg font-extrabold text-neutral-800">{BRAND_NAME}</span>
             </div>
-            <p className="text-sm text-neutral-500 leading-relaxed max-w-[280px] mb-4">
+            <p className="text-xs sm:text-sm text-neutral-500 leading-relaxed max-w-[280px] mb-4">
               پلتفرم مزایده آنلاین، خرید مستقیم، سرگرمی و اقتصاد محلی {BRAND_NAME}
             </p>
 
             {/* Social icons */}
-            <div className="flex items-center gap-2.5 mb-4">
+            <div className="flex items-center gap-2 sm:gap-2.5 mb-4">
               {s.links.filter(l => l.visible).map((link) => {
                 const Icon = socialIconMap[link.icon] ?? Globe;
                 return (
@@ -73,7 +73,7 @@ export function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     title={link.title}
-                    className="w-9 h-9 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-primary-600 hover:border-primary-300 hover:shadow-sm transition-all"
+                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-primary-600 hover:border-primary-300 hover:shadow-sm transition-all"
                   >
                     <Icon className="w-4 h-4" />
                   </a>
@@ -82,19 +82,19 @@ export function Footer() {
             </div>
 
             {/* Credentials */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               {cred.enamad.visible && (
                 <a
                   href={cred.enamad.link || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-16 h-16 rounded-lg border border-neutral-200 bg-white flex items-center justify-center hover:shadow-sm transition-shadow overflow-hidden"
+                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg border border-neutral-200 bg-white flex items-center justify-center hover:shadow-sm transition-shadow overflow-hidden"
                   title="نماد اعتماد الکترونیکی"
                 >
                   {cred.enamad.image_url ? (
                     <img src={cred.enamad.image_url} alt="اینماد" className="w-full h-full object-contain p-1" />
                   ) : (
-                    <ShieldCheck className="w-6 h-6 text-neutral-300" />
+                    <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-300" />
                   )}
                 </a>
               )}
@@ -103,13 +103,13 @@ export function Footer() {
                   href={cred.business_license.link || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-16 h-16 rounded-lg border border-neutral-200 bg-white flex items-center justify-center hover:shadow-sm transition-shadow overflow-hidden"
+                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg border border-neutral-200 bg-white flex items-center justify-center hover:shadow-sm transition-shadow overflow-hidden"
                   title="مجوز کسب‌وکار اینترنتی"
                 >
                   {cred.business_license.image_url ? (
                     <img src={cred.business_license.image_url} alt="مجوز کسب‌وکار" className="w-full h-full object-contain p-1" />
                   ) : (
-                    <Award className="w-6 h-6 text-neutral-300" />
+                    <Award className="w-5 h-5 sm:w-6 sm:h-6 text-neutral-300" />
                   )}
                 </a>
               )}
@@ -119,13 +119,13 @@ export function Footer() {
           {/* Link groups */}
           {footerGroups.map((group) => (
             <div key={group.title}>
-              <h4 className="text-sm font-bold text-neutral-700 mb-3">{group.title}</h4>
-              <ul className="space-y-2">
+              <h4 className="text-xs sm:text-sm font-bold text-neutral-700 mb-2 sm:mb-3">{group.title}</h4>
+              <ul className="space-y-1.5 sm:space-y-2">
                 {group.links.map((link) => (
                   <li key={link.to}>
                     <Link
                       to={link.to}
-                      className="text-sm text-neutral-500 hover:text-primary-600 transition-colors"
+                      className="text-xs sm:text-sm text-neutral-500 hover:text-primary-600 transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -137,20 +137,20 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-6 pt-5 border-t border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3 text-sm text-neutral-400">
+        <div className="mt-5 sm:mt-6 pt-4 sm:pt-5 border-t border-neutral-200 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-neutral-400">
             <span>{cr.text}</span>
             <span className="text-neutral-300">|</span>
             <span>نسخه {cr.version}</span>
           </div>
-          <div className="flex items-center gap-4 text-neutral-400">
-            <span className="flex items-center gap-1.5 text-sm">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-neutral-400">
+            <span className="flex items-center gap-1.5 text-xs sm:text-sm">
               <Globe className="w-4 h-4" /> {BRAND_DOMAIN}
             </span>
-            <a href={`mailto:${BRAND_EMAIL}`} className="flex items-center gap-1.5 text-sm hover:text-primary-600 transition-colors">
+            <a href={`mailto:${BRAND_EMAIL}`} className="flex items-center gap-1.5 text-xs sm:text-sm hover:text-primary-600 transition-colors">
               <Mail className="w-4 h-4" /> {BRAND_EMAIL}
             </a>
-            <a href={`tel:${BRAND_PHONE.replace(/[^\d+]/g, '')}`} className="flex items-center gap-1.5 text-sm hover:text-primary-600 transition-colors">
+            <a href={`tel:${BRAND_PHONE.replace(/[^\d+]/g, '')}`} className="flex items-center gap-1.5 text-xs sm:text-sm hover:text-primary-600 transition-colors">
               <Phone className="w-4 h-4" /> {toPersianDigits(BRAND_PHONE)}
             </a>
           </div>

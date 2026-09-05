@@ -108,9 +108,9 @@ export function ProductDetailPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 animate-fade-in">
+    <div className="max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 animate-fade-in">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-sm text-neutral-400 mb-6 overflow-x-auto scrollbar-hide">
+      <nav className="flex items-center gap-1.5 text-xs sm:text-sm text-neutral-400 mb-4 sm:mb-6 overflow-x-auto scrollbar-hide">
         <Link to="/" className="shrink-0 hover:text-neutral-600 transition-colors">
           خانه
         </Link>
@@ -129,14 +129,14 @@ export function ProductDetailPage() {
       </nav>
 
       {/* Main content: Gallery | Info */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 mb-8 sm:mb-12">
         {/* Gallery */}
         <div>
           <ProductGallery media={media} productName={product.name} />
         </div>
 
         {/* Product Info */}
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-4 sm:gap-5">
           {/* Badges */}
           <div className="flex items-center gap-2 flex-wrap">
             {product.isNew && <ProductBadge type="new" />}
@@ -150,13 +150,13 @@ export function ProductDetailPage() {
           </div>
 
           {/* Name */}
-          <h1 className="text-xl sm:text-2xl font-extrabold text-neutral-800 leading-tight">
+          <h1 className="text-lg sm:text-2xl font-extrabold text-neutral-800 leading-tight">
             {product.name}
           </h1>
 
           {/* Description */}
           {(product.description || product.shortDescription) && (
-            <p className="text-sm text-neutral-500 leading-relaxed">
+            <p className="text-xs sm:text-sm text-neutral-500 leading-relaxed">
               {product.description ?? product.shortDescription}
             </p>
           )}
@@ -171,9 +171,9 @@ export function ProductDetailPage() {
           )}
 
           {/* Price */}
-          <div className="py-4 border-y border-neutral-200/80">
+          <div className="py-3 sm:py-4 border-y border-neutral-200/80">
             <span className="text-xs text-neutral-400 block mb-1">قیمت محصول</span>
-            <span className="text-2xl font-extrabold text-primary-700 font-num">
+            <span className="text-xl sm:text-2xl font-extrabold text-primary-700 font-num">
               {formatCurrency(displayPrice)}
             </span>
           </div>
@@ -199,21 +199,21 @@ export function ProductDetailPage() {
 
           {/* Quantity + Add to cart */}
           {inStock && (
-            <div className="flex items-center gap-4 mt-1">
+            <div className="flex items-center gap-3 mt-1">
               <div className="flex items-center gap-0.5 bg-neutral-50 rounded-xl border border-neutral-200 p-1">
                 <button
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="w-9 h-9 flex items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-200 transition-colors"
+                  className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-200 transition-colors"
                   aria-label="کاهش تعداد"
                 >
                   <Minus className="w-4 h-4" />
                 </button>
-                <span className="w-10 text-center text-sm font-bold text-neutral-800 font-num">
+                <span className="w-9 text-center text-sm font-bold text-neutral-800 font-num">
                   {toPersianDigits(quantity)}
                 </span>
                 <button
                   onClick={() => setQuantity((q) => q + 1)}
-                  className="w-9 h-9 flex items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-200 transition-colors"
+                  className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-200 transition-colors"
                   aria-label="افزایش تعداد"
                 >
                   <Plus className="w-4 h-4" />

@@ -10,7 +10,7 @@ export function SupportButton() {
       {/* Floating button with rotating glow */}
       <button
         onClick={() => setPanelOpen(!panelOpen)}
-        className="fixed bottom-24 lg:bottom-6 right-4 lg:right-6 z-40 w-14 h-14 rounded-full bg-primary-700 text-white shadow-lg hover:bg-primary-600 hover:shadow-xl transition-all group support-glow-ring"
+        className="fixed bottom-20 sm:bottom-24 lg:bottom-6 right-3 sm:right-4 lg:right-6 z-40 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary-700 text-white shadow-lg hover:bg-primary-600 hover:shadow-xl transition-all group support-glow-ring"
         aria-label="پشتیبانی آنلاین"
       >
         {panelOpen
@@ -21,7 +21,7 @@ export function SupportButton() {
 
       {/* Support panel */}
       {panelOpen && (
-        <div className="fixed bottom-[7rem] lg:bottom-[5.5rem] right-4 lg:right-6 z-40 w-[300px] sm:w-[340px] bg-white rounded-2xl shadow-lg border border-neutral-200 animate-scale-in overflow-hidden">
+        <div className="fixed bottom-[6.5rem] sm:bottom-[7rem] lg:bottom-[5.5rem] right-3 sm:right-4 lg:right-6 z-40 w-[calc(100vw-1.5rem)] sm:w-[300px] sm:w-[340px] bg-white rounded-xl sm:rounded-2xl shadow-lg border border-neutral-200 animate-scale-in overflow-hidden">
           <div className="bg-primary-700 text-white px-4 py-3 flex items-center gap-2">
             <Headset className="w-5 h-5" />
             <span className="text-sm font-bold">پشتیبانی آنلاین پارسی شو</span>

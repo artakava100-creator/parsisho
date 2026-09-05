@@ -223,18 +223,18 @@ export function HomeIntro() {
         </div>
       )}
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7">
-        <div className="flex flex-col items-center text-center gap-2.5">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-50 border border-primary-100">
+      <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-7">
+        <div className="flex flex-col items-center text-center gap-2 sm:gap-2.5">
+          <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-primary-50 border border-primary-100">
             <span className="w-1.5 h-1.5 rounded-full bg-primary-500" />
-            <span className="text-xs font-bold text-primary-700">{c.title}</span>
+            <span className="text-[11px] sm:text-xs font-bold text-primary-700">{c.title}</span>
           </div>
-          <h2 className="text-lg sm:text-xl lg:text-2xl font-extrabold text-neutral-800 leading-relaxed max-w-2xl">
+          <h2 className="text-base sm:text-xl lg:text-2xl font-extrabold text-neutral-800 leading-relaxed max-w-2xl">
             پلتفرم <span className="text-primary-700">مزایده آنلاین</span>،{' '}
             <span className="text-accent-600">خرید مستقیم</span>، سرگرمی و{' '}
             <span className="text-local-600">اقتصاد محلی</span>
           </h2>
-          <p className="text-sm sm:text-base text-neutral-500 max-w-lg leading-relaxed">
+          <p className="text-xs sm:text-base text-neutral-500 max-w-lg leading-relaxed">
             {c.description}
           </p>
         </div>

@@ -120,8 +120,8 @@ export function HeroSlider() {
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-        <div className="rounded-2xl bg-neutral-100 animate-pulse aspect-[9/2] sm:aspect-[7/2]" />
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2">
+        <div className="rounded-xl sm:rounded-2xl bg-neutral-100 animate-pulse aspect-[9/2] sm:aspect-[7/2]" />
       </div>
     );
   }
@@ -129,9 +129,9 @@ export function HeroSlider() {
   if (count === 0) return null;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2 pb-4">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-2 pb-3 sm:pb-4">
       <div
-        className="relative rounded-2xl overflow-hidden shadow-lg bg-neutral-100"
+        className="relative rounded-xl sm:rounded-2xl overflow-hidden shadow-lg bg-neutral-100"
         onMouseEnter={() => { if (timerRef.current) clearInterval(timerRef.current); }}
         onMouseLeave={() => {
           if (count > 1 && !reducedMotion) {

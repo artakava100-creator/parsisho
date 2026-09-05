@@ -29,12 +29,12 @@ export function StorePage() {
   return (
     <div className="animate-fade-in pb-16">
       {/* Hero */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-4 sm:pb-6">
         <MarketplaceHero />
       </div>
 
       {/* Category Navigation */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-6 sm:pb-8">
         <CategoryNav
           categories={categories}
           activeCategory={activeCategory}
@@ -44,7 +44,7 @@ export function StorePage() {
 
       {/* Category-filtered products */}
       {showCategoryProducts && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-8 sm:pb-10">
           <ProductSection
             title="محصولات دسته‌بندی"
             icon={<Store className="w-4 h-4" />}
@@ -59,7 +59,7 @@ export function StorePage() {
       )}
 
       {/* Main product sections */}
-      <div id="products" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 pb-12">
+      <div id="products" className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 space-y-8 sm:space-y-12 pb-12">
         {/* Best Sellers */}
         <ProductSection
           title="پرفروش‌ترین‌ها"

@@ -53,14 +53,14 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-200/80 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 lg:h-24 gap-3">
-          {/* Logo — 3x larger */}
-          <Link to="/" className="flex items-center gap-3 shrink-0 group">
-            <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
-              <span className="text-white font-extrabold text-2xl sm:text-3xl lg:text-4xl leading-none">پ</span>
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-20 lg:h-24 gap-2 sm:gap-3">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2 sm:gap-3 shrink-0 group">
+            <div className="w-9 h-9 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
+              <span className="text-white font-extrabold text-lg sm:text-3xl lg:text-4xl leading-none">پ</span>
             </div>
-            <span className="text-xl sm:text-2xl lg:text-[1.7rem] font-extrabold text-neutral-800 hidden sm:block tracking-tight whitespace-nowrap">
+            <span className="text-base sm:text-2xl lg:text-[1.7rem] font-extrabold text-neutral-800 hidden sm:block tracking-tight whitespace-nowrap">
               {BRAND_NAME}
             </span>
           </Link>
@@ -108,10 +108,10 @@ export function Header() {
           {/* Mobile search toggle */}
           <button
             onClick={() => setSearchOpen(!searchOpen)}
-            className="sm:hidden flex items-center justify-center w-10 h-10 rounded-xl bg-neutral-50 border border-neutral-200/80 text-neutral-500"
+            className="sm:hidden flex items-center justify-center w-9 h-9 rounded-xl bg-neutral-50 border border-neutral-200/80 text-neutral-500"
             aria-label="جستجو"
           >
-            {searchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+            {searchOpen ? <X className="w-[18px] h-[18px]" /> : <Search className="w-[18px] h-[18px]" />}
           </button>
 
           {/* Action controls */}
@@ -119,13 +119,13 @@ export function Header() {
             {/* Cart */}
             <Link
               to="/cart"
-              className="relative flex items-center gap-1.5 h-10 px-2.5 sm:px-3 rounded-xl bg-neutral-50 border border-neutral-200/80 text-neutral-500 hover:text-primary-600 hover:border-primary-200 hover:bg-primary-50 transition-all whitespace-nowrap"
+              className="relative flex items-center gap-1.5 h-9 sm:h-10 px-2 sm:px-3 rounded-xl bg-neutral-50 border border-neutral-200/80 text-neutral-500 hover:text-primary-600 hover:border-primary-200 hover:bg-primary-50 transition-all whitespace-nowrap"
               aria-label="سبد خرید"
             >
-              <ShoppingCart className="w-5 h-5 shrink-0" />
+              <ShoppingCart className="w-[18px] h-[18px] sm:w-5 sm:h-5 shrink-0" />
               <span className="text-xs font-semibold hidden md:block">سبد&zwnj;خرید</span>
               {cartCount > 0 && (
-                <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 flex items-center justify-center rounded-full bg-accent-500 text-white text-[10px] font-bold shadow-sm">
+                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-accent-500 text-white text-[10px] font-bold shadow-sm">
                   {toPersianDigits(cartCount)}
                 </span>
               )}
@@ -144,7 +144,7 @@ export function Header() {
                   </Link>
                 )}
 
-                {/* Wallet balance */}
+                {/* Wallet balance — desktop */}
                 <Link
                   to="/wallet"
                   className="hidden sm:flex items-center gap-1.5 h-10 px-3 rounded-xl bg-neutral-50 border border-neutral-200/80 hover:border-primary-200 hover:bg-primary-50 transition-all whitespace-nowrap"
@@ -156,10 +156,19 @@ export function Header() {
                   </span>
                 </Link>
 
+                {/* Wallet icon — mobile (compact) */}
+                <Link
+                  to="/wallet"
+                  className="sm:hidden flex items-center justify-center w-9 h-9 rounded-xl bg-neutral-50 border border-neutral-200/80 text-primary-600 hover:border-primary-200 hover:bg-primary-50 transition-all"
+                  aria-label="کیف پول"
+                >
+                  <Wallet className="w-[18px] h-[18px]" />
+                </Link>
+
                 {/* Profile */}
                 <Link
                   to="/account"
-                  className="flex items-center gap-1.5 h-10 px-2 rounded-xl bg-neutral-50 border border-neutral-200/80 hover:border-primary-200 hover:bg-primary-50 transition-all"
+                  className="flex items-center gap-1.5 h-9 sm:h-10 px-1.5 sm:px-2 rounded-xl bg-neutral-50 border border-neutral-200/80 hover:border-primary-200 hover:bg-primary-50 transition-all"
                   aria-label="حساب کاربری"
                 >
                   <Avatar src={user.avatarUrl} name={user.displayName} size="sm" />
@@ -170,7 +179,7 @@ export function Header() {
 
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-neutral-50 border border-neutral-200/80 text-neutral-400 hover:text-error-600 hover:bg-error-50 hover:border-error-200 transition-all"
+                  className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl bg-neutral-50 border border-neutral-200/80 text-neutral-400 hover:text-error-600 hover:bg-error-50 hover:border-error-200 transition-all"
                   aria-label="خروج"
                 >
                   <LogOut className="w-5 h-5" />

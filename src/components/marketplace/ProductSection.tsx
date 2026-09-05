@@ -37,6 +37,8 @@ export function ProductSection({
     4: 'grid-cols-2 md:grid-cols-4',
   }[columns];
 
+  const gap = 'gap-3 sm:gap-4';
+
   return (
     <section>
       {/* Section header */}
@@ -60,7 +62,7 @@ export function ProductSection({
 
       {/* Content */}
       {isLoading ? (
-        <div className={cn('grid gap-4', gridCols)}>
+        <div className={cn('grid', gap, gridCols)}>
           {Array.from({ length: skeletonCount }).map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
@@ -68,7 +70,7 @@ export function ProductSection({
       ) : !products || products.length === 0 ? (
         <EmptyState icon={emptyIcon} title={emptyTitle} description={emptyDescription} />
       ) : (
-        <div className={cn('grid gap-4', gridCols)}>
+        <div className={cn('grid', gap, gridCols)}>
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

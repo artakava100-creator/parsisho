@@ -74,7 +74,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
           {/* Badges */}
           {hasBadge && (
-            <div className="absolute top-2.5 right-2.5 flex flex-col gap-1">
+            <div className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 flex flex-col gap-1">
               {product.isNew && <ProductBadge type="new" />}
               {product.isBestSeller && <ProductBadge type="best-seller" />}
             </div>
@@ -91,22 +91,22 @@ export function ProductCard({ product, className }: ProductCardProps) {
         </div>
 
         {/* Content */}
-        <div className="p-3.5 flex flex-col flex-1 gap-2">
-          <h3 className="text-sm font-bold text-neutral-800 leading-relaxed line-clamp-2 min-h-[2.5rem]">
+        <div className="p-3 sm:p-3.5 flex flex-col flex-1 gap-2">
+          <h3 className="text-xs sm:text-sm font-bold text-neutral-800 leading-relaxed line-clamp-2 min-h-[2.5rem]">
             {product.name}
           </h3>
 
           {product.shortDescription && (
-            <p className="text-[11px] text-neutral-400 line-clamp-1">
+            <p className="text-[10px] sm:text-[11px] text-neutral-400 line-clamp-1">
               {product.shortDescription}
             </p>
           )}
 
           {/* Price + Action */}
-          <div className="mt-auto pt-3 border-t border-neutral-100 flex items-center justify-between gap-2">
+          <div className="mt-auto pt-2.5 sm:pt-3 border-t border-neutral-100 flex items-center justify-between gap-2">
             <div className="flex flex-col">
-              <span className="text-[11px] text-neutral-400">قیمت</span>
-              <span className="text-sm font-extrabold text-primary-700 font-num">
+              <span className="text-[10px] sm:text-[11px] text-neutral-400">قیمت</span>
+              <span className="text-xs sm:text-sm font-extrabold text-primary-700 font-num">
                 {formatCurrency(displayPrice)}
               </span>
             </div>
@@ -115,7 +115,7 @@ export function ProductCard({ product, className }: ProductCardProps) {
               onClick={handleAddToCart}
               disabled={!inStock}
               className={cn(
-                'flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200',
+                'flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-[11px] sm:text-xs font-bold transition-all duration-200',
                 inStock
                   ? 'bg-primary-700 text-white hover:bg-primary-600 active:scale-95'
                   : 'bg-neutral-100 text-neutral-400 cursor-not-allowed',

@@ -92,7 +92,7 @@ export function HomeHeroAuction() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
           {/* Status badge */}
-          <div className="absolute top-4 right-4 flex items-center gap-2 z-20">
+          <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2 z-20">
             {isLive && (
               <>
                 <span className="relative flex h-2.5 w-2.5">
@@ -112,7 +112,7 @@ export function HomeHeroAuction() {
           </div>
 
           {auction.extensionUsed && (
-            <div className="absolute bottom-3 right-3 z-20">
+            <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-20">
               <Badge tone="warning" variant="outline" className="text-[11px]">
                 <Zap className="w-3 h-3" /> تمدید شده
               </Badge>
@@ -121,21 +121,21 @@ export function HomeHeroAuction() {
         </div>
 
         {/* Info side — content drives the height */}
-        <div className="p-5 sm:p-6 flex flex-col gap-4 bg-white">
+        <div className="p-4 sm:p-6 flex flex-col gap-3 sm:gap-4 bg-white">
           <div>
-            <p className="text-xs font-semibold text-primary-600 mb-1.5">
+            <p className="text-[11px] sm:text-xs font-semibold text-primary-600 mb-1">
               {isLive ? `مزایده آنلاین ${BRAND_NAME}` : `مزایده آینده ${BRAND_NAME}`}
             </p>
-            <h3 className="text-lg sm:text-xl font-extrabold text-neutral-800 line-clamp-2 mb-2.5">
+            <h3 className="text-base sm:text-xl font-extrabold text-neutral-800 line-clamp-2 mb-2">
               {auction.title}
             </h3>
 
             {auction.description && (
-              <p className="text-sm text-neutral-500 line-clamp-2 mb-3">{auction.description}</p>
+              <p className="text-xs sm:text-sm text-neutral-500 line-clamp-2 mb-2.5">{auction.description}</p>
             )}
 
             {/* Price hierarchy */}
-            <div className="rounded-2xl border border-neutral-200 bg-neutral-50/60 p-3.5 sm:p-4 mb-4 space-y-3">
+            <div className="rounded-xl sm:rounded-2xl border border-neutral-200 bg-neutral-50/60 p-3 sm:p-4 mb-3 sm:mb-4 space-y-2.5 sm:space-y-3">
               {/* Original price — secondary treatment */}
               {auction.originalPrice != null && auction.originalPrice > 0 && (
                 <div className="flex items-center justify-between">
@@ -148,11 +148,11 @@ export function HomeHeroAuction() {
 
               {/* Current auction price — the visual hero */}
               <div className="flex items-end justify-between gap-2">
-                <span className="text-xs font-semibold text-primary-600 whitespace-nowrap">
+                <span className="text-[11px] sm:text-xs font-semibold text-primary-600 whitespace-nowrap">
                   {isLive ? 'قیمت فعلی مزایده' : 'قیمت شروع مزایده'}
                 </span>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl sm:text-[2rem] font-extrabold text-primary-700 tabular-nums leading-none">
+                  <span className="text-xl sm:text-[2rem] font-extrabold text-primary-700 tabular-nums leading-none">
                     {formatToman(isLive ? auction.currentPrice : auction.startingPrice).replace(' تومان', '')}
                   </span>
                   <span className="text-sm font-bold text-primary-600">تومان</span>
@@ -170,18 +170,18 @@ export function HomeHeroAuction() {
               )}
             </div>
 
-            <div className="grid grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-3 gap-2">
               {[
                 { icon: MousePointerClick, value: auction.clickCount, label: 'کلیک‌ها' },
                 { icon: Users, value: auction.participantCount, label: 'شرکت‌کنندگان' },
                 { icon: Zap, value: auction.clickIncrement, label: 'افزایش هر کلیک', format: true },
               ].map(({ icon: Icon, value, label, format }) => (
-                <div key={label} className="text-center p-2.5 rounded-xl bg-neutral-50 border border-neutral-100">
-                  <Icon className="w-4 h-4 text-neutral-400 mx-auto mb-1" />
-                  <p className="text-sm font-bold text-neutral-800">
+                <div key={label} className="text-center p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-neutral-50 border border-neutral-100">
+                  <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-neutral-400 mx-auto mb-1" />
+                  <p className="text-xs sm:text-sm font-bold text-neutral-800">
                     {toPersianDigits(format ? value.toLocaleString('en-US') : value)}
                   </p>
-                  <p className="text-[10px] text-neutral-500 mt-0.5">{label}</p>
+                  <p className="text-[9px] sm:text-[10px] text-neutral-500 mt-0.5">{label}</p>
                 </div>
               ))}
             </div>

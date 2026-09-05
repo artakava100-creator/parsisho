@@ -168,19 +168,19 @@ export function AccountPage() {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-[calc(100vh-4rem)] py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-600 transition-colors mb-6"
+          className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-neutral-500 hover:text-neutral-600 transition-colors mb-4 sm:mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           بازگشت به میدان شهر
         </Link>
 
         {/* Identity progress */}
-        <Card className="p-6 sm:p-8 mb-6">
-          <h2 className="text-lg font-bold text-neutral-800 mb-5">مراحل تکمیل هویت</h2>
+        <Card className="p-4 sm:p-6 sm:p-8 mb-4 sm:mb-6">
+          <h2 className="text-base sm:text-lg font-bold text-neutral-800 mb-3 sm:mb-5">مراحل تکمیل هویت</h2>
           <div className="space-y-3">
             {steps.map((step, idx) => (
               <div key={idx} className="flex items-center gap-3">
@@ -214,11 +214,11 @@ export function AccountPage() {
         </Card>
 
         {/* Header card */}
-        <Card className="p-6 sm:p-8 mb-6">
-          <div className="flex items-start gap-5">
+        <Card className="p-4 sm:p-6 sm:p-8 mb-4 sm:mb-6">
+          <div className="flex items-start gap-3 sm:gap-5">
             <Avatar src={user.avatarUrl ?? undefined} name={user.displayName} size="xl" ring />
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl font-extrabold text-neutral-800 truncate">{user.displayName}</h1>
+              <h1 className="text-base sm:text-xl font-extrabold text-neutral-800 truncate">{user.displayName}</h1>
               <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                 <Badge tone="primary" variant="soft">
                   <Shield className="w-3 h-3" />
@@ -248,8 +248,8 @@ export function AccountPage() {
         </Card>
 
         {/* Identity section */}
-        <Card className="p-6 sm:p-8 mb-6">
-          <h2 className="text-lg font-bold text-neutral-800 mb-5">اطلاعات حساب</h2>
+        <Card className="p-4 sm:p-6 sm:p-8 mb-4 sm:mb-6">
+          <h2 className="text-base sm:text-lg font-bold text-neutral-800 mb-3 sm:mb-5">اطلاعات حساب</h2>
 
           {editing ? (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
@@ -463,14 +463,14 @@ export function AccountPage() {
         <AuctionHistorySection />
 
         {/* Store Orders */}
-        <Card className="p-6 sm:p-8 mb-6">
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-lg font-bold text-neutral-800">سفارش‌های فروشگاه</h2>
-            <Link to="/orders" className="text-sm text-primary-700 hover:text-primary-200 transition-colors">
+        <Card className="p-4 sm:p-6 sm:p-8 mb-4 sm:mb-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-5">
+            <h2 className="text-base sm:text-lg font-bold text-neutral-800">سفارش‌های فروشگاه</h2>
+            <Link to="/orders" className="text-xs sm:text-sm text-primary-700 hover:text-primary-200 transition-colors">
               مشاهده همه
             </Link>
           </div>
-          <p className="text-sm text-neutral-500">
+          <p className="text-xs sm:text-sm text-neutral-500">
             برای مشاهده و پیگیری سفارش‌های فروشگاه به صفحه سفارش‌ها مراجعه کنید.
           </p>
         </Card>
@@ -498,8 +498,8 @@ function AuctionHistorySection() {
 
   if (isLoading) {
     return (
-      <Card className="p-6 sm:p-8 mb-6">
-        <h2 className="text-lg font-bold text-neutral-800 mb-5">مزایده‌های شرکت‌کرده</h2>
+      <Card className="p-4 sm:p-6 sm:p-8 mb-4 sm:mb-6">
+        <h2 className="text-base sm:text-lg font-bold text-neutral-800 mb-3 sm:mb-5">مزایده‌های شرکت‌کرده</h2>
         <div className="space-y-3">
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-16 w-full" />
@@ -510,8 +510,8 @@ function AuctionHistorySection() {
 
   if (history.length === 0) {
     return (
-      <Card className="p-6 sm:p-8 mb-6">
-        <h2 className="text-lg font-bold text-neutral-800 mb-5">مزایده‌های شرکت‌کرده</h2>
+      <Card className="p-4 sm:p-6 sm:p-8 mb-4 sm:mb-6">
+        <h2 className="text-base sm:text-lg font-bold text-neutral-800 mb-3 sm:mb-5">مزایده‌های شرکت‌کرده</h2>
         <EmptyState
           icon={<Gavel className="w-8 h-8" />}
           title="هنوز در مزایده‌ای شرکت نکرده‌اید"
@@ -522,8 +522,8 @@ function AuctionHistorySection() {
   }
 
   return (
-    <Card className="p-6 sm:p-8 mb-6">
-      <h2 className="text-lg font-bold text-neutral-800 mb-5">مزایده‌های شرکت‌کرده</h2>
+    <Card className="p-4 sm:p-6 sm:p-8 mb-4 sm:mb-6">
+      <h2 className="text-base sm:text-lg font-bold text-neutral-800 mb-3 sm:mb-5">مزایده‌های شرکت‌کرده</h2>
       <div className="space-y-3">
         {history.map((entry) => {
           const result = getResultLabel(entry);

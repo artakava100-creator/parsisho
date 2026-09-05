@@ -44,9 +44,9 @@ export function CartPage() {
   }
 
   return (
-    <div className="py-4 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in">
+    <div className="py-4 px-3 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-neutral-500 mb-4">
+      <nav className="flex items-center gap-2 text-xs sm:text-sm text-neutral-500 mb-4">
         <Link to="/" className="hover:text-neutral-600 transition-colors">میدان شهر</Link>
         <ArrowRight className="w-3.5 h-3.5" />
         <Link to="/market" className="hover:text-neutral-600 transition-colors">فروشگاه</Link>
@@ -55,7 +55,7 @@ export function CartPage() {
       </nav>
 
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-extrabold text-neutral-800">سبد خرید</h1>
+        <h1 className="text-lg sm:text-xl font-extrabold text-neutral-800">سبد خرید</h1>
         <button
           onClick={() => { clear(); toast.info('سبد خرید پاک شد'); }}
           className="text-sm text-neutral-500 hover:text-error-700 transition-colors"
@@ -67,11 +67,11 @@ export function CartPage() {
       {/* Items */}
       <div className="space-y-3 mb-6">
         {items.map((item) => (
-          <Card key={item.product.id} className="p-4">
-            <div className="flex gap-4">
+          <Card key={item.product.id} className="p-3 sm:p-4">
+            <div className="flex gap-3 sm:gap-4">
               {/* Image */}
               <Link to={`/market/${item.product.id}`} className="shrink-0">
-                <div className="w-20 h-20 rounded-lg overflow-hidden bg-gradient-to-br from-neutral-200 to-neutral-400">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-gradient-to-br from-neutral-200 to-neutral-400">
                   <img
                     src={item.product.imageUrl}
                     alt={item.product.name}
@@ -83,30 +83,30 @@ export function CartPage() {
               {/* Info */}
               <div className="flex-1 min-w-0">
                 <Link to={`/market/${item.product.id}`}>
-                  <h3 className="text-sm font-bold text-neutral-800 hover:text-primary-700 transition-colors line-clamp-1">
+                  <h3 className="text-xs sm:text-sm font-bold text-neutral-800 hover:text-primary-700 transition-colors line-clamp-1">
                     {item.product.name}
                   </h3>
                 </Link>
-                <p className="text-xs text-neutral-500 mt-0.5">
+                <p className="text-[11px] sm:text-xs text-neutral-500 mt-0.5">
                   {formatCurrency(item.product.price)}
                 </p>
 
-                <div className="flex items-center justify-between mt-3">
+                <div className="flex items-center justify-between mt-2 sm:mt-3">
                   {/* Quantity */}
                   <div className="flex items-center gap-1 bg-surface-overlay rounded-lg border border-neutral-300 p-0.5">
                     <button
                       onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                      className="w-7 h-7 flex items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-200 transition-colors"
+                      className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-200 transition-colors"
                       aria-label="کاهش تعداد"
                     >
                       <Minus className="w-3.5 h-3.5" />
                     </button>
-                    <span className="w-8 text-center text-sm font-bold text-neutral-800 font-num">
+                    <span className="w-7 sm:w-8 text-center text-sm font-bold text-neutral-800 font-num">
                       {toPersianDigits(item.quantity)}
                     </span>
                     <button
                       onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                      className="w-7 h-7 flex items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-200 transition-colors"
+                      className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-md text-neutral-600 hover:bg-neutral-200 transition-colors"
                       aria-label="افزایش تعداد"
                     >
                       <Plus className="w-3.5 h-3.5" />
@@ -114,13 +114,13 @@ export function CartPage() {
                   </div>
 
                   {/* Price + Remove */}
-                  <div className="flex items-center gap-3">
-                    <p className="text-sm font-extrabold text-primary-700 font-num">
+                  <div className="flex items-center gap-2 sm:gap-3">
+                    <p className="text-xs sm:text-sm font-extrabold text-primary-700 font-num">
                       {formatCurrency(item.product.price * item.quantity)}
                     </p>
                     <button
                       onClick={() => handleRemove(item.product.id, item.product.name)}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-neutral-500 hover:text-error-700 hover:bg-error-50 transition-colors"
+                      className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-lg text-neutral-500 hover:text-error-700 hover:bg-error-50 transition-colors"
                       aria-label="حذف از سبد"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -134,26 +134,26 @@ export function CartPage() {
       </div>
 
       {/* Summary */}
-      <Card className="p-5">
+      <Card className="p-4 sm:p-5">
         <div className="space-y-2 mb-4">
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-xs sm:text-sm">
             <span className="text-neutral-500">تعداد اقلام</span>
             <span className="font-num text-neutral-700">{toPersianDigits(count)}</span>
           </div>
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-xs sm:text-sm">
             <span className="text-neutral-500">هزینه ارسال</span>
             <span className="text-neutral-500 text-xs">در مرحله ثبت سفارش محاسبه می‌شود</span>
           </div>
           <div className="border-t border-neutral-200 pt-2 flex items-center justify-between">
-            <span className="text-base font-bold text-neutral-800">مبلغ قابل پرداخت</span>
-            <span className="text-xl font-extrabold text-primary-700 font-num">
+            <span className="text-sm sm:text-base font-bold text-neutral-800">مبلغ قابل پرداخت</span>
+            <span className="text-lg sm:text-xl font-extrabold text-primary-700 font-num">
               {formatCurrency(total)}
             </span>
           </div>
         </div>
 
-        <div className="flex gap-3">
-          <Link to="/checkout" className="flex-1">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link to="/checkout" className="flex-1 order-1 sm:order-none">
             <Button variant="primary" fullWidth size="lg">
               <CheckCircle className="w-5 h-5" />
               ادامه ثبت سفارش
@@ -161,7 +161,7 @@ export function CartPage() {
             </Button>
           </Link>
           <Link to="/market">
-            <Button variant="outline" size="lg">
+            <Button variant="outline" size="lg" fullWidth>
               ادامه خرید
             </Button>
           </Link>

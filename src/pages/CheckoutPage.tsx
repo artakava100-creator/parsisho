@@ -201,9 +201,9 @@ export function CheckoutPage() {
   const canSubmit = gatewayReady && !shippingNotConfigured && settings !== null;
 
   return (
-    <div className="py-4 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto animate-fade-in">
+    <div className="py-4 px-3 sm:px-6 lg:px-8 max-w-5xl mx-auto animate-fade-in">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-neutral-500 mb-4">
+      <nav className="flex items-center gap-2 text-xs sm:text-sm text-neutral-500 mb-4">
         <Link to="/market" className="hover:text-neutral-600 transition-colors">فروشگاه</Link>
         <ArrowRight className="w-3.5 h-3.5" />
         <Link to="/cart" className="hover:text-neutral-600 transition-colors">سبد خرید</Link>
@@ -211,18 +211,18 @@ export function CheckoutPage() {
         <span className="text-neutral-600">ثبت سفارش</span>
       </nav>
 
-      <h1 className="text-xl font-extrabold text-neutral-800 mb-6">ثبت سفارش</h1>
+      <h1 className="text-lg sm:text-xl font-extrabold text-neutral-800 mb-4 sm:mb-6">ثبت سفارش</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left: forms */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="lg:col-span-2 space-y-3 sm:space-y-4">
           {/* Customer info */}
-          <Card className="p-5">
-            <div className="flex items-center gap-2 mb-4">
+          <Card className="p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <User className="w-4 h-4 text-primary-600" />
               <h2 className="text-sm font-bold text-neutral-800">اطلاعات مشتری</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <Input label="نام و نام خانوادگی" error={errors.customerName?.message} {...register('customerName')} />
               <Input
                 label="شماره موبایل"
@@ -235,17 +235,17 @@ export function CheckoutPage() {
           </Card>
 
           {/* Delivery address */}
-          <Card className="p-5">
-            <div className="flex items-center gap-2 mb-4">
+          <Card className="p-4 sm:p-5">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <MapPin className="w-4 h-4 text-primary-600" />
               <h2 className="text-sm font-bold text-neutral-800">آدرس تحویل</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-sm font-medium text-neutral-600 mb-2">استان</label>
                 <select
                   {...register('province')}
-                  className="w-full h-11 px-4 rounded-lg bg-surface-sunken border border-neutral-300 text-neutral-800 transition-colors duration-normal focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+                  className="w-full h-10 sm:h-11 px-4 rounded-lg bg-surface-sunken border border-neutral-300 text-neutral-800 transition-colors duration-normal focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
                 >
                   <option value="">انتخاب استان</option>
                   {provinces.map((p) => (
@@ -256,10 +256,10 @@ export function CheckoutPage() {
               </div>
               <Input label="شهر" error={errors.city?.message} {...register('city')} />
             </div>
-            <div className="mt-4">
+            <div className="mt-3 sm:mt-4">
               <Input label="آدرس کامل" placeholder="خیابان، کوچه، پلاک، واحد" error={errors.address?.message} {...register('address')} />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-3 sm:mt-4">
               <Input
                 label="کد پستی"
                 dir="ltr"
@@ -279,8 +279,8 @@ export function CheckoutPage() {
 
         {/* Right: order review */}
         <div className="lg:col-span-1">
-          <Card className="p-5 sticky top-20">
-            <div className="flex items-center gap-2 mb-4">
+          <Card className="p-4 sm:p-5 lg:sticky lg:top-20">
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
               <ShoppingBag className="w-4 h-4 text-primary-600" />
               <h2 className="text-sm font-bold text-neutral-800">خلاصه سفارش</h2>
             </div>
@@ -307,7 +307,7 @@ export function CheckoutPage() {
 
             {/* Price breakdown */}
             <div className="space-y-2 py-3 border-t border-neutral-200">
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
                 <span className="text-neutral-500">جمع کالا</span>
                 <span className="font-num text-neutral-700">{formatCurrency(priceCalc.subtotal)}</span>
               </div>
@@ -355,8 +355,8 @@ export function CheckoutPage() {
               )}
 
               <div className="flex items-center justify-between pt-2 border-t border-neutral-200">
-                <span className="text-base font-bold text-neutral-800">مبلغ قابل پرداخت</span>
-                <span className="text-lg font-extrabold text-primary-700 font-num">
+                <span className="text-sm sm:text-base font-bold text-neutral-800">مبلغ قابل پرداخت</span>
+                <span className="text-base sm:text-lg font-extrabold text-primary-700 font-num">
                   {formatCurrency(priceCalc.total)}
                 </span>
               </div>

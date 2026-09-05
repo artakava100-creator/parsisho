@@ -106,7 +106,7 @@ function AuctionMiniCard({ auction, isSelected }: { auction: Auction; isSelected
             </Badge>
           </div>
         </div>
-        <div className="p-3.5 space-y-2">
+        <div className="p-3 sm:p-3.5 space-y-2">
           <h4 className="text-sm font-bold text-neutral-800 truncate">
             {auction.productName || auction.title}
           </h4>
@@ -172,18 +172,18 @@ export function AuctionHall() {
   }, [auctions, activeCategory, todayStr, tomorrowStr, dayAfterStr]);
 
   return (
-    <section className="py-6 sm:py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-primary-100 flex items-center justify-center">
-              <Gavel className="w-5 h-5 text-primary-700" />
+    <section className="py-4 sm:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-2.5">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-primary-100 flex items-center justify-center">
+              <Gavel className="w-4 h-4 sm:w-5 sm:h-5 text-primary-700" />
             </div>
-            <h2 className="text-lg sm:text-xl font-extrabold text-neutral-800">تالار مزایده</h2>
+            <h2 className="text-base sm:text-xl font-extrabold text-neutral-800">تالار مزایده</h2>
           </div>
           <Link
             to="/auctions"
-            className="text-sm font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-1.5 transition-colors"
+            className="text-xs sm:text-sm font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-1.5 transition-colors"
           >
             همه مزایده‌ها
             <ArrowLeft className="w-4 h-4" />
@@ -191,7 +191,7 @@ export function AuctionHall() {
         </div>
 
         {/* Visual category cards */}
-        <div className="flex gap-2.5 mb-6 overflow-x-auto scrollbar-hide pb-1" role="tablist">
+        <div className="flex gap-2 sm:gap-2.5 mb-4 sm:mb-6 overflow-x-auto scrollbar-hide pb-1" role="tablist">
           {visibleCategories.map((cat) => {
             const Icon = iconMap[cat.icon] ?? Sparkles;
             const isActive = activeCategory === cat.id;
@@ -203,13 +203,13 @@ export function AuctionHall() {
                 aria-selected={isActive}
                 onClick={() => setActiveCategory(cat.id)}
                 className={cn(
-                  'flex items-center gap-2 px-5 py-3 rounded-xl border whitespace-nowrap',
-                  'transition-all duration-200 font-bold text-sm',
+                  'flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border whitespace-nowrap',
+                  'transition-all duration-200 font-bold text-xs sm:text-sm',
                   isActive ? colors.active : colors.normal,
                   !isActive && 'hover:shadow-sm hover:-translate-y-px',
                 )}
               >
-                <Icon className="w-5 h-5" />
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 {cat.label}
               </button>
             );
@@ -218,7 +218,7 @@ export function AuctionHall() {
 
         {/* Auction grid */}
         {isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {[1, 2, 3].map((i) => (
               <Skeleton key={i} className="w-full h-[240px] rounded-2xl" />
             ))}
@@ -232,7 +232,7 @@ export function AuctionHall() {
             />
           </Card>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {filtered.length > 0
               ? filtered.map((auction) => <AuctionMiniCard key={auction.id} auction={auction} />)
               : [0, 1, 2].map((i) => <EmptySlotCard key={i} />)

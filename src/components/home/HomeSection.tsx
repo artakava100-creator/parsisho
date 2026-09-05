@@ -11,10 +11,10 @@ interface HomeSectionProps {
 
 export function HomeSection({ title, action, children, className, id }: HomeSectionProps) {
   return (
-    <section id={id} className={cn('max-w-7xl mx-auto px-4 sm:px-6 lg:px-8', className)}>
+    <section id={id} className={cn('max-w-7xl mx-auto px-3 sm:px-6 lg:px-8', className)}>
       {(title || action) && (
-        <div className="flex items-center justify-between mb-6">
-          {title && <h2 className="text-lg sm:text-xl font-extrabold text-neutral-800">{title}</h2>}
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
+          {title && <h2 className="text-base sm:text-lg sm:text-xl font-extrabold text-neutral-800">{title}</h2>}
           {action}
         </div>
       )}

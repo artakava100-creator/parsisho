@@ -140,12 +140,12 @@ function PackageGrid() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="p-5" glass={false}>
-            <Skeleton className="w-12 h-12 rounded-xl mx-auto mb-4" />
-            <Skeleton className="h-8 w-24 mx-auto mb-2" />
-            <Skeleton className="h-3 w-12 mx-auto mb-4" />
+          <Card key={i} className="p-4 sm:p-5" glass={false}>
+            <Skeleton className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl mx-auto mb-3 sm:mb-4" />
+            <Skeleton className="h-7 sm:h-8 w-20 sm:w-24 mx-auto mb-2" />
+            <Skeleton className="h-3 w-10 sm:w-12 mx-auto mb-3 sm:mb-4" />
             <Skeleton className="h-9 w-full" />
           </Card>
         ))}
@@ -167,7 +167,7 @@ function PackageGrid() {
 
   return (
     <>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {packages.map((pkg) => (
           <ParsiPackageCard
             key={pkg.id}
@@ -568,22 +568,22 @@ export function WalletPage() {
   const [showCustomTopUp, setShowCustomTopUp] = useState(false);
 
   return (
-    <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto animate-fade-in">
+    <div className="py-4 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto animate-fade-in">
       <Link
         to="/"
-        className="inline-flex items-center gap-1.5 text-sm text-neutral-500 hover:text-neutral-600 transition-colors mb-6"
+        className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-neutral-500 hover:text-neutral-600 transition-colors mb-4 sm:mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
         بازگشت به میدان شهر
       </Link>
 
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-accent-50 border border-accent-500/30 flex items-center justify-center">
-          <WalletIcon className="w-5 h-5 text-accent-600" />
+      <div className="flex items-center gap-3 mb-5 sm:mb-6">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-accent-50 border border-accent-500/30 flex items-center justify-center">
+          <WalletIcon className="w-4 h-4 sm:w-5 sm:h-5 text-accent-600" />
         </div>
         <div>
-          <h1 className="text-2xl font-extrabold text-neutral-800">بانک پارسیشو</h1>
-          <p className="text-sm text-neutral-500">مدیریت موجودی، بسته‌ها و تراکنش‌ها</p>
+          <h1 className="text-xl sm:text-2xl font-extrabold text-neutral-800">بانک پارسیشو</h1>
+          <p className="text-xs sm:text-sm text-neutral-500">مدیریت موجودی، بسته‌ها و تراکنش‌ها</p>
         </div>
       </div>
 
@@ -598,7 +598,7 @@ export function WalletPage() {
         </aside>
 
         {/* Main content */}
-        <div className="flex-1 min-w-0 space-y-8">
+        <div className="flex-1 min-w-0 space-y-5 sm:space-y-8">
           {/* Bank card */}
           <ParsishoBankCard wallet={wallet} isLoading={walletLoading} />
 

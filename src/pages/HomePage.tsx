@@ -37,18 +37,18 @@ export function HomePage() {
 
       {/* Auction hero + ads */}
       <section className="relative overflow-hidden bg-primary-50/40">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="flex items-center gap-2.5 mb-4">
+        <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+          <div className="flex items-center gap-2 sm:gap-2.5 mb-3 sm:mb-4">
             <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60 bg-primary-400" />
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-600" />
             </span>
-            <h1 className="text-base sm:text-lg font-extrabold text-neutral-800">
+            <h1 className="text-sm sm:text-base sm:text-lg font-extrabold text-neutral-800">
               {auctionTitle}
             </h1>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_200px] gap-3 sm:gap-4">
             <HomeHeroAuction />
             <div className="hidden lg:block">
               <HomeAdRail />
@@ -56,9 +56,9 @@ export function HomePage() {
           </div>
 
           {/* Mobile ad rail */}
-          <div className="lg:hidden mt-4 flex gap-3 overflow-x-auto scrollbar-hide pb-1">
+          <div className="lg:hidden mt-3 sm:mt-4 flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-1">
             {homeAdSlotKeys.map((key) => (
-              <div key={key} className="min-w-[140px] flex-shrink-0">
+              <div key={key} className="min-w-[120px] sm:min-w-[140px] flex-shrink-0">
                 <AdSlot slotKey={key} device="mobile" />
               </div>
             ))}
