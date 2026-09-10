@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { formatToman } from '@/lib/persian';
 import { formatTime } from '@/lib/jalali';
-import { useAuctions, useIranToday } from '@/hooks/useAuction';
+import { useAuctions, useIranToday, useAuctionMedia } from '@/hooks/useAuction';
 import { useSiteSetting } from '@/hooks/useSiteSettings';
 import { SectionEmptyState } from './SectionEmptyState';
 import { cn } from '@/lib/cn';
@@ -80,13 +80,19 @@ function getFilterFn(catId: string) {
 }
 
 function AuctionMiniCard({ auction, isSelected }: { auction: Auction; isSelected?: boolean }) {
+  const { data: media } = useAuctionMedia(auction.id);
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  const mediaImages = (media ?? []).slice(0, 5);
+  const displayImage = activeIdx === 0 ? auction.imageUrl : (mediaImages[activeIdx - 1]?.url ?? auction.imageUrl);
+
   return (
     <Link to={`/auctions/${auction.id}`} className="block group">
       <Card hover glass={false} className={cn('p-0 overflow-hidden h-full transition-all rounded-2xl border border-neutral-200', isSelected === false && 'opacity-60')}>
         <div className="aspect-[16/9] bg-gradient-to-br from-neutral-100 to-neutral-200 relative overflow-hidden">
-          {auction.imageUrl ? (
+          {displayImage ? (
             <img
-              src={auction.imageUrl}
+              src={displayImage}
               alt={auction.productName || auction.title}
               className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
               loading="lazy"
@@ -106,6 +112,43 @@ function AuctionMiniCard({ auction, isSelected }: { auction: Auction; isSelected
             </Badge>
           </div>
         </div>
+        {mediaImages.length > 0 && (
+          <div className="flex gap-1.5 px-3 pt-2.5">
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveIdx(0); }}
+              aria-label="تصویر اصلی"
+              className={cn(
+                'shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-lg overflow-hidden border-2 transition-all duration-200',
+                activeIdx === 0
+                  ? 'border-primary-500 ring-1 ring-primary-300'
+                  : 'border-neutral-200 hover:border-neutral-300 opacity-75 hover:opacity-100',
+              )}
+            >
+              {auction.imageUrl ? (
+                <img src={auction.imageUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-neutral-100">
+                  <Gavel className="w-3.5 h-3.5 text-neutral-400" />
+                </div>
+              )}
+            </button>
+            {mediaImages.map((img, idx) => (
+              <button
+                key={img.id}
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveIdx(idx + 1); }}
+              aria-label={`تصویر ${idx + 2}`}
+                className={cn(
+                  'shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-lg overflow-hidden border-2 transition-all duration-200',
+                  activeIdx === idx + 1
+                    ? 'border-primary-500 ring-1 ring-primary-300'
+                    : 'border-neutral-200 hover:border-neutral-300 opacity-75 hover:opacity-100',
+                )}
+              >
+                <img src={img.url} alt={img.altText ?? ''} className="w-full h-full object-cover" loading="lazy" />
+              </button>
+            ))}
+          </div>
+        )}
         <div className="p-3 sm:p-3.5 space-y-2">
           <h4 className="text-sm font-bold text-neutral-800 truncate">
             {auction.productName || auction.title}
