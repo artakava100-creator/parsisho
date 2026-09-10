@@ -347,11 +347,11 @@
   .animate-quick-access-glow { animation: quick-access-glow-anim 3.5s ease-in-out infinite; }
 
   @keyframes auction-card-backlight {
-    0%, 100% { opacity: 0.35; }
-    50% { opacity: 0.75; }
+    0%, 100% { opacity: 0.45; }
+    50% { opacity: 1; }
   }
   .auction-card-backlight {
-    animation: auction-card-backlight 3s ease-in-out infinite;
+    animation: auction-card-backlight 1.5s ease-in-out infinite;
   }
 
   @media (prefers-reduced-motion: reduce) {
