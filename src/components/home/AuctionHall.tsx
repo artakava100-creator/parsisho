@@ -88,7 +88,7 @@ function AuctionMiniCard({ auction, isSelected }: { auction: Auction; isSelected
 
   return (
     <Link to={`/auctions/${auction.id}`} className="block group">
-      <Card hover glass={false} className={cn('p-0 h-full transition-all rounded-2xl border border-neutral-200', isSelected === false && 'opacity-60')}>
+      <Card hover glass={false} className={cn('p-0 h-full overflow-visible transition-all rounded-2xl border border-neutral-200', isSelected === false && 'opacity-60')}>
         <div className="aspect-[16/9] bg-gradient-to-br from-neutral-100 to-neutral-200 relative overflow-hidden rounded-2xl">
           {displayImage ? (
             <img
