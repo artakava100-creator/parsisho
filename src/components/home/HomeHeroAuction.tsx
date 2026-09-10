@@ -132,7 +132,7 @@ export function HomeHeroAuction() {
 
           {/* Thumbnail gallery — up to 5 images below the main image */}
           {(auction.imageUrl || mediaImages.length > 0) && (
-            <div className="flex gap-1.5 px-3 pt-2.5 pb-3 bg-white">
+            <div className="relative z-20 flex gap-1.5 px-3 pt-2.5 pb-3 bg-white">
               {auction.imageUrl && (
                 <button
                   type="button"
