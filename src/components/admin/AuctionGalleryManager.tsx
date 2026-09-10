@@ -292,11 +292,11 @@ export function AuctionGalleryManager({
       </div>
 
       {/* Thumbnail grid */}
-      <div className="grid grid-cols-7 gap-2">
+      <div className="grid grid-cols-7 gap-1.5">
         {images.map((image, index) => (
           <div
             key={image.id}
-            className="relative group aspect-square rounded-lg border border-neutral-200 overflow-hidden bg-neutral-50"
+            className="relative group aspect-[4/3] rounded-lg border border-neutral-200 overflow-hidden bg-neutral-50"
           >
             <img src={image.url} alt="" className="w-full h-full object-cover" />
 
@@ -353,7 +353,7 @@ export function AuctionGalleryManager({
             key={`empty-${i}`}
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="aspect-square rounded-lg border-2 border-dashed border-neutral-300 text-neutral-400 hover:border-primary-400 hover:text-primary-500 hover:bg-primary-50/50 transition-colors flex flex-col items-center justify-center gap-1 disabled:opacity-50"
+            className="aspect-[4/3] rounded-lg border-2 border-dashed border-neutral-300 text-neutral-400 hover:border-primary-400 hover:text-primary-500 hover:bg-primary-50/50 transition-colors flex flex-col items-center justify-center gap-1 disabled:opacity-50"
           >
             {uploading ? (
               <Loader2 className="w-5 h-5 animate-spin" />

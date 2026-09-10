@@ -77,6 +77,8 @@ export function HomeHeroAuction() {
 
   return (
     <Card className="relative p-0 overflow-hidden border border-neutral-200 rounded-2xl self-start">
+      {/* Subtle premium backlight along the bottom edge of the entire card */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary-300/30 to-transparent" />
       {/* Top accent bar — only for live/ending */}
       {isLive && (
         <div className={`h-1 w-full ${isEnding ? 'bg-error-500' : 'bg-accent-500'}`} />
@@ -130,7 +132,7 @@ export function HomeHeroAuction() {
 
           {/* Thumbnail gallery — up to 7 unique images below the main image */}
           {thumbnails.length > 0 && (
-            <div className="flex gap-2 pt-3 flex-wrap">
+            <div className="flex gap-1.5 pt-3">
               {thumbnails.map((img, idx) => (
                 <button
                   key={img.id}
@@ -138,7 +140,7 @@ export function HomeHeroAuction() {
                   onClick={() => setActiveIdx(idx)}
                   aria-label={`تصویر ${idx + 1}`}
                   className={cn(
-                    'shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 transition-all duration-200 bg-neutral-100',
+                    'shrink-0 flex-1 aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all duration-200 bg-neutral-100 min-w-0',
                     activeIdx === idx
                       ? 'border-primary-500 ring-2 ring-primary-300'
                       : 'border-neutral-200 hover:border-neutral-400 opacity-80 hover:opacity-100',
@@ -149,20 +151,10 @@ export function HomeHeroAuction() {
               ))}
             </div>
           )}
-
-          {/* Subtle premium highlight divider */}
-          <div className="relative h-px mt-1 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-l from-transparent via-primary-300/40 to-transparent" />
-            <div className="gallery-shimmer-track absolute inset-0" style={{ animation: 'gallery-shimmer 3s ease-in-out infinite' }}>
-              <div className="h-full w-1/3 bg-gradient-to-l from-transparent via-primary-400/30 to-transparent" />
-            </div>
-          </div>
         </div>
 
         {/* Info side — content drives the height */}
         <div className="relative p-4 sm:p-6 flex flex-col gap-3 sm:gap-4 bg-white">
-          {/* Subtle premium top highlight */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-l from-transparent via-primary-200/50 to-transparent" />
           <div>
             <p className="text-[11px] sm:text-xs font-semibold text-primary-600 mb-1">
               {isLive ? `مزایده آنلاین ${BRAND_NAME}` : `مزایده آینده ${BRAND_NAME}`}
