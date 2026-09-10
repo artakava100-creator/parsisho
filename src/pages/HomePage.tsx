@@ -67,13 +67,13 @@ export function HomePage() {
         </div>
       </section>
 
+      {/* Special Section (ویژه) */}
+      <SpecialSection />
+
       {/* Auction Hall */}
       <div className="bg-white/60">
         <AuctionHall />
       </div>
-
-      {/* Special Section (ویژه) */}
-      <SpecialSection />
 
       {/* Support */}
       <SupportButton />
