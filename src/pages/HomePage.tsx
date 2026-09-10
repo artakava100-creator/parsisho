@@ -38,7 +38,7 @@ export function HomePage() {
 
       {/* Auction hero + ads */}
       <section className="relative overflow-hidden bg-primary-50/40">
-        <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-8 pb-1 sm:pb-2">
           <div className="flex items-center gap-2 sm:gap-2.5 mb-3 sm:mb-4">
             <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60 bg-primary-400" />

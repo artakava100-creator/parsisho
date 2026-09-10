@@ -20,7 +20,7 @@ export function SpecialSection() {
   if (!isLoading && (!items || items.length === 0)) return null;
 
   return (
-    <section className="py-4 sm:py-8 bg-white/60">
+    <section className="pt-1 sm:pt-2 pb-4 sm:pb-8 bg-white/60">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Section heading — matches AuctionHall heading pattern */}
         <div className="flex items-center justify-between mb-4 sm:mb-6">
