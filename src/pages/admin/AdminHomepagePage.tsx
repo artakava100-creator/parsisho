@@ -10,8 +10,10 @@ import { supabase } from '@/lib/supabase';
 import {
   quickAccessIconOptions,
   defaultQuickAccessItems,
+  defaultSpecialSectionConfig,
   type QuickAccessConfig,
   type QuickAccessConfigItem,
+  type SpecialSectionConfig,
 } from '@/config/home-sections';
 
 const SETTINGS_KEYS = [
@@ -23,6 +25,7 @@ const SETTINGS_KEYS = [
   'footer_credentials',
   'auction_hall_categories',
   'homepage_quick_access',
+  'homepage_special_section',
 ];
 
 interface IntroConfig {
@@ -120,6 +123,7 @@ export function AdminHomepagePage() {
   });
   const [hall, setHall] = useState<HallConfig>({ categories: [] });
   const [quickAccess, setQuickAccess] = useState<QuickAccessConfig>({ items: defaultQuickAccessItems });
+  const [specialSection, setSpecialSection] = useState<SpecialSectionConfig>(defaultSpecialSectionConfig);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -132,6 +136,7 @@ export function AdminHomepagePage() {
     if (allSettings.footer_credentials) setCredentials(allSettings.footer_credentials as CredentialsConfig);
     if (allSettings.auction_hall_categories) setHall(allSettings.auction_hall_categories as HallConfig);
     if (allSettings.homepage_quick_access) setQuickAccess(allSettings.homepage_quick_access as QuickAccessConfig);
+    if (allSettings.homepage_special_section) setSpecialSection(allSettings.homepage_special_section as SpecialSectionConfig);
   }, [allSettings]);
 
   const handleUploadBg = async (file: File) => {
@@ -175,6 +180,7 @@ export function AdminHomepagePage() {
         updateSetting.mutateAsync({ key: 'footer_credentials', value: credentials }),
         updateSetting.mutateAsync({ key: 'auction_hall_categories', value: hall }),
         updateSetting.mutateAsync({ key: 'homepage_quick_access', value: quickAccess }),
+        updateSetting.mutateAsync({ key: 'homepage_special_section', value: specialSection }),
       ]);
       toast.success('تنظیمات صفحه اصلی ذخیره شد');
     } catch {
@@ -328,6 +334,33 @@ export function AdminHomepagePage() {
               </button>
             </div>
           ))}
+        </div>
+      </SectionCard>
+
+      {/* SPECIAL SECTION (ویژه) */}
+      <SectionCard title="بخش ویژه">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 mb-2">
+            <label className="text-sm font-medium text-neutral-600">نمایش بخش</label>
+            <button
+              onClick={() => setSpecialSection((p) => ({ ...p, enabled: !p.enabled }))}
+              className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors ${specialSection.enabled ? 'bg-success-50 border-success-300 text-success-600' : 'bg-neutral-50 border-neutral-200 text-neutral-400'}`}
+            >
+              {specialSection.enabled ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            </button>
+          </div>
+          <Field label="عنوان بخش" value={specialSection.title} onChange={(v) => setSpecialSection((p) => ({ ...p, title: v }))} placeholder="ویژه" />
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-neutral-600">حداکثر آیتم‌های نمایشی</label>
+            <Input
+              type="number"
+              value={specialSection.maxVisible}
+              onChange={(e) => setSpecialSection((p) => ({ ...p, maxVisible: parseInt(e.target.value) || 6 }))}
+            />
+          </div>
+          <p className="text-xs text-neutral-400">
+            مدیریت آیتم‌های این بخش در صفحه «مدیریت ویژه» انجام می‌شود.
+          </p>
         </div>
       </SectionCard>
 

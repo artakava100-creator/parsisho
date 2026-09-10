@@ -2,6 +2,8 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Gavel, Store, Wallet, Trophy, Gamepad2, Gift, Users, Building2,
   ShoppingBag, Sparkles, Star, Clock, Flame, Compass,
+  TrendingUp, Wrench, Library, Bot, Zap, BookOpen, Calculator,
+  Globe, Cpu, Tag, ShoppingBasket, Lightbulb, Rocket,
 } from 'lucide-react';
 
 export interface QuickAccessItem {
@@ -136,3 +138,45 @@ export const homeAdSlotKeys = [
   'home_hero_2',
   'home_hero_3',
 ] as const;
+
+// ─── Special Section (ویژه) Icon Map ──────────────────────────────
+
+export const specialIconMap: Record<string, LucideIcon> = {
+  ...quickAccessIconMap,
+  trendingUp: TrendingUp,
+  wrench: Wrench,
+  library: Library,
+  bot: Bot,
+  zap: Zap,
+  bookOpen: BookOpen,
+  calculator: Calculator,
+  globe: Globe,
+  cpu: Cpu,
+  tag: Tag,
+  shoppingBasket: ShoppingBasket,
+  lightbulb: Lightbulb,
+  rocket: Rocket,
+};
+
+export const specialIconOptions: { value: string; label: string }[] = [
+  ...quickAccessIconOptions,
+  { value: 'trendingUp', label: 'روند صعودی' },
+  { value: 'wrench', label: 'آچار' },
+  { value: 'library', label: 'کتابخانه' },
+  { value: 'bot', label: 'ربات' },
+  { value: 'zap', label: 'صاعقه' },
+  { value: 'bookOpen', label: 'کتاب باز' },
+  { value: 'calculator', label: 'ماشین حساب' },
+  { value: 'globe', label: 'کره زمین' },
+  { value: 'cpu', label: 'پردازنده' },
+  { value: 'tag', label: 'برچسب' },
+  { value: 'shoppingBasket', label: 'سبد خرید' },
+  { value: 'lightbulb', label: 'لامپ' },
+  { value: 'rocket', label: 'موشک' },
+];
+
+export const defaultSpecialSectionConfig = {
+  enabled: true,
+  title: 'ویژه',
+  maxVisible: 6,
+};

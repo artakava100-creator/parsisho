@@ -50,6 +50,7 @@ export const adminNavGroups: AdminNavGroup[] = [
       { label: 'کسب‌وکارها', to: '/admin/marketplace/businesses', icon: Building2, permission: 'manage_businesses' },
       { label: 'تبلیغات', to: '/admin/marketplace/ads', icon: Megaphone, permission: 'manage_content' },
       { label: 'صفحه اصلی', to: '/admin/marketplace/homepage', icon: Home, permission: 'manage_content' },
+      { label: 'مدیریت ویژه', to: '/admin/marketplace/special', icon: Sparkles, permission: 'manage_content' },
     ],
   },
   {

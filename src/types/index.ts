@@ -1042,3 +1042,47 @@ export interface AttributeValueItem {
   createdAt: string;
   updatedAt: string;
 }
+
+// ─── Special Items (ویژه) Types ────────────────────────────────────
+
+export interface SpecialItem {
+  id: string;
+  title: string;
+  description: string | null;
+  icon: string;
+  imageUrl: string | null;
+  destinationUrl: string;
+  displayOrder: number;
+  isPublished: boolean;
+  isEnabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateSpecialItemInput {
+  title: string;
+  description?: string | null;
+  icon: string;
+  imageUrl?: string | null;
+  destinationUrl: string;
+  displayOrder?: number;
+  isPublished?: boolean;
+  isEnabled?: boolean;
+}
+
+export interface UpdateSpecialItemInput {
+  title?: string | null;
+  description?: string | null;
+  icon?: string | null;
+  imageUrl?: string | null;
+  destinationUrl?: string | null;
+  displayOrder?: number | null;
+  isPublished?: boolean | null;
+  isEnabled?: boolean | null;
+}
+
+export interface SpecialSectionConfig {
+  enabled: boolean;
+  title: string;
+  maxVisible: number;
+}

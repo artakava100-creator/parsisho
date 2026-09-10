@@ -5,6 +5,7 @@ import { HomeAdRail } from '@/components/home/HomeAdRail';
 import { QuickAccessGrid } from '@/components/home/QuickAccessGrid';
 import { AuctionHall } from '@/components/home/AuctionHall';
 import { HomeSection } from '@/components/home/HomeSection';
+import { SpecialSection } from '@/components/home/SpecialSection';
 import { SupportButton } from '@/components/home/SupportButton';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { useSiteSetting } from '@/hooks/useSiteSettings';
@@ -70,6 +71,9 @@ export function HomePage() {
       <div className="bg-white/60">
         <AuctionHall />
       </div>
+
+      {/* Special Section (ویژه) */}
+      <SpecialSection />
 
       {/* Support */}
       <SupportButton />
