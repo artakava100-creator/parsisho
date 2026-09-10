@@ -135,7 +135,7 @@ export function HomeHeroAuction() {
 
           {/* Thumbnail gallery — up to 7 unique images below the main image */}
           {thumbnails.length > 0 && (
-            <div className="flex gap-1.5 pt-3">
+            <div className="flex gap-1.5 pt-5">
               {thumbnails.map((img, idx) => (
                 <button
                   key={img.id}
