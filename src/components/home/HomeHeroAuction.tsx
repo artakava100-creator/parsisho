@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Gavel, MousePointerClick, Users, Zap, ArrowLeft, Clock as ClockIcon,
@@ -8,16 +9,24 @@ import { Card } from '@/components/ui/Card';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { CountdownTimer } from '@/components/auction/CountdownTimer';
 import { formatToman, toPersianDigits } from '@/lib/persian';
-import { useHomepageAuction } from '@/hooks/useAuction';
+import { useHomepageAuction, useAuctionMedia } from '@/hooks/useAuction';
 import { BRAND_NAME } from '@/config/brand';
 import { SectionEmptyState } from './SectionEmptyState';
+import { cn } from '@/lib/cn';
 
 export function HomeHeroAuction() {
   const { data: auction, isLoading, isError, refetch } = useHomepageAuction();
+  const { data: media } = useAuctionMedia(auction?.id);
+  const [activeIdx, setActiveIdx] = useState(0);
 
   const serverTimeOffset = auction
     ? new Date(auction.serverTime).getTime() - Date.now()
     : 0;
+
+  const mediaImages = (media ?? []).slice(0, 5);
+  const displayImage = activeIdx === 0
+    ? auction?.imageUrl
+    : (mediaImages[activeIdx - 1]?.url ?? auction?.imageUrl);
 
   if (isLoading) {
     return (
@@ -76,46 +85,85 @@ export function HomeHeroAuction() {
 
       <div className="grid grid-cols-1 md:grid-cols-[1.1fr_1fr] gap-0">
         {/* Image side — content-driven height, no forced min-height */}
-        <div className="relative aspect-[16/11] bg-gradient-to-br from-primary-900/90 to-primary-800/70 overflow-hidden">
-          {auction.imageUrl ? (
-            <img
-              src={auction.imageUrl}
-              alt={auction.title}
-              className="absolute inset-0 w-full h-full object-cover"
-              loading="eager"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Gavel className="w-16 h-16 text-primary-300/40" />
-            </div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-
-          {/* Status badge */}
-          <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2 z-20">
-            {isLive && (
-              <>
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-error-400" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-error-500" />
-                </span>
-                <Badge tone={isEnding ? 'error' : 'accent'} variant="solid" className="text-xs font-bold">
-                  {isEnding ? 'آخرین ثانیه‌ها' : 'مزایده آنلاین'}
-                </Badge>
-              </>
+        <div className="relative bg-gradient-to-br from-primary-900/90 to-primary-800/70 overflow-hidden">
+          <div className="relative aspect-[16/11]">
+            {displayImage ? (
+              <img
+                src={displayImage}
+                alt={auction.title}
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="eager"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Gavel className="w-16 h-16 text-primary-300/40" />
+              </div>
             )}
-            {isScheduled && (
-              <Badge tone="primary" variant="soft" className="text-xs font-bold">
-                <ClockIcon className="w-3.5 h-3.5" /> آغاز به‌زودی
-              </Badge>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+
+            {/* Status badge */}
+            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2 z-20">
+              {isLive && (
+                <>
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-error-400" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-error-500" />
+                  </span>
+                  <Badge tone={isEnding ? 'error' : 'accent'} variant="solid" className="text-xs font-bold">
+                    {isEnding ? 'آخرین ثانیه‌ها' : 'مزایده آنلاین'}
+                  </Badge>
+                </>
+              )}
+              {isScheduled && (
+                <Badge tone="primary" variant="soft" className="text-xs font-bold">
+                  <ClockIcon className="w-3.5 h-3.5" /> آغاز به‌زودی
+                </Badge>
+              )}
+            </div>
+
+            {auction.extensionUsed && (
+              <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-20">
+                <Badge tone="warning" variant="outline" className="text-[11px]">
+                  <Zap className="w-3 h-3" /> تمدید شده
+                </Badge>
+              </div>
             )}
           </div>
 
-          {auction.extensionUsed && (
-            <div className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 z-20">
-              <Badge tone="warning" variant="outline" className="text-[11px]">
-                <Zap className="w-3 h-3" /> تمدید شده
-              </Badge>
+          {/* Thumbnail gallery — up to 5 images below the main image */}
+          {(auction.imageUrl || mediaImages.length > 0) && (
+            <div className="flex gap-1.5 px-3 pt-2.5 pb-3 bg-white">
+              {auction.imageUrl && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveIdx(0); }}
+                  aria-label="تصویر اصلی"
+                  className={cn(
+                    'shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all duration-200 bg-neutral-100',
+                    activeIdx === 0
+                      ? 'border-primary-500 ring-1 ring-primary-300'
+                      : 'border-neutral-200 hover:border-neutral-300 opacity-80 hover:opacity-100',
+                  )}
+                >
+                  <img src={auction.imageUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+                </button>
+              )}
+              {mediaImages.map((img, idx) => (
+                <button
+                  key={img.id}
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveIdx(idx + 1); }}
+                  aria-label={`تصویر ${idx + 2}`}
+                  className={cn(
+                    'shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all duration-200 bg-neutral-100',
+                    activeIdx === idx + 1
+                      ? 'border-primary-500 ring-1 ring-primary-300'
+                      : 'border-neutral-200 hover:border-neutral-300 opacity-80 hover:opacity-100',
+                  )}
+                >
+                  <img src={img.url} alt={img.altText ?? ''} className="w-full h-full object-cover" loading="lazy" />
+                </button>
+              ))}
             </div>
           )}
         </div>
