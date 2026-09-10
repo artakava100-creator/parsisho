@@ -67,8 +67,8 @@ export function BusinessDetailPage() {
   return (
     <div className="animate-fade-in pb-12">
       {/* Cover */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        <div className="aspect-[21/9] sm:aspect-[3/1] rounded-2xl bg-gradient-to-br from-neutral-200 to-neutral-400 relative overflow-hidden">
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6">
+        <div className="aspect-[16/9] sm:aspect-[21/9] lg:aspect-[3/1] rounded-2xl bg-gradient-to-br from-neutral-200 to-neutral-400 relative overflow-hidden">
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -92,8 +92,8 @@ export function BusinessDetailPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-        <div className="flex items-center gap-2 mb-4">
+      <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 mt-4 sm:mt-6">
+        <div className="flex items-center gap-2 mb-3 sm:mb-4">
           <Link to="/businesses" className="text-sm text-neutral-500 hover:text-primary-700 transition-colors">
             محله کسب‌وکار
           </Link>
@@ -101,9 +101,9 @@ export function BusinessDetailPage() {
           <span className="text-sm text-neutral-500">{business.categoryName}</span>
         </div>
 
-        <h1 className="text-2xl font-extrabold text-neutral-800 mb-2">{business.name}</h1>
+        <h1 className="text-xl sm:text-2xl font-extrabold text-neutral-800 mb-2">{business.name}</h1>
 
-        <div className="flex flex-wrap items-center gap-2 mb-6">
+        <div className="flex flex-wrap items-center gap-2 mb-4 sm:mb-6">
           <Badge tone="primary" variant="soft">
             <Tag className="w-3 h-3" />
             {business.categoryName}
@@ -118,14 +118,14 @@ export function BusinessDetailPage() {
         </div>
 
         {business.shortDescription && (
-          <p className="text-base text-neutral-600 leading-relaxed mb-6">
+          <p className="text-sm sm:text-base text-neutral-600 leading-relaxed mb-4 sm:mb-6">
             {business.shortDescription}
           </p>
         )}
 
         {business.description && (
-          <Card className="p-5 mb-6">
-            <h2 className="text-sm font-bold text-neutral-800 mb-3">درباره کسب‌وکار</h2>
+          <Card className="p-4 sm:p-5 mb-4 sm:mb-6">
+            <h2 className="text-sm font-bold text-neutral-800 mb-2.5 sm:mb-3">درباره کسب‌وکار</h2>
             <p className="text-sm text-neutral-500 leading-relaxed whitespace-pre-line">
               {business.description}
             </p>
@@ -133,9 +133,9 @@ export function BusinessDetailPage() {
         )}
 
         {/* Contact Info */}
-        <Card className="p-5">
-          <h2 className="text-sm font-bold text-neutral-800 mb-4">اطلاعات تماس</h2>
-          <div className="space-y-3">
+        <Card className="p-4 sm:p-5">
+          <h2 className="text-sm font-bold text-neutral-800 mb-3 sm:mb-4">اطلاعات تماس</h2>
+          <div className="space-y-2.5 sm:space-y-3">
             {business.address && (
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-surface-overlay flex items-center justify-center shrink-0">

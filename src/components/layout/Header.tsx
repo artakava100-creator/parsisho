@@ -54,7 +54,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-200/80 shadow-sm">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-20 lg:h-24 gap-2 sm:gap-3">
+        <div className="flex items-center justify-between h-14 sm:h-20 lg:h-24 gap-1.5 sm:gap-3">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 sm:gap-3 shrink-0 group">
             <div className="w-9 h-9 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
@@ -115,7 +115,7 @@ export function Header() {
           </button>
 
           {/* Action controls */}
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {/* Cart */}
             <Link
               to="/cart"

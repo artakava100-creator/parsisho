@@ -135,10 +135,10 @@ function RoundCard({
         )}
       </div>
 
-      <div className="p-5 flex flex-col flex-1 gap-3.5">
+      <div className="p-4 sm:p-5 flex flex-col flex-1 gap-3 sm:gap-3.5">
         {/* Question */}
         <div>
-          <h3 className="text-lg font-bold text-neutral-800">{round.title}</h3>
+          <h3 className="text-base sm:text-lg font-bold text-neutral-800">{round.title}</h3>
           <p className="mt-1.5 text-sm text-neutral-500 leading-relaxed line-clamp-2">{round.question}</p>
         </div>
 
@@ -278,7 +278,7 @@ function RoundDetail({
         )}
 
         {/* ── Info + question + answer ── */}
-        <div className="p-6 lg:p-8 space-y-6">
+        <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
           {/* Badges */}
           <div className="flex items-center gap-2 flex-wrap">
             <Badge tone={isActive ? 'success' : 'neutral'} variant={isActive ? 'solid' : 'soft'}>
@@ -312,42 +312,42 @@ function RoundDetail({
               <div className="w-1 h-5 rounded-full bg-primary-500" />
               <span className="text-xs font-semibold text-primary-600 uppercase tracking-wide">چالش</span>
             </div>
-            <h2 className="text-xl lg:text-2xl font-extrabold text-neutral-800 mb-2">{round.title}</h2>
-            <p className="text-base lg:text-lg text-neutral-600 leading-relaxed">{round.question}</p>
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-extrabold text-neutral-800 mb-2">{round.title}</h2>
+            <p className="text-sm sm:text-base lg:text-lg text-neutral-600 leading-relaxed">{round.question}</p>
           </div>
 
           {/* ── Entry fee / prize / time info bar ── */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="p-4 rounded-xl bg-surface-sunken/60 border border-neutral-200/60">
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div className="p-2.5 sm:p-4 rounded-xl bg-surface-sunken/60 border border-neutral-200/60">
               <div className="flex items-center gap-2 mb-1.5">
                 <div className="w-7 h-7 rounded-lg bg-primary-50 flex items-center justify-center">
                   <Wallet className="w-3.5 h-3.5 text-primary-600" />
                 </div>
               </div>
               <p className="text-xs text-neutral-500 mb-0.5">هزینه شرکت</p>
-              <p className="text-sm font-bold text-neutral-800">
+              <p className="text-xs sm:text-sm font-bold text-neutral-800">
                 {round.entryFee > 0 ? formatCurrency(round.entryFee) : 'رایگان'}
               </p>
             </div>
-            <div className="p-4 rounded-xl bg-surface-sunken/60 border border-neutral-200/60">
+            <div className="p-2.5 sm:p-4 rounded-xl bg-surface-sunken/60 border border-neutral-200/60">
               <div className="flex items-center gap-2 mb-1.5">
                 <div className="w-7 h-7 rounded-lg bg-accent-50 flex items-center justify-center">
                   <Trophy className="w-3.5 h-3.5 text-accent-600" />
                 </div>
               </div>
               <p className="text-xs text-neutral-500 mb-0.5">جایزه دور</p>
-              <p className="text-sm font-bold text-accent-700">
+              <p className="text-xs sm:text-sm font-bold text-accent-700">
                 {round.prizeAmount > 0 ? formatCurrency(round.prizeAmount) : '—'}
               </p>
             </div>
-            <div className="p-4 rounded-xl bg-surface-sunken/60 border border-neutral-200/60">
+            <div className="p-2.5 sm:p-4 rounded-xl bg-surface-sunken/60 border border-neutral-200/60">
               <div className="flex items-center gap-2 mb-1.5">
                 <div className="w-7 h-7 rounded-lg bg-secondary-500/10 flex items-center justify-center">
                   <Users className="w-3.5 h-3.5 text-secondary-600" />
                 </div>
               </div>
               <p className="text-xs text-neutral-500 mb-0.5">تعداد برندها</p>
-              <p className="text-sm font-bold text-neutral-800">
+              <p className="text-xs sm:text-sm font-bold text-neutral-800">
                 {toPersianDigits(round.winnerCount)} نفر
               </p>
             </div>
@@ -447,7 +447,7 @@ function ResultView({
         {/* Result banner */}
         <div className={`relative h-2 w-full ${isQualified ? 'bg-success-500' : 'bg-error-500'}`} />
 
-        <div className="p-8 lg:p-10 text-center">
+        <div className="p-6 sm:p-8 lg:p-10 text-center">
           {/* Result icon */}
           <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6 ${
             isQualified
@@ -462,7 +462,7 @@ function ResultView({
           </div>
 
           {/* Result heading */}
-          <h2 className="text-2xl lg:text-3xl font-extrabold text-neutral-800 mb-2">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-neutral-800 mb-2">
             {isQualified ? 'پاسخ صحیح!' : 'پاسخ نادرست'}
           </h2>
 
@@ -536,13 +536,13 @@ function GuessItHeader({ onBack }: { onBack: () => void }) {
         بازگشت به سرزمین هیجان
       </button>
 
-      <div className="flex items-center gap-3.5 mb-8">
-        <div className="w-14 h-14 rounded-2xl bg-primary-500/12 flex items-center justify-center border border-primary-500/20">
-          <Brain className="w-7 h-7 text-primary-600" />
+      <div className="flex items-center gap-3 sm:gap-3.5 mb-6 sm:mb-8">
+        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary-500/12 flex items-center justify-center border border-primary-500/20 shrink-0">
+          <Brain className="w-6 h-6 sm:w-7 sm:h-7 text-primary-600" />
         </div>
-        <div>
+        <div className="min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-2xl font-extrabold text-neutral-800">حدس بزن</h1>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-neutral-800">حدس بزن</h1>
             <Badge tone="primary" variant="soft">
               <Sparkles className="w-3 h-3" />
               بازی فعال
@@ -592,7 +592,7 @@ export function GuessItPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8">
         <GuessItHeader onBack={() => navigate('/excitement')} />
         <div className="flex justify-center py-20">
           <Spinner size="lg" label="در حال بارگذاری دورها…" />
@@ -603,7 +603,7 @@ export function GuessItPage() {
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8">
         <GuessItHeader onBack={() => navigate('/excitement')} />
         <EmptyState
           icon={<AlertCircle className="w-8 h-8" />}
@@ -620,7 +620,7 @@ export function GuessItPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8">
       {view === 'list' && (
         <>
           <GuessItHeader onBack={() => navigate('/excitement')} />
@@ -632,7 +632,7 @@ export function GuessItPage() {
               description="در حال حاضر دور فعالی برای بازی «حدس بزن» وجود ندارد. بعداً دوباره بررسی کنید."
             />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {activeRounds.map((round) => (
                 <RoundCard
                   key={round.id}

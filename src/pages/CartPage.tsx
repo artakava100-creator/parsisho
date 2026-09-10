@@ -44,7 +44,7 @@ export function CartPage() {
   }
 
   return (
-    <div className="py-4 px-3 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in">
+    <div className="py-3 px-3 sm:py-4 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs sm:text-sm text-neutral-500 mb-4">
         <Link to="/" className="hover:text-neutral-600 transition-colors">میدان شهر</Link>
@@ -54,8 +54,8 @@ export function CartPage() {
         <span className="text-neutral-600">سبد خرید</span>
       </nav>
 
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-lg sm:text-xl font-extrabold text-neutral-800">سبد خرید</h1>
+      <div className="flex items-center justify-between mb-3 sm:mb-4">
+        <h1 className="text-base sm:text-xl font-extrabold text-neutral-800">سبد خرید</h1>
         <button
           onClick={() => { clear(); toast.info('سبد خرید پاک شد'); }}
           className="text-sm text-neutral-500 hover:text-error-700 transition-colors"
@@ -65,7 +65,7 @@ export function CartPage() {
       </div>
 
       {/* Items */}
-      <div className="space-y-3 mb-6">
+      <div className="space-y-2.5 sm:space-y-3 mb-4 sm:mb-6">
         {items.map((item) => (
           <Card key={item.product.id} className="p-3 sm:p-4">
             <div className="flex gap-3 sm:gap-4">

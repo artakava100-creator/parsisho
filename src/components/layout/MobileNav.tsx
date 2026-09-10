@@ -16,7 +16,7 @@ export function MobileNav() {
       className="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-t border-neutral-200/80 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_12px_rgba(0,0,0,0.04)]"
       aria-label="منوی موبایل"
     >
-      <div className="flex items-center justify-around h-16 px-1">
+      <div className="flex items-center justify-around h-14 sm:h-16 px-1">
         {bottomNavItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -26,7 +26,7 @@ export function MobileNav() {
               end={item.end}
               className={({ isActive }) =>
                 cn(
-                  'flex flex-col items-center justify-center gap-1 px-2 py-1.5 rounded-xl transition-all duration-200 min-w-[52px] relative',
+                  'flex flex-col items-center justify-center gap-0.5 px-2 py-1 rounded-lg transition-all duration-200 min-w-[48px] relative',
                   isActive
                     ? 'text-primary-700'
                     : 'text-neutral-400 active:text-neutral-600',
@@ -48,8 +48,8 @@ export function MobileNav() {
                     className={cn(
                       'transition-all duration-200',
                       isActive
-                        ? 'text-[11px] font-bold'
-                        : 'text-[10px] font-medium',
+                        ? 'text-[10px] font-bold'
+                        : 'text-[9px] font-medium',
                     )}
                   >
                     {item.label}

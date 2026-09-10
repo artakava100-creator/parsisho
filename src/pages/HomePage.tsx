@@ -57,9 +57,9 @@ export function HomePage() {
           </div>
 
           {/* Mobile ad rail */}
-          <div className="lg:hidden mt-3 sm:mt-4 flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide pb-1">
-            {homeAdSlotKeys.map((key) => (
-              <div key={key} className="min-w-[120px] sm:min-w-[140px] flex-shrink-0">
+          <div className="lg:hidden mt-3 sm:mt-4 grid grid-cols-2 gap-2 sm:gap-3 pb-1">
+            {homeAdSlotKeys.slice(0, 2).map((key) => (
+              <div key={key}>
                 <AdSlot slotKey={key} device="mobile" />
               </div>
             ))}

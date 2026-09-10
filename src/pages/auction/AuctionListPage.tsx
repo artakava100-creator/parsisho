@@ -56,14 +56,14 @@ function LiveAuctionHero({ auction, serverTimeOffset }: { auction: Auction; serv
             </div>
 
             {/* Info side */}
-            <div className="p-5 md:p-6 flex flex-col justify-between gap-3">
+            <div className="p-4 sm:p-5 md:p-6 flex flex-col justify-between gap-3">
               <div>
-                <h2 className="text-lg md:text-xl font-extrabold text-neutral-800 mb-1">{auction.productName || auction.title}</h2>
-                <p className="text-sm text-neutral-500 line-clamp-2 mb-3">{auction.description || ''}</p>
+                <h2 className="text-base sm:text-lg md:text-xl font-extrabold text-neutral-800 mb-1">{auction.productName || auction.title}</h2>
+                <p className="text-xs sm:text-sm text-neutral-500 line-clamp-2 mb-3">{auction.description || ''}</p>
 
                 <div className="flex items-baseline gap-2 mb-3">
                   <p className="text-xs text-neutral-500">قیمت فعلی:</p>
-                  <p className="text-xl font-extrabold text-primary-700">{formatToman(auction.currentPrice)}</p>
+                  <p className="text-lg sm:text-xl font-extrabold text-primary-700">{formatToman(auction.currentPrice)}</p>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2">
@@ -323,10 +323,10 @@ export function AuctionListPage() {
 
   if (isLoading) {
     return (
-      <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-xl font-extrabold text-neutral-800 mb-1">تالار مزایده</h1>
-          <p className="text-sm text-neutral-500">مزایده‌های رسمی روزانه پارسیشو</p>
+      <div className="py-6 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-lg sm:text-xl font-extrabold text-neutral-800 mb-1">تالار مزایده</h1>
+          <p className="text-xs sm:text-sm text-neutral-500">مزایده‌های رسمی روزانه پارسیشو</p>
         </div>
         <HeroSkeleton />
       </div>
@@ -389,7 +389,7 @@ export function AuctionListPage() {
   );
 
   return (
-    <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+    <div className="py-6 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-6xl mx-auto">
       {/* Page header */}
       <div className="mb-6">
         <h1 className="text-xl font-extrabold text-neutral-800 mb-1">تالار مزایده</h1>
@@ -398,14 +398,14 @@ export function AuctionListPage() {
 
       {/* A) LIVE AUCTION — dominant */}
       {activeAuction && (
-        <section className="mb-10">
+        <section className="mb-6 sm:mb-10">
           <LiveAuctionHero auction={activeAuction} serverTimeOffset={serverTimeOffset} />
         </section>
       )}
 
       {/* Today's scheduled (only if no active auction) */}
       {!activeAuction && todayScheduled.length > 0 && (
-        <section className="mb-10">
+        <section className="mb-6 sm:mb-10">
           <SectionHeader
             icon={<Flame className="w-4 h-4" />}
             title="مزایده امروز"
@@ -422,7 +422,7 @@ export function AuctionListPage() {
 
       {/* No active auction message */}
       {!activeAuction && todayScheduled.length === 0 && (
-        <section className="mb-10">
+        <section className="mb-6 sm:mb-10">
           <Card className="p-6 text-center max-w-2xl">
             <p className="text-sm text-neutral-500">در حال حاضر مزایده فعالی وجود ندارد</p>
           </Card>
@@ -431,7 +431,7 @@ export function AuctionListPage() {
 
       {/* B) TOMORROW */}
       {tomorrowAuctions.length > 0 && (
-        <section className="mb-10">
+        <section className="mb-6 sm:mb-10">
           <SectionHeader
             icon={<Calendar className="w-4 h-4" />}
             title="مزایده فردا"
@@ -448,7 +448,7 @@ export function AuctionListPage() {
 
       {/* C) DAY AFTER TOMORROW */}
       {dayAfterAuctions.length > 0 && (
-        <section className="mb-10">
+        <section className="mb-6 sm:mb-10">
           <SectionHeader
             icon={<Calendar className="w-4 h-4" />}
             title="مزایده پس‌فردا"
@@ -465,7 +465,7 @@ export function AuctionListPage() {
 
       {/* D) UPCOMING */}
       {allUpcoming.length > 0 && (
-        <section className="mb-10">
+        <section className="mb-6 sm:mb-10">
           <SectionHeader
             icon={<Calendar className="w-4 h-4" />}
             title="مزایده‌های آینده"

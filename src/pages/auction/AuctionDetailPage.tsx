@@ -147,14 +147,14 @@ export function AuctionDetailPage() {
   );
 
   return (
-    <div className="py-4 px-4 sm:px-6 lg:px-8 max-w-2xl mx-auto">
+    <div className="py-3 px-3 sm:py-4 sm:px-6 lg:px-8 max-w-2xl mx-auto">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-neutral-500 mb-4">
+      <nav className="flex items-center gap-2 text-xs sm:text-sm text-neutral-500 mb-3 sm:mb-4 overflow-hidden">
         <Link to="/" className="hover:text-neutral-600 transition-colors">میدان شهر</Link>
         <ArrowRight className="w-3.5 h-3.5" />
         <Link to="/auctions" className="hover:text-neutral-600 transition-colors">تالار مزایده</Link>
         <ArrowRight className="w-3.5 h-3.5" />
-        <span className="text-neutral-600 truncate">{auction.title}</span>
+        <span className="text-neutral-600 truncate min-w-0">{auction.title}</span>
       </nav>
 
       {/* ═══ ONE COHERENT AUCTION CARD ═══ */}
@@ -204,16 +204,16 @@ export function AuctionDetailPage() {
         </div>
 
         {/* Product name + description — shown once */}
-        <div className="px-5 pt-4 pb-3 border-b border-neutral-200">
-          <h1 className="text-lg font-extrabold text-neutral-800 mb-0.5">{auction.productName || auction.title}</h1>
-          <p className="text-sm text-neutral-500 leading-relaxed line-clamp-2">
+        <div className="px-4 sm:px-5 pt-3 sm:pt-4 pb-3 border-b border-neutral-200">
+          <h1 className="text-base sm:text-lg font-extrabold text-neutral-800 mb-0.5">{auction.productName || auction.title}</h1>
+          <p className="text-xs sm:text-sm text-neutral-500 leading-relaxed line-clamp-2">
             {auction.description || 'توضیحاتی برای این مزایده ثبت نشده است.'}
           </p>
         </div>
 
         {/* ─── LIVE AUCTION AREA ─── */}
         {isLive && (
-          <div className="px-5 py-4">
+          <div className="px-4 sm:px-5 py-3 sm:py-4">
             {/* Countdown */}
             <div className="text-center mb-4">
               <p className="text-xs text-neutral-500 mb-2">زمان باقیمانده</p>
@@ -227,15 +227,15 @@ export function AuctionDetailPage() {
             </div>
 
             {/* Current price — single prominent display */}
-            <div className="text-center py-3 border-y border-neutral-200 mb-4">
+            <div className="text-center py-3 border-y border-neutral-200 mb-3 sm:mb-4">
               <p className="text-xs text-neutral-500 mb-1">قیمت فعلی مزایده</p>
-              <p className="text-3xl font-extrabold text-primary-700 font-num tracking-tight">
+              <p className="text-2xl sm:text-3xl font-extrabold text-primary-700 font-num tracking-tight">
                 {formatToman(auction.currentPrice)}
               </p>
             </div>
 
             {/* Stats — single row, compact */}
-            <div className="grid grid-cols-3 gap-2 mb-4">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-3 sm:mb-4">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1 text-neutral-500 mb-0.5">
                   <MousePointerClick className="w-3 h-3" />
@@ -261,7 +261,7 @@ export function AuctionDetailPage() {
 
             {/* User's own participation status — compact inline */}
             {userHasClicked && (
-              <div className={`p-2.5 rounded-lg border mb-3 ${
+              <div className={`p-2.5 rounded-lg border mb-2.5 sm:mb-3 ${
                 isUserLastClicker
                   ? 'bg-success-50 border-success-500/20'
                   : 'bg-warning-50 border-warning-500/20'
@@ -283,7 +283,7 @@ export function AuctionDetailPage() {
                     </>
                   )}
                 </div>
-                <div className="flex items-center gap-4 text-xs text-neutral-500">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral-500">
                   <span>کلیک‌های شما: <span className="font-medium text-neutral-600">{toPersianDigits(userClickCount)}</span></span>
                   <span>مبلغ مصرف‌شده: <span className="font-medium text-neutral-600">{formatToman(userTotalSpent)}</span></span>
                 </div>
@@ -297,7 +297,7 @@ export function AuctionDetailPage() {
 
         {/* ─── FINISHING — TIMER EXPIRED, AWAITING BACKEND FINALIZATION ─── */}
         {isFinishing && (
-          <div className="px-5 py-8 text-center">
+          <div className="px-4 sm:px-5 py-6 sm:py-8 text-center">
             <Spinner className="w-6 h-6 mx-auto mb-3 text-primary-600" />
             <p className="text-sm text-neutral-500">در حال پایان مزایده...</p>
           </div>
@@ -305,37 +305,37 @@ export function AuctionDetailPage() {
 
         {/* ─── ENDED AUCTION ─── */}
         {isEnded && (
-          <div className="px-5 py-4">
+          <div className="px-4 sm:px-5 py-3 sm:py-4">
             {/* === WINNER EXPERIENCE === */}
             {winner?.isOwnBid && (
-              <div className="mb-4 p-4 rounded-xl bg-gradient-to-br from-success-500/15 to-success-700/5 border border-success-500/30">
-                <div className="flex items-center gap-2 mb-3">
-                  <PartyPopper className="w-5 h-5 text-success-600" />
-                  <h3 className="text-base font-extrabold text-success-700">شما برنده مزایده شدید!</h3>
+              <div className="mb-3 sm:mb-4 p-3 sm:p-4 rounded-xl bg-gradient-to-br from-success-500/15 to-success-700/5 border border-success-500/30">
+                <div className="flex items-center gap-2 mb-2.5 sm:mb-3">
+                  <PartyPopper className="w-5 h-5 text-success-600 shrink-0" />
+                  <h3 className="text-sm sm:text-base font-extrabold text-success-700">شما برنده مزایده شدید!</h3>
                 </div>
-                <div className="grid grid-cols-2 gap-3 mb-4">
-                  <div className="p-2.5 rounded-lg bg-neutral-100/40">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
+                  <div className="p-2 sm:p-2.5 rounded-lg bg-neutral-100/40">
                     <p className="text-[10px] text-neutral-500 mb-0.5">قیمت نهایی مزایده</p>
-                    <p className="text-sm font-bold text-success-700">{formatToman(auction.currentPrice)}</p>
+                    <p className="text-xs sm:text-sm font-bold text-success-700">{formatToman(auction.currentPrice)}</p>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-neutral-100/40">
+                  <div className="p-2 sm:p-2.5 rounded-lg bg-neutral-100/40">
                     <p className="text-[10px] text-neutral-500 mb-0.5">زمان پایان</p>
-                    <p className="text-sm font-bold text-neutral-700">{formatJalaliDate(new Date(auction.endsAt))}</p>
+                    <p className="text-xs sm:text-sm font-bold text-neutral-700">{formatJalaliDate(new Date(auction.endsAt))}</p>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-neutral-100/40">
+                  <div className="p-2 sm:p-2.5 rounded-lg bg-neutral-100/40">
                     <p className="text-[10px] text-neutral-500 mb-0.5">تعداد کلیک‌های شما</p>
-                    <p className="text-sm font-bold text-neutral-700">{toPersianDigits(userClickCount)}</p>
+                    <p className="text-xs sm:text-sm font-bold text-neutral-700">{toPersianDigits(userClickCount)}</p>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-neutral-100/40">
+                  <div className="p-2 sm:p-2.5 rounded-lg bg-neutral-100/40">
                     <p className="text-[10px] text-neutral-500 mb-0.5">مبلغ پرداختی برای کلیک‌ها</p>
-                    <p className="text-sm font-bold text-neutral-700">{formatToman(userTotalSpent)}</p>
+                    <p className="text-xs sm:text-sm font-bold text-neutral-700">{formatToman(userTotalSpent)}</p>
                   </div>
                 </div>
-                <div className="p-3 rounded-lg bg-neutral-200/40 border border-neutral-200">
+                <div className="p-2.5 sm:p-3 rounded-lg bg-neutral-200/40 border border-neutral-200">
                   <p className="text-xs text-neutral-500 leading-relaxed">
                     تبریک! شما با آخرین کلیک معتبر برنده این مزایده شدید. برای پیگیری وضعیت جایزه و تحویل، به صفحه حساب کاربری مراجعه کنید.
                   </p>
-                  <Link to="/account" className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-700 hover:text-primary-200 transition-colors mt-3">
+                  <Link to="/account" className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-700 hover:text-primary-200 transition-colors mt-2.5 sm:mt-3">
                     <Trophy className="w-4 h-4" />
                     مشاهده تاریخچه و پیگیری جایزه
                     <ArrowRight className="w-3 h-3" />
@@ -348,17 +348,17 @@ export function AuctionDetailPage() {
             {/* === LOSER EXPERIENCE === */}
             {isLosingParticipant && (
               <div className="mb-4">
-                <div className="flex items-center gap-3 mb-3 p-3 rounded-lg bg-neutral-100/40 border border-neutral-300">
-                  <div className="w-10 h-10 rounded-xl bg-neutral-200/30 border border-neutral-300 flex items-center justify-center shrink-0">
-                    <Trophy className="w-5 h-5 text-neutral-500" />
+                <div className="flex items-center gap-3 mb-2.5 sm:mb-3 p-2.5 sm:p-3 rounded-lg bg-neutral-100/40 border border-neutral-300">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-neutral-200/30 border border-neutral-300 flex items-center justify-center shrink-0">
+                    <Trophy className="w-4 sm:w-5 h-4 sm:h-5 text-neutral-500" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-xs text-neutral-500">برنده مزایده — آخرین کلیک‌کننده</p>
-                    <p className="text-base font-bold text-neutral-800">{winner?.bidderName || 'کاربر'}</p>
+                    <p className="text-sm sm:text-base font-bold text-neutral-800 truncate">{winner?.bidderName || 'کاربر'}</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2 mb-3 sm:mb-4">
                   <div className="text-center">
                     <p className="text-xs text-neutral-500 mb-0.5">قیمت نهایی</p>
                     <p className="text-sm font-bold text-success-700">{formatToman(auction.currentPrice)}</p>
@@ -375,17 +375,17 @@ export function AuctionDetailPage() {
 
                 {/* Direct purchase option */}
                 {auction.originalPrice && auction.originalPrice > 0 && (
-                  <div className="p-3 rounded-lg border border-primary-300 bg-primary-500/5">
-                    <div className="flex items-start gap-3">
+                  <div className="p-2.5 sm:p-3 rounded-lg border border-primary-300 bg-primary-500/5">
+                    <div className="flex items-start gap-2.5 sm:gap-3">
                       <div className="w-9 h-9 rounded-lg bg-primary-50 border border-primary-500/20 flex items-center justify-center shrink-0">
                         <ShoppingBag className="w-4 h-4 text-primary-600" />
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-bold text-neutral-800 mb-0.5">خرید مستقیم کالا</h3>
-                        <p className="text-xs text-neutral-500 mb-3">
+                        <p className="text-xs text-neutral-500 mb-2.5 sm:mb-3">
                           می‌توانید این کالا را مستقیماً خریداری کنید. اعتبار مشارکت شما در خرید اعمال می‌شود.
                         </p>
-                        <div className="flex items-center gap-3 mb-3 text-xs">
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2.5 sm:mb-3 text-xs">
                           <span className="text-neutral-500">قیمت اصلی: <span className="font-bold text-neutral-700">{formatToman(auction.originalPrice)}</span></span>
                           <span className="text-neutral-500">اعتبار شما: <span className="font-bold text-primary-700">{formatToman(directPurchaseCredit)}</span></span>
                           <span className="text-neutral-500">باقی‌مانده: <span className="font-bold text-warning-700">{formatToman(directPurchaseRemaining)}</span></span>
@@ -405,17 +405,17 @@ export function AuctionDetailPage() {
             {!userHasClicked && !winner?.isOwnBid && (
               <div>
                 {winner && (
-                  <div className="flex items-center gap-3 mb-4 p-3 rounded-lg bg-neutral-100/40 border border-neutral-300">
-                    <div className="w-10 h-10 rounded-xl bg-neutral-200/30 border border-neutral-300 flex items-center justify-center shrink-0">
-                      <Trophy className="w-5 h-5 text-neutral-500" />
+                  <div className="flex items-center gap-3 mb-3 sm:mb-4 p-2.5 sm:p-3 rounded-lg bg-neutral-100/40 border border-neutral-300">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-neutral-200/30 border border-neutral-300 flex items-center justify-center shrink-0">
+                      <Trophy className="w-4 sm:w-5 h-4 sm:h-5 text-neutral-500" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-xs text-neutral-500">برنده — آخرین کلیک‌کننده</p>
-                      <p className="text-base font-bold text-neutral-800">{winner.bidderName}</p>
+                      <p className="text-sm sm:text-base font-bold text-neutral-800 truncate">{winner.bidderName}</p>
                     </div>
                   </div>
                 )}
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
                   <div className="text-center">
                     <p className="text-xs text-neutral-500 mb-0.5">قیمت نهایی</p>
                     <p className="text-sm font-bold text-success-700">{formatToman(auction.currentPrice)}</p>
@@ -436,7 +436,7 @@ export function AuctionDetailPage() {
 
         {/* ─── LAST FIVE CLICKERS — same card ─── */}
         {(isLive || isFinishing || isEnded) && (
-          <div className="px-5 py-4 border-t border-neutral-200">
+          <div className="px-4 sm:px-5 py-3 sm:py-4 border-t border-neutral-200">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <MousePointerClick className="w-4 h-4 text-primary-600" />
@@ -453,7 +453,7 @@ export function AuctionDetailPage() {
 
       {/* ═══ UPCOMING AUCTIONS ═══ */}
       {(tomorrowAuctions.length > 0 || dayAfterAuctions.length > 0) && (
-        <div className="mt-6 space-y-5">
+        <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-5">
           {tomorrowAuctions.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-3">

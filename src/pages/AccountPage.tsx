@@ -168,7 +168,7 @@ export function AccountPage() {
   ];
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
+    <div className="min-h-[calc(100vh-4rem)] py-3 sm:py-8 px-3 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         <Link
           to="/"
@@ -179,7 +179,7 @@ export function AccountPage() {
         </Link>
 
         {/* Identity progress */}
-        <Card className="p-4 sm:p-6 sm:p-8 mb-4 sm:mb-6">
+        <Card className="p-4 sm:p-8 mb-4 sm:mb-6">
           <h2 className="text-base sm:text-lg font-bold text-neutral-800 mb-3 sm:mb-5">مراحل تکمیل هویت</h2>
           <div className="space-y-3">
             {steps.map((step, idx) => (
@@ -214,7 +214,7 @@ export function AccountPage() {
         </Card>
 
         {/* Header card */}
-        <Card className="p-4 sm:p-6 sm:p-8 mb-4 sm:mb-6">
+        <Card className="p-4 sm:p-8 mb-4 sm:mb-6">
           <div className="flex items-start gap-3 sm:gap-5">
             <Avatar src={user.avatarUrl ?? undefined} name={user.displayName} size="xl" ring />
             <div className="flex-1 min-w-0">
@@ -248,7 +248,7 @@ export function AccountPage() {
         </Card>
 
         {/* Identity section */}
-        <Card className="p-4 sm:p-6 sm:p-8 mb-4 sm:mb-6">
+        <Card className="p-4 sm:p-8 mb-4 sm:mb-6">
           <h2 className="text-base sm:text-lg font-bold text-neutral-800 mb-3 sm:mb-5">اطلاعات حساب</h2>
 
           {editing ? (
@@ -463,7 +463,7 @@ export function AccountPage() {
         <AuctionHistorySection />
 
         {/* Store Orders */}
-        <Card className="p-4 sm:p-6 sm:p-8 mb-4 sm:mb-6">
+        <Card className="p-4 sm:p-8 mb-4 sm:mb-6">
           <div className="flex items-center justify-between mb-3 sm:mb-5">
             <h2 className="text-base sm:text-lg font-bold text-neutral-800">سفارش‌های فروشگاه</h2>
             <Link to="/orders" className="text-xs sm:text-sm text-primary-700 hover:text-primary-200 transition-colors">
@@ -498,7 +498,7 @@ function AuctionHistorySection() {
 
   if (isLoading) {
     return (
-      <Card className="p-4 sm:p-6 sm:p-8 mb-4 sm:mb-6">
+      <Card className="p-4 sm:p-8 mb-4 sm:mb-6">
         <h2 className="text-base sm:text-lg font-bold text-neutral-800 mb-3 sm:mb-5">مزایده‌های شرکت‌کرده</h2>
         <div className="space-y-3">
           <Skeleton className="h-16 w-full" />
@@ -510,7 +510,7 @@ function AuctionHistorySection() {
 
   if (history.length === 0) {
     return (
-      <Card className="p-4 sm:p-6 sm:p-8 mb-4 sm:mb-6">
+      <Card className="p-4 sm:p-8 mb-4 sm:mb-6">
         <h2 className="text-base sm:text-lg font-bold text-neutral-800 mb-3 sm:mb-5">مزایده‌های شرکت‌کرده</h2>
         <EmptyState
           icon={<Gavel className="w-8 h-8" />}
@@ -522,7 +522,7 @@ function AuctionHistorySection() {
   }
 
   return (
-    <Card className="p-4 sm:p-6 sm:p-8 mb-4 sm:mb-6">
+    <Card className="p-4 sm:p-8 mb-4 sm:mb-6">
       <h2 className="text-base sm:text-lg font-bold text-neutral-800 mb-3 sm:mb-5">مزایده‌های شرکت‌کرده</h2>
       <div className="space-y-3">
         {history.map((entry) => {
@@ -550,7 +550,7 @@ function AuctionHistorySection() {
                   <h3 className="text-sm font-bold text-neutral-800 truncate group-hover:text-primary-700 transition-colors">
                     {entry.productName || entry.title}
                   </h3>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-neutral-500">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-neutral-500">
                     <span className="flex items-center gap-1">
                       <MousePointerClick className="w-3 h-3" />
                       {toPersianDigits(entry.userClickCount)} کلیک

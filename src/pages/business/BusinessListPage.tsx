@@ -102,14 +102,14 @@ export function BusinessListPage() {
   return (
     <div className="animate-fade-in pb-12">
       {/* Header */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-primary-50 border border-primary-500/25 flex items-center justify-center">
-            <Building2 className="w-5 h-5 text-primary-700" />
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6">
+        <div className="flex items-center gap-2.5 sm:gap-3 mb-2">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary-50 border border-primary-500/25 flex items-center justify-center shrink-0">
+            <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary-700" />
           </div>
-          <div>
-            <h1 className="text-2xl font-extrabold text-neutral-800">محله کسب‌وکار</h1>
-            <p className="text-sm text-neutral-500">
+          <div className="min-w-0">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-neutral-800">محله کسب‌وکار</h1>
+            <p className="text-xs sm:text-sm text-neutral-500">
               کشف کسب‌وکارها، تولیدکنندگان و خدمات‌دهندگان محلی مورد اعتماد
             </p>
           </div>
@@ -118,7 +118,7 @@ export function BusinessListPage() {
 
       {/* Category Navigation */}
       {categories && categories.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+        <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-4">
           <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
             <button
               onClick={() => setActiveCategory(null)}
@@ -154,7 +154,7 @@ export function BusinessListPage() {
       )}
 
       {/* Search & City Filter */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500 pointer-events-none" />
@@ -178,7 +178,7 @@ export function BusinessListPage() {
       </section>
 
       {/* Business Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {isLoading ? (
           <FullPageSpinner />
         ) : error ? (

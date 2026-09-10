@@ -65,7 +65,7 @@ function HeroEmblem() {
    ─────────────────────────────────────────────── */
 function FeaturedGame() {
   return (
-    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-14">
+    <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-14">
       <div className="relative">
         {/* Asymmetric grid: visual 7 cols, content 5 cols */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-0 items-stretch">
@@ -125,7 +125,7 @@ function FeaturedGame() {
           </div>
 
           {/* ── Content side ── */}
-          <div className="lg:col-span-5 relative bg-surface-raised/60 border border-primary-500/15 lg:border-r-0 rounded-2xl lg:rounded-l-none lg:rounded-r-2xl p-7 sm:p-9 lg:p-10 flex flex-col justify-between gap-8">
+          <div className="lg:col-span-5 relative bg-surface-raised/60 border border-primary-500/15 lg:border-r-0 rounded-2xl lg:rounded-l-none lg:rounded-r-2xl p-5 sm:p-9 lg:p-10 flex flex-col justify-between gap-6 sm:gap-8">
             {/* Decorative corner accent */}
             <div className="absolute top-0 left-0 w-24 h-24 border-t-2 border-l-2 border-primary-500/20 rounded-tl-2xl pointer-events-none" />
 
@@ -135,10 +135,10 @@ function FeaturedGame() {
                 <span className="text-xs font-semibold text-primary-600 tracking-wide">بازی ویژه</span>
               </div>
 
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-neutral-800 mb-3 leading-tight">
+              <h2 className="text-2xl sm:text-4xl font-extrabold text-neutral-800 mb-2 sm:mb-3 leading-tight">
                 حدس بزن
               </h2>
-              <p className="text-sm sm:text-base text-neutral-500 leading-relaxed mb-7 max-w-md">
+              <p className="text-xs sm:text-base text-neutral-500 leading-relaxed mb-5 sm:mb-7 max-w-md">
                 تصویر یا معما را ببین، پاسخ بده و در صورت پاسخ صحیح وارد قرعه‌کشی برندگان شو. هر چالش یک شانس جدید است.
               </p>
 
@@ -352,8 +352,8 @@ export function ExcitementLandPage() {
         {/* Bottom fade into page */}
         <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-surface to-transparent" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-20 lg:pt-20 lg:pb-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
+        <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-10 sm:pt-16 pb-14 sm:pb-20 lg:pt-20 lg:pb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-8 items-center">
             {/* Text side */}
             <div className="lg:col-span-6 text-center lg:text-right order-2 lg:order-1">
               {/* Label */}
@@ -363,19 +363,19 @@ export function ExcitementLandPage() {
               </div>
 
               {/* Title */}
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-neutral-800 leading-[1.1] tracking-tight mb-6">
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-neutral-800 leading-[1.1] tracking-tight mb-4 sm:mb-6">
                 بازی کن،
                 <br />
                 <span className="text-gradient-primary">پارسی ببر</span>
               </h1>
 
               {/* Supporting text */}
-              <p className="text-base sm:text-lg text-neutral-500 leading-relaxed max-w-lg mx-auto lg:mx-0 lg:ml-auto lg:text-right mb-8">
+              <p className="text-sm sm:text-lg text-neutral-500 leading-relaxed max-w-lg mx-auto lg:mx-0 lg:ml-auto lg:text-right mb-6 sm:mb-8">
                 چالش‌های هیجان‌انگیز را امتحان کن، مهارت و شانس خودت را به آزمایش بگذار و جایزه پارسی ببر.
               </p>
 
               {/* Quick stats */}
-              <div className="flex items-center justify-center lg:justify-start gap-6 lg:gap-8">
+              <div className="flex items-center justify-center lg:justify-start gap-4 sm:gap-6 lg:gap-8">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-primary-50 border border-primary-500/20 flex items-center justify-center">
                     <Gamepad2 className="w-4 h-4 text-primary-600" />
@@ -417,14 +417,14 @@ export function ExcitementLandPage() {
       {/* ════════════════════════════════════════════
           GAME HUB — three distinct tiles
          ════════════════════════════════════════════ */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-10 sm:pb-16">
         {/* Section header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-1 h-7 rounded-full bg-gradient-to-b from-primary-600 to-secondary-500" />
+        <div className="flex items-center justify-between mb-5 sm:mb-8">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-1 h-6 sm:h-7 rounded-full bg-gradient-to-b from-primary-600 to-secondary-500" />
             <div>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-neutral-800">بازی‌های سرزمین هیجان</h2>
-              <p className="text-sm text-neutral-500 mt-0.5">هر بازی یک شانس جدید برای برد</p>
+              <h2 className="text-lg sm:text-2xl font-extrabold text-neutral-800">بازی‌های سرزمین هیجان</h2>
+              <p className="text-xs sm:text-sm text-neutral-500 mt-0.5">هر بازی یک شانس جدید برای برد</p>
             </div>
           </div>
           <div className="hidden sm:flex items-center gap-2 text-xs text-neutral-500">
@@ -434,7 +434,7 @@ export function ExcitementLandPage() {
         </div>
 
         {/* Tiles — asymmetric layout: first tile wider on desktop */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-5">
           <div className="sm:col-span-2 lg:col-span-5">
             <GameTile tile={gameTiles[0]} index={0} />
           </div>

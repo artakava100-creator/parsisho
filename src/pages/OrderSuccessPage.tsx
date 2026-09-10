@@ -50,9 +50,9 @@ export function OrderSuccessPage() {
   }
 
   return (
-    <div className="py-4 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto animate-fade-in">
+    <div className="py-3 px-3 sm:py-4 sm:px-6 lg:px-8 max-w-3xl mx-auto animate-fade-in">
       {/* Success header */}
-      <Card className="p-8 text-center mb-6">
+      <Card className="p-5 sm:p-8 text-center mb-4 sm:mb-6">
         <div className="w-16 h-16 rounded-full bg-success-50 flex items-center justify-center mx-auto mb-4">
           <CheckCircle className="w-9 h-9 text-success-600" />
         </div>
@@ -72,9 +72,9 @@ export function OrderSuccessPage() {
       </Card>
 
       {/* Order details */}
-      <Card className="p-5 mb-6">
-        <h2 className="text-sm font-bold text-neutral-800 mb-4">اقلام سفارش</h2>
-        <div className="space-y-3">
+      <Card className="p-4 sm:p-5 mb-4 sm:mb-6">
+        <h2 className="text-sm font-bold text-neutral-800 mb-3 sm:mb-4">اقلام سفارش</h2>
+        <div className="space-y-2.5 sm:space-y-3">
           {order.items.map((item) => (
             <div key={item.id} className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-lg overflow-hidden bg-neutral-100 shrink-0">
@@ -129,9 +129,9 @@ export function OrderSuccessPage() {
       </Card>
 
       {/* Delivery info */}
-      <Card className="p-5 mb-6">
-        <h2 className="text-sm font-bold text-neutral-800 mb-4">اطلاعات تحویل</h2>
-        <div className="grid grid-cols-2 gap-3 text-sm">
+      <Card className="p-4 sm:p-5 mb-4 sm:mb-6">
+        <h2 className="text-sm font-bold text-neutral-800 mb-3 sm:mb-4">اطلاعات تحویل</h2>
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3 text-sm">
           <div>
             <p className="text-neutral-500 text-xs">نام</p>
             <p className="text-neutral-700">{order.customerName}</p>
@@ -164,7 +164,7 @@ export function OrderSuccessPage() {
       </Card>
 
       {/* Actions */}
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3">
         <Link to="/orders" className="flex-1">
           <Button variant="primary" fullWidth size="lg">
             مشاهده سفارش‌های من

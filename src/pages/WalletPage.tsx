@@ -568,7 +568,7 @@ export function WalletPage() {
   const [showCustomTopUp, setShowCustomTopUp] = useState(false);
 
   return (
-    <div className="py-4 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto animate-fade-in">
+    <div className="py-3 sm:py-8 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto animate-fade-in">
       <Link
         to="/"
         className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-neutral-500 hover:text-neutral-600 transition-colors mb-4 sm:mb-6"
@@ -577,12 +577,12 @@ export function WalletPage() {
         بازگشت به میدان شهر
       </Link>
 
-      <div className="flex items-center gap-3 mb-5 sm:mb-6">
-        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-accent-50 border border-accent-500/30 flex items-center justify-center">
+      <div className="flex items-center gap-3 mb-4 sm:mb-6">
+        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-accent-50 border border-accent-500/30 flex items-center justify-center shrink-0">
           <WalletIcon className="w-4 h-4 sm:w-5 sm:h-5 text-accent-600" />
         </div>
-        <div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-neutral-800">بانک پارسیشو</h1>
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-2xl font-extrabold text-neutral-800">بانک پارسیشو</h1>
           <p className="text-xs sm:text-sm text-neutral-500">مدیریت موجودی، بسته‌ها و تراکنش‌ها</p>
         </div>
       </div>
@@ -598,7 +598,7 @@ export function WalletPage() {
         </aside>
 
         {/* Main content */}
-        <div className="flex-1 min-w-0 space-y-5 sm:space-y-8">
+        <div className="flex-1 min-w-0 space-y-4 sm:space-y-8">
           {/* Bank card */}
           <ParsishoBankCard wallet={wallet} isLoading={walletLoading} />
 

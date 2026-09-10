@@ -38,15 +38,15 @@ export function OrderHistoryPage() {
   }, []);
 
   return (
-    <div className="py-4 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in">
+    <div className="py-3 px-3 sm:py-4 sm:px-6 lg:px-8 max-w-4xl mx-auto animate-fade-in">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-neutral-500 mb-4">
+      <nav className="flex items-center gap-2 text-xs sm:text-sm text-neutral-500 mb-3 sm:mb-4">
         <Link to="/" className="hover:text-neutral-600 transition-colors">میدان شهر</Link>
         <ArrowRight className="w-3.5 h-3.5" />
         <span className="text-neutral-600">سفارش‌های من</span>
       </nav>
 
-      <h1 className="text-xl font-extrabold text-neutral-800 mb-6">سفارش‌های من</h1>
+      <h1 className="text-lg sm:text-xl font-extrabold text-neutral-800 mb-4 sm:mb-6">سفارش‌های من</h1>
 
       {loading ? (
         <div className="space-y-3">
@@ -74,12 +74,12 @@ export function OrderHistoryPage() {
             const pt = paymentLabels[order.paymentStatus];
             return (
               <Link key={order.id} to={`/orders/${order.id}/success`}>
-                <Card hover className="p-4">
-                  <div className="flex items-start justify-between gap-3 mb-3">
+                <Card hover className="p-3 sm:p-4">
+                  <div className="flex items-start justify-between gap-2 sm:gap-3 mb-2.5 sm:mb-3">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <Package className="w-4 h-4 text-neutral-500 shrink-0" />
-                        <span className="text-sm font-bold text-neutral-800 truncate">{order.orderNumber}</span>
+                        <span className="text-xs sm:text-sm font-bold text-neutral-800 truncate">{order.orderNumber}</span>
                       </div>
                       <p className="text-xs text-neutral-500">{formatJalaliShort(new Date(order.createdAt))}</p>
                     </div>
@@ -88,13 +88,13 @@ export function OrderHistoryPage() {
                       <Badge tone={pt.tone} variant="soft">{pt.label}</Badge>
                     </div>
                   </div>
-                  <div className="flex items-center justify-between pt-3 border-t border-neutral-200">
-                    <div className="text-xs text-neutral-500">
+                  <div className="flex items-center justify-between pt-2.5 sm:pt-3 border-t border-neutral-200 gap-2">
+                    <div className="text-xs text-neutral-500 min-w-0 truncate">
                       <span className="text-neutral-500">{order.customerName}</span>
                       <span className="text-neutral-700 mx-1">|</span>
                       <span>{order.province} - {order.city}</span>
                     </div>
-                    <p className="text-sm font-extrabold text-primary-700 font-num">
+                    <p className="text-xs sm:text-sm font-extrabold text-primary-700 font-num shrink-0">
                       {formatCurrency(order.total)}
                     </p>
                   </div>

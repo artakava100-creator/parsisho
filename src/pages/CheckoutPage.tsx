@@ -201,7 +201,7 @@ export function CheckoutPage() {
   const canSubmit = gatewayReady && !shippingNotConfigured && settings !== null;
 
   return (
-    <div className="py-4 px-3 sm:px-6 lg:px-8 max-w-5xl mx-auto animate-fade-in">
+    <div className="py-3 sm:py-4 px-3 sm:px-6 lg:px-8 max-w-5xl mx-auto animate-fade-in">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs sm:text-sm text-neutral-500 mb-4">
         <Link to="/market" className="hover:text-neutral-600 transition-colors">فروشگاه</Link>
@@ -211,7 +211,7 @@ export function CheckoutPage() {
         <span className="text-neutral-600">ثبت سفارش</span>
       </nav>
 
-      <h1 className="text-lg sm:text-xl font-extrabold text-neutral-800 mb-4 sm:mb-6">ثبت سفارش</h1>
+      <h1 className="text-lg sm:text-xl font-extrabold text-neutral-800 mb-3 sm:mb-6">ثبت سفارش</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left: forms */}

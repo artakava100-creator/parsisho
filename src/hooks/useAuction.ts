@@ -9,6 +9,7 @@ import type { PlaceClickResult } from '@/types';
 export function useHomepageAuction() {
   const queryClient = useQueryClient();
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const query = useQuery({
     queryKey: ['homepage-auction'],
@@ -27,12 +28,16 @@ export function useHomepageAuction() {
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'auctions', filter: `id=eq.${auctionId}` },
         () => {
-          queryClient.invalidateQueries({ queryKey: ['homepage-auction'] });
+          if (debounceRef.current) clearTimeout(debounceRef.current);
+          debounceRef.current = setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['homepage-auction'] });
+          }, 500);
         },
       )
       .subscribe();
 
     return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
@@ -86,6 +91,7 @@ export function useAuction(id: string | undefined) {
 export function useAuctionDetail(id: string | undefined) {
   const queryClient = useQueryClient();
   const channelRef = useRef<ReturnType<typeof bidService.subscribeToAuction> | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const query = useQuery({
     queryKey: ['auction-detail', id],
@@ -95,20 +101,22 @@ export function useAuctionDetail(id: string | undefined) {
     },
     enabled: Boolean(id),
     refetchInterval: 15_000,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
   });
 
   useEffect(() => {
     if (!id) return;
 
     channelRef.current = bidService.subscribeToAuction(id, () => {
-      queryClient.invalidateQueries({ queryKey: ['auction-detail', id] });
-      queryClient.invalidateQueries({ queryKey: ['auction', id] });
-      queryClient.invalidateQueries({ queryKey: ['auctions'] });
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['auction-detail', id] });
+        queryClient.invalidateQueries({ queryKey: ['auction', id] });
+        queryClient.invalidateQueries({ queryKey: ['auctions'] });
+      }, 500);
     });
 
     return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;

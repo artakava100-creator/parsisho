@@ -124,7 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (!mounted) return;
 
-      if (event === 'SIGNED_OUT' || !session) {
+      if (event === 'SIGNED_OUT') {
         clearUserState();
         return;
       }
@@ -134,12 +134,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        (async () => {
-          const authUser = await buildAuthUser(extractUserInfo(session));
-          if (!mounted) return;
-          setUser(authUser);
-          setState('authenticated');
-        })();
+        if (session) {
+          (async () => {
+            const authUser = await buildAuthUser(extractUserInfo(session));
+            if (!mounted) return;
+            setUser(authUser);
+            setState('authenticated');
+          })();
+        }
+        return;
+      }
+
+      // For any other event with a null session, only clear if we were
+      // previously authenticated — transient nulls during token refresh
+      // on mobile should not wipe the entire app state.
+      if (!session && state === 'authenticated') {
+        clearUserState();
       }
     });
 
