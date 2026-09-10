@@ -23,10 +23,12 @@ export function HomeHeroAuction() {
     ? new Date(auction.serverTime).getTime() - Date.now()
     : 0;
 
-  const mediaImages = (media ?? []).slice(0, 5);
-  const displayImage = activeIdx === 0
-    ? auction?.imageUrl
-    : (mediaImages[activeIdx - 1]?.url ?? auction?.imageUrl);
+  const mediaImages = (media ?? []).slice(0, 6);
+  const thumbnails = [
+    ...(auction?.imageUrl ? [{ id: 'cover', url: auction.imageUrl, altText: null as string | null }] : []),
+    ...mediaImages,
+  ].filter((img, i, arr) => arr.findIndex((x) => x.url === img.url) === i).slice(0, 6);
+  const displayImage = thumbnails[activeIdx]?.url ?? auction?.imageUrl;
 
   if (isLoading) {
     return (
@@ -75,9 +77,6 @@ export function HomeHeroAuction() {
 
   return (
     <Card className="relative p-0 overflow-hidden border border-neutral-200 rounded-2xl self-start">
-      {/* Stretched navigation link — covers exactly the card content area */}
-      <Link to={`/auctions/${auction.id}`} className="absolute inset-0 z-10" aria-label={auction.title} />
-
       {/* Top accent bar — only for live/ending */}
       {isLive && (
         <div className={`h-1 w-full ${isEnding ? 'bg-error-500' : 'bg-accent-500'}`} />
@@ -86,7 +85,7 @@ export function HomeHeroAuction() {
       <div className="grid grid-cols-1 md:grid-cols-[1.1fr_1fr] gap-0">
         {/* Image side — content-driven height, no forced min-height */}
         <div className="relative bg-gradient-to-br from-primary-900/90 to-primary-800/70 overflow-hidden">
-          <div className="relative aspect-[16/11]">
+          <div className="relative aspect-square">
             {displayImage ? (
               <img
                 src={displayImage}
@@ -130,35 +129,20 @@ export function HomeHeroAuction() {
             )}
           </div>
 
-          {/* Thumbnail gallery — up to 5 images below the main image */}
-          {(auction.imageUrl || mediaImages.length > 0) && (
-            <div className="relative z-20 flex gap-1.5 px-3 pt-2.5 pb-3 bg-white">
-              {auction.imageUrl && (
-                <button
-                  type="button"
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveIdx(0); }}
-                  aria-label="تصویر اصلی"
-                  className={cn(
-                    'shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all duration-200 bg-neutral-100',
-                    activeIdx === 0
-                      ? 'border-primary-500 ring-1 ring-primary-300'
-                      : 'border-neutral-200 hover:border-neutral-300 opacity-80 hover:opacity-100',
-                  )}
-                >
-                  <img src={auction.imageUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
-                </button>
-              )}
-              {mediaImages.map((img, idx) => (
+          {/* Thumbnail gallery — up to 6 unique images below the main image */}
+          {thumbnails.length > 0 && (
+            <div className="flex gap-2 px-3 pt-3 pb-3 bg-white">
+              {thumbnails.map((img, idx) => (
                 <button
                   key={img.id}
                   type="button"
-                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setActiveIdx(idx + 1); }}
-                  aria-label={`تصویر ${idx + 2}`}
+                  onClick={() => setActiveIdx(idx)}
+                  aria-label={`تصویر ${idx + 1}`}
                   className={cn(
-                    'shrink-0 w-12 h-12 rounded-lg overflow-hidden border-2 transition-all duration-200 bg-neutral-100',
-                    activeIdx === idx + 1
-                      ? 'border-primary-500 ring-1 ring-primary-300'
-                      : 'border-neutral-200 hover:border-neutral-300 opacity-80 hover:opacity-100',
+                    'shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden border-2 transition-all duration-200 bg-neutral-100',
+                    activeIdx === idx
+                      ? 'border-primary-500 ring-2 ring-primary-300'
+                      : 'border-neutral-200 hover:border-neutral-400 opacity-80 hover:opacity-100',
                   )}
                 >
                   <img src={img.url} alt={img.altText ?? ''} className="w-full h-full object-cover" loading="lazy" />
@@ -244,16 +228,18 @@ export function HomeHeroAuction() {
                 variant="hero"
               />
             </div>
-            <Button
-              variant={isLive ? 'primary' : 'outline'}
-              fullWidth
-              size="md"
-              className="relative z-20 text-sm font-bold py-3"
-            >
-              <MousePointerClick className="w-5 h-5" />
-              {isLive ? 'ورود به مزایده' : 'مشاهده جزئیات'}
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
+            <Link to={`/auctions/${auction.id}`}>
+              <Button
+                variant={isLive ? 'primary' : 'outline'}
+                fullWidth
+                size="md"
+                className="text-sm font-bold py-3"
+              >
+                <MousePointerClick className="w-5 h-5" />
+                {isLive ? 'ورود به مزایده' : 'مشاهده جزئیات'}
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
