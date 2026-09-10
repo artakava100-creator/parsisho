@@ -6,9 +6,10 @@ import { useResolveAdSlot, useTrackAdEvent } from '@/hooks/useAds';
 interface Props {
   slotKey: string;
   device?: string;
+  fill?: boolean;
 }
 
-export function AdSlot({ slotKey, device = 'desktop' }: Props) {
+export function AdSlot({ slotKey, device = 'desktop', fill = false }: Props) {
   const { data, isLoading } = useResolveAdSlot(slotKey, device);
   const trackEvent = useTrackAdEvent();
   const impressionTracked = useRef(false);
@@ -40,9 +41,11 @@ export function AdSlot({ slotKey, device = 'desktop' }: Props) {
     }
   };
 
+  const sizing = fill ? 'w-full h-full' : 'w-full aspect-[3/4]';
+
   if (isLoading) {
     return (
-      <div className="w-full aspect-[3/4] rounded-2xl overflow-hidden">
+      <div className={`${sizing} rounded-2xl overflow-hidden`}>
         <Skeleton className="w-full h-full" />
       </div>
     );
@@ -50,7 +53,7 @@ export function AdSlot({ slotKey, device = 'desktop' }: Props) {
 
   if (!advertisement) {
     return (
-      <div className="w-full aspect-[3/4] rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50/60 flex flex-col items-center justify-center gap-2.5 p-4">
+      <div className={`${sizing} rounded-2xl border-2 border-dashed border-neutral-200 bg-neutral-50/60 flex flex-col items-center justify-center gap-2.5 p-4`}>
         <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center">
           <Megaphone className="w-5 h-5 text-neutral-300" />
         </div>
@@ -62,10 +65,10 @@ export function AdSlot({ slotKey, device = 'desktop' }: Props) {
   return (
     <button
       onClick={handleClick}
-      className="w-full rounded-2xl overflow-hidden border border-neutral-200/80 hover:border-primary-300 hover:shadow-md transition-all duration-normal group block"
+      className={`${sizing} rounded-2xl overflow-hidden border border-neutral-200/80 hover:border-primary-300 hover:shadow-md transition-all duration-normal group block`}
       aria-label={advertisement.title}
     >
-      <div className="relative w-full aspect-[3/4]">
+      <div className={`relative ${sizing}`}>
         <img
           src={advertisement.imageUrl}
           alt={advertisement.title}
