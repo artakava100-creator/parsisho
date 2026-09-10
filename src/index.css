@@ -346,6 +346,14 @@
   }
   .animate-quick-access-glow { animation: quick-access-glow-anim 3.5s ease-in-out infinite; }
 
+  @keyframes auction-card-backlight {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 0.55; }
+  }
+  .auction-card-backlight {
+    animation: auction-card-backlight 3s ease-in-out infinite;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .animate-border-glow,
     .animate-border-glow-urgent,
@@ -355,6 +363,7 @@
       animation: none;
     }
     .gallery-shimmer-track { animation: none !important; }
+    .auction-card-backlight { animation: none !important; }
   }
 
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }

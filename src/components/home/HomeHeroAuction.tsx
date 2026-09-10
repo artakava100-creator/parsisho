@@ -77,8 +77,8 @@ export function HomeHeroAuction() {
 
   return (
     <Card className="relative p-0 overflow-hidden border border-neutral-200 rounded-2xl self-start">
-      {/* Subtle premium backlight along the bottom edge of the entire card */}
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary-300/30 to-transparent" />
+      {/* Subtle green animated backlight along the bottom edge of the entire card */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-success-400/40 to-transparent auction-card-backlight" />
       {/* Top accent bar — only for live/ending */}
       {isLive && (
         <div className={`h-1 w-full ${isEnding ? 'bg-error-500' : 'bg-accent-500'}`} />
@@ -92,7 +92,7 @@ export function HomeHeroAuction() {
               <img
                 src={displayImage}
                 alt={auction.title}
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-contain"
                 loading="eager"
               />
             ) : (
@@ -146,7 +146,7 @@ export function HomeHeroAuction() {
                       : 'border-neutral-200 hover:border-neutral-400 opacity-80 hover:opacity-100',
                   )}
                 >
-                  <img src={img.url} alt={img.altText ?? ''} className="w-full h-full object-cover" loading="lazy" />
+                  <img src={img.url} alt={img.altText ?? ''} className="w-full h-full object-contain" loading="lazy" />
                 </button>
               ))}
             </div>
