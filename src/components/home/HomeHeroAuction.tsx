@@ -77,10 +77,9 @@ export function HomeHeroAuction() {
 
   return (
     <Card className="relative p-0 overflow-hidden border border-neutral-200 rounded-2xl self-start">
-      {/* Green animated backlight strip along the full bottom edge of the entire card */}
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-30 flex flex-col items-center auction-card-backlight">
+      {/* Green animated backlight strip along the full bottom edge — mirrors the top accent bar */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-30 auction-card-backlight">
         <div className="h-1 w-full bg-success-500" />
-        <div className="h-3 w-full bg-success-500/50 blur-md" />
       </div>
       {/* Top accent bar — only for live/ending */}
       {isLive && (
@@ -143,9 +142,9 @@ export function HomeHeroAuction() {
                   onClick={() => setActiveIdx(idx)}
                   aria-label={`تصویر ${idx + 1}`}
                   className={cn(
-                    'shrink-0 flex-1 aspect-[4/3] rounded-lg overflow-hidden border-2 transition-all duration-200 bg-neutral-100 min-w-0',
+                    'shrink-0 flex-1 aspect-[4/3] rounded-lg overflow-hidden border transition-all duration-200 bg-neutral-100 min-w-0',
                     activeIdx === idx
-                      ? 'border-primary-500 ring-2 ring-primary-300'
+                      ? 'border-primary-500 ring-1 ring-primary-300'
                       : 'border-neutral-200 hover:border-neutral-400 opacity-80 hover:opacity-100',
                   )}
                 >
