@@ -20,10 +20,10 @@ export function SpecialSection() {
   if (!isLoading && (!items || items.length === 0)) return null;
 
   return (
-    <section className="pt-1 sm:pt-2 pb-4 sm:pb-8 bg-white/60">
+    <section className="pt-1 sm:pt-2 pb-2 sm:pb-3 bg-white/60">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Section heading — matches AuctionHall heading pattern */}
-        <div className="flex items-center justify-between mb-4 sm:mb-6">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
           <div className="flex items-center gap-2 sm:gap-2.5">
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-primary-100 flex items-center justify-center">
               <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary-700" />

@@ -172,7 +172,7 @@ export function AuctionHall() {
   }, [auctions, activeCategory, todayStr, tomorrowStr, dayAfterStr]);
 
   return (
-    <section className="py-4 sm:py-8">
+    <section className="pt-3 sm:pt-4 pb-4 sm:pb-8">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div className="flex items-center gap-2 sm:gap-2.5">
