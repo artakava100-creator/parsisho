@@ -23,11 +23,11 @@ export function HomeHeroAuction() {
     ? new Date(auction.serverTime).getTime() - Date.now()
     : 0;
 
-  const mediaImages = (media ?? []).slice(0, 6);
+  const mediaImages = (media ?? []).slice(0, 7);
   const thumbnails = [
     ...(auction?.imageUrl ? [{ id: 'cover', url: auction.imageUrl, altText: null as string | null }] : []),
     ...mediaImages,
-  ].filter((img, i, arr) => arr.findIndex((x) => x.url === img.url) === i).slice(0, 6);
+  ].filter((img, i, arr) => arr.findIndex((x) => x.url === img.url) === i).slice(0, 7);
   const displayImage = thumbnails[activeIdx]?.url ?? auction?.imageUrl;
 
   if (isLoading) {
@@ -83,9 +83,9 @@ export function HomeHeroAuction() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-[1.1fr_1fr] gap-0">
-        {/* Image side — content-driven height, no forced min-height */}
-        <div className="relative bg-gradient-to-br from-primary-900/90 to-primary-800/70 overflow-hidden">
-          <div className="relative aspect-square">
+        {/* Image side */}
+        <div className="relative bg-neutral-50 overflow-hidden p-3 sm:p-4">
+          <div className="relative aspect-square rounded-2xl overflow-hidden ring-1 ring-neutral-200/60">
             {displayImage ? (
               <img
                 src={displayImage}
@@ -94,11 +94,10 @@ export function HomeHeroAuction() {
                 loading="eager"
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Gavel className="w-16 h-16 text-primary-300/40" />
+              <div className="absolute inset-0 flex items-center justify-center bg-neutral-100">
+                <Gavel className="w-16 h-16 text-neutral-300" />
               </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
 
             {/* Status badge */}
             <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2 z-20">
@@ -129,9 +128,9 @@ export function HomeHeroAuction() {
             )}
           </div>
 
-          {/* Thumbnail gallery — up to 6 unique images below the main image */}
+          {/* Thumbnail gallery — up to 7 unique images below the main image */}
           {thumbnails.length > 0 && (
-            <div className="flex gap-2 px-3 pt-3 pb-3 bg-white">
+            <div className="flex gap-2 pt-3 flex-wrap">
               {thumbnails.map((img, idx) => (
                 <button
                   key={img.id}
@@ -150,10 +149,20 @@ export function HomeHeroAuction() {
               ))}
             </div>
           )}
+
+          {/* Subtle premium highlight divider */}
+          <div className="relative h-px mt-1 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-l from-transparent via-primary-300/40 to-transparent" />
+            <div className="gallery-shimmer-track absolute inset-0" style={{ animation: 'gallery-shimmer 3s ease-in-out infinite' }}>
+              <div className="h-full w-1/3 bg-gradient-to-l from-transparent via-primary-400/30 to-transparent" />
+            </div>
+          </div>
         </div>
 
         {/* Info side — content drives the height */}
-        <div className="p-4 sm:p-6 flex flex-col gap-3 sm:gap-4 bg-white">
+        <div className="relative p-4 sm:p-6 flex flex-col gap-3 sm:gap-4 bg-white">
+          {/* Subtle premium top highlight */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2/3 h-px bg-gradient-to-l from-transparent via-primary-200/50 to-transparent" />
           <div>
             <p className="text-[11px] sm:text-xs font-semibold text-primary-600 mb-1">
               {isLive ? `مزایده آنلاین ${BRAND_NAME}` : `مزایده آینده ${BRAND_NAME}`}

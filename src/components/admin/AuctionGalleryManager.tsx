@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { logger } from '@/lib/logger';
 import type { AuctionMedia } from '@/types';
 
-const MAX_IMAGES = 5;
+const MAX_IMAGES = 7;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 
@@ -165,7 +165,7 @@ export function AuctionGalleryManager({
       return;
     }
     if (images.length >= MAX_IMAGES) {
-      setUploadError('حداکثر ۵ تصویر مجاز است');
+      setUploadError('حداکثر ۷ تصویر مجاز است');
       return;
     }
 
@@ -264,7 +264,7 @@ export function AuctionGalleryManager({
     <div>
       <label className="text-sm font-medium text-neutral-600">گالری تصاویر مزایده</label>
       <p className="text-xs text-neutral-400 mt-0.5 mb-3">
-        حداکثر ۵ تصویر — تصویر اول به‌عنوان تصویر اصلی استفاده می‌شود
+        حداکثر ۷ تصویر — تصویر اول به‌عنوان تصویر اصلی استفاده می‌شود
       </p>
 
       {/* Main preview */}
@@ -292,7 +292,7 @@ export function AuctionGalleryManager({
       </div>
 
       {/* Thumbnail grid */}
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-7 gap-2">
         {images.map((image, index) => (
           <div
             key={image.id}
