@@ -77,8 +77,11 @@ export function HomeHeroAuction() {
 
   return (
     <Card className="relative p-0 overflow-hidden border border-neutral-200 rounded-2xl self-start">
-      {/* Subtle green animated backlight along the bottom edge of the entire card */}
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-success-400/40 to-transparent auction-card-backlight" />
+      {/* Green animated backlight strip along the full bottom edge of the entire card */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-30 flex flex-col items-center auction-card-backlight">
+        <div className="h-1 w-full bg-success-500" />
+        <div className="h-2 w-full bg-success-500/25 blur-sm" />
+      </div>
       {/* Top accent bar — only for live/ending */}
       {isLive && (
         <div className={`h-1 w-full ${isEnding ? 'bg-error-500' : 'bg-accent-500'}`} />
