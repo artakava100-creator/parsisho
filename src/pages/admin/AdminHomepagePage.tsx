@@ -26,6 +26,7 @@ const SETTINGS_KEYS = [
   'auction_hall_categories',
   'homepage_quick_access',
   'homepage_special_section',
+  'homepage_sponsor_banners',
 ];
 
 interface IntroConfig {
@@ -83,6 +84,16 @@ interface HallConfig {
   categories: HallCategory[];
 }
 
+interface SponsorBannerItem {
+  image_url: string;
+  link_url: string;
+  visible: boolean;
+}
+
+interface SponsorBannerConfig {
+  banners: SponsorBannerItem[];
+}
+
 
 
 function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
@@ -114,6 +125,7 @@ export function AdminHomepagePage() {
   const [introBg, setIntroBg] = useState<IntroBgConfig>({ image_url: null });
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bannerFileRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [auctionTitle, setAuctionTitle] = useState<AuctionTitleConfig>({ title: '' });
   const [copyright, setCopyright] = useState<CopyrightConfig>({ text: '', version: '' });
   const [social, setSocial] = useState<SocialConfig>({ links: [] });
@@ -124,6 +136,7 @@ export function AdminHomepagePage() {
   const [hall, setHall] = useState<HallConfig>({ categories: [] });
   const [quickAccess, setQuickAccess] = useState<QuickAccessConfig>({ items: defaultQuickAccessItems });
   const [specialSection, setSpecialSection] = useState<SpecialSectionConfig>(defaultSpecialSectionConfig);
+  const [sponsorBanners, setSponsorBanners] = useState<SponsorBannerConfig>({ banners: Array.from({ length: 5 }, () => ({ image_url: '', link_url: '', visible: true })) });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -137,6 +150,7 @@ export function AdminHomepagePage() {
     if (allSettings.auction_hall_categories) setHall(allSettings.auction_hall_categories as HallConfig);
     if (allSettings.homepage_quick_access) setQuickAccess(allSettings.homepage_quick_access as QuickAccessConfig);
     if (allSettings.homepage_special_section) setSpecialSection(allSettings.homepage_special_section as SpecialSectionConfig);
+    if (allSettings.homepage_sponsor_banners) setSponsorBanners(allSettings.homepage_sponsor_banners as SponsorBannerConfig);
   }, [allSettings]);
 
   const handleUploadBg = async (file: File) => {
@@ -168,6 +182,39 @@ export function AdminHomepagePage() {
     setIntroBg({ image_url: null });
   };
 
+  const handleUploadBanner = async (file: File, index: number) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('فقط فایل تصویری مجاز است');
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const fileName = `sponsor-${index}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('homepage-images')
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage
+        .from('homepage-images')
+        .getPublicUrl(fileName);
+      const updated = [...sponsorBanners.banners];
+      updated[index] = { ...updated[index], image_url: pub.publicUrl };
+      setSponsorBanners({ banners: updated });
+      toast.success(`تصویر اسپانسر ${index + 1} آپلود شد`);
+    } catch {
+      toast.error('خطا در آپلود تصویر');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveBanner = (index: number) => {
+    const updated = [...sponsorBanners.banners];
+    updated[index] = { ...updated[index], image_url: '' };
+    setSponsorBanners({ banners: updated });
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -181,6 +228,7 @@ export function AdminHomepagePage() {
         updateSetting.mutateAsync({ key: 'auction_hall_categories', value: hall }),
         updateSetting.mutateAsync({ key: 'homepage_quick_access', value: quickAccess }),
         updateSetting.mutateAsync({ key: 'homepage_special_section', value: specialSection }),
+        updateSetting.mutateAsync({ key: 'homepage_sponsor_banners', value: sponsorBanners }),
       ]);
       toast.success('تنظیمات صفحه اصلی ذخیره شد');
     } catch {
@@ -332,6 +380,86 @@ export function AdminHomepagePage() {
               >
                 {cat.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
               </button>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+      {/* SPONSOR BANNERS */}
+      <SectionCard title="بنر اسپانسرها">
+        <p className="text-xs text-neutral-400 mb-3">
+          ۵ جایگاه برای بنر اسپانسرها بین تالار مزایده و فوتر. فقط بنرهایی که تصویر دارند نمایش داده می‌شوند.
+        </p>
+        <div className="space-y-3">
+          {sponsorBanners.banners.map((banner, idx) => (
+            <div key={idx} className="p-3 rounded-xl bg-neutral-50 border border-neutral-100">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-6 h-6 rounded bg-primary-100 text-primary-700 text-xs font-bold flex items-center justify-center flex-shrink-0">
+                  {idx + 1}
+                </span>
+                <span className="text-sm font-medium text-neutral-600">بنر {idx + 1}</span>
+                <button
+                  onClick={() => {
+                    const updated = [...sponsorBanners.banners];
+                    updated[idx] = { ...banner, visible: !banner.visible };
+                    setSponsorBanners({ banners: updated });
+                  }}
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center border transition-colors flex-shrink-0 ${banner.visible ? 'bg-success-50 border-success-300 text-success-600' : 'bg-neutral-50 border-neutral-200 text-neutral-400'}`}
+                >
+                  {banner.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-24 h-12 rounded-lg border border-neutral-200 overflow-hidden bg-neutral-50 flex-shrink-0">
+                  {banner.image_url ? (
+                    <img src={banner.image_url} alt={`اسپانسر ${idx + 1}`} className="w-full h-full object-contain" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-neutral-300">
+                      <ImageIcon className="w-5 h-5" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col gap-1.5 flex-1">
+                  <div className="flex items-center gap-2">
+                    <input
+                      ref={(el) => { bannerFileRefs.current[idx] = el; }}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadBanner(file, idx);
+                        e.target.value = '';
+                      }}
+                    />
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => bannerFileRefs.current[idx]?.click()}
+                      disabled={uploading}
+                    >
+                      {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                      {banner.image_url ? 'تغییر' : 'آپلود'}
+                    </Button>
+                    {banner.image_url && (
+                      <Button variant="ghost" size="sm" onClick={() => handleRemoveBanner(idx)} disabled={uploading}>
+                        <Trash2 className="w-3.5 h-3.5" /> حذف
+                      </Button>
+                    )}
+                  </div>
+                  <input
+                    value={banner.link_url}
+                    onChange={(e) => {
+                      const updated = [...sponsorBanners.banners];
+                      updated[idx] = { ...banner, link_url: e.target.value };
+                      setSponsorBanners({ banners: updated });
+                    }}
+                    className="w-full h-9 px-3 rounded-lg border border-neutral-200 bg-white text-sm"
+                    placeholder="https://link.com"
+                    dir="ltr"
+                  />
+                </div>
+              </div>
             </div>
           ))}
         </div>

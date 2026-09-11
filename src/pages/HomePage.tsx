@@ -5,7 +5,7 @@ import { HomeAdRail } from '@/components/home/HomeAdRail';
 import { QuickAccessGrid } from '@/components/home/QuickAccessGrid';
 import { AuctionHall } from '@/components/home/AuctionHall';
 import { HomeSection } from '@/components/home/HomeSection';
-import { MarketTicker } from '@/components/home/MarketTicker';
+import { SponsorBanner } from '@/components/home/SponsorBanner';
 import { SpecialSection } from '@/components/home/SpecialSection';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { useSiteSetting } from '@/hooks/useSiteSettings';
@@ -75,8 +75,8 @@ export function HomePage() {
         <AuctionHall />
       </div>
 
-      {/* Market Ticker */}
-      <MarketTicker />
+      {/* Sponsor Banners */}
+      <SponsorBanner />
     </div>
   );
 }
