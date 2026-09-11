@@ -314,7 +314,7 @@
     content: '';
     position: absolute;
     inset: -3px;
-    border-radius: 50%;
+    border-radius: 9999px;
     background: conic-gradient(
       from 0deg,
       transparent 0deg,
@@ -331,7 +331,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: 50%;
+    border-radius: inherit;
     background: inherit;
     z-index: 0;
   }
