@@ -372,10 +372,10 @@
   /* Market ticker — seamless right-to-left infinite scroll */
   @keyframes ticker-scroll {
     from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
+    to { transform: translateX(-66.6667%); }
   }
   .animate-ticker-scroll {
-    animation: ticker-scroll 60s linear infinite;
+    animation: ticker-scroll 80s linear infinite;
   }
 
   @media (prefers-reduced-motion: reduce) {

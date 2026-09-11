@@ -9,6 +9,16 @@ interface MarketItem {
 }
 
 const MARKET_ITEMS: MarketItem[] = [
+  // Gold & Coins
+  { name: 'طلا ۱۸ عیار', price: '۴٬۵۲۰٬۰۰۰', unit: 'تومان', change: 1.53 },
+  { name: 'سکه امامی', price: '۴۵٬۲۰۰٬۰۰۰', unit: 'تومان', change: 0.91 },
+  { name: 'مثقال طلا', price: '۳۵٬۴۰۰٬۰۰۰', unit: 'تومان', change: 1.12 },
+  { name: 'سکه بهار آزادی', price: '۴۳٬۸۰۰٬۰۰۰', unit: 'تومان', change: 0.74 },
+  { name: 'طلای آب‌شده', price: '۴٬۴۸۰٬۰۰۰', unit: 'تومان', change: 1.38 },
+  { name: 'انس طلا', price: '۲٬۴۸۰', unit: 'دلار', change: 0.62 },
+  { name: 'انس نقره', price: '۲۹٫۸', unit: 'دلار', change: -0.43 },
+  { name: 'پلاتین', price: '۹۸۵', unit: 'دلار', change: 0.28 },
+  // Major Currencies
   { name: 'دلار آمریکا', price: '۶۰٬۲۵۰', unit: 'تومان', change: 0.82 },
   { name: 'یورو', price: '۶۵٬۴۸۰', unit: 'تومان', change: -0.31 },
   { name: 'پوند انگلیس', price: '۷۶٬۱۲۰', unit: 'تومان', change: 0.54 },
@@ -17,22 +27,28 @@ const MARKET_ITEMS: MarketItem[] = [
   { name: 'یوان چین', price: '۸٬۲۱۰', unit: 'تومان', change: 0.19 },
   { name: 'ین ژاپن', price: '۴۱۰', unit: 'تومان', change: 0.07 },
   { name: 'روبل روسیه', price: '۶۸۰', unit: 'تومان', change: -0.45 },
-  { name: 'طلا ۱۸ عیار', price: '۴٬۵۲۰٬۰۰۰', unit: 'تومان', change: 1.53 },
-  { name: 'سکه امامی', price: '۴۵٬۲۰۰٬۰۰۰', unit: 'تومان', change: 0.91 },
-  { name: 'مثقال طلا', price: '۳۵٬۴۰۰٬۰۰۰', unit: 'تومان', change: 1.12 },
+  { name: 'دلار کانادا', price: '۴۴٬۸۰۰', unit: 'تومان', change: 0.33 },
+  { name: 'دلار استرالیا', price: '۴۰٬۱۰۰', unit: 'تومان', change: -0.22 },
+  { name: 'فرانک سوئیس', price: '۶۸٬۹۰۰', unit: 'تومان', change: 0.15 },
+  { name: 'کرون سوئد', price: '۵٬۸۰۰', unit: 'تومان', change: -0.08 },
+  // Cryptocurrencies
   { name: 'بیت‌کوین', price: '۴٬۱۸۰٬۰۰۰٬۰۰۰', unit: 'تومان', change: -2.14 },
   { name: 'اتریوم', price: '۱۴۸٬۵۰۰٬۰۰۰', unit: 'تومان', change: 3.27 },
   { name: 'تتر', price: '۶۰٬۵۰۰', unit: 'تومان', change: -0.05 },
-  { name: 'دوج کوین', price: '۱۰٬۲۵۰', unit: 'تومان', change: 4.61 },
-  { name: 'ریپل', price: '۱۸٬۹۰۰', unit: 'تومان', change: -1.08 },
-  { name: 'سولانا', price: '۸۲۰٬۰۰۰', unit: 'تومان', change: 2.43 },
   { name: 'بایننس کوین', price: '۱۲٬۸۰۰٬۰۰۰', unit: 'تومان', change: 0.67 },
+  { name: 'سولانا', price: '۸۲۰٬۰۰۰', unit: 'تومان', change: 2.43 },
+  { name: 'ریپل', price: '۱۸٬۹۰۰', unit: 'تومان', change: -1.08 },
+  { name: 'کاردانو', price: '۲٬۸۵۰', unit: 'تومان', change: 1.76 },
+  { name: 'دوج کوین', price: '۱۰٬۲۵۰', unit: 'تومان', change: 4.61 },
+  { name: 'آوالانچ', price: '۱٬۲۴۰٬۰۰۰', unit: 'تومان', change: -0.92 },
+  { name: 'پالیگان', price: '۸٬۹۰۰', unit: 'تومان', change: 0.54 },
+  { name: 'چین لینک', price: '۲۸٬۵۰۰', unit: 'تومان', change: 1.23 },
+  { name: 'ترون', price: '۶٬۸۵۰', unit: 'تومان', change: 0.11 },
 ];
 
 function MarketCell({ item }: { item: MarketItem }) {
   const isUp = item.change > 0;
   const isDown = item.change < 0;
-  const isNeutral = item.change === 0;
 
   const Icon = isUp ? TrendingUp : isDown ? TrendingDown : Minus;
   const changeColor = isUp
@@ -54,7 +70,7 @@ function MarketCell({ item }: { item: MarketItem }) {
   const changeStr = (isUp ? '+' : isDown ? '−' : '') + toPersianDigits(Math.abs(item.change).toFixed(2)) + '٪';
 
   return (
-    <div className="flex items-center gap-3 px-5 sm:px-7 shrink-0">
+    <div className="flex items-center gap-3 px-5 sm:px-6 shrink-0">
       <div className="flex flex-col gap-1">
         <span className="text-sm sm:text-base font-bold text-neutral-800 leading-tight">{item.name}</span>
         <span className="text-xs sm:text-sm font-num text-neutral-600 leading-tight">
@@ -72,7 +88,7 @@ function MarketCell({ item }: { item: MarketItem }) {
 }
 
 export function MarketTicker() {
-  const items = [...MARKET_ITEMS, ...MARKET_ITEMS];
+  const items = [...MARKET_ITEMS, ...MARKET_ITEMS, ...MARKET_ITEMS];
 
   return (
     <section className="bg-gradient-to-b from-white to-neutral-50/60 border-y border-neutral-200">
