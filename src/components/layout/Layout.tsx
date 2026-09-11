@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { MobileNav } from './MobileNav';
+import { SupportButton } from '@/components/home/SupportButton';
 
 export function Layout() {
   return (
@@ -12,6 +13,7 @@ export function Layout() {
       </main>
       <Footer />
       <MobileNav />
+      <SupportButton />
     </div>
   );
 }

@@ -7,7 +7,6 @@ import { AuctionHall } from '@/components/home/AuctionHall';
 import { HomeSection } from '@/components/home/HomeSection';
 import { MarketTicker } from '@/components/home/MarketTicker';
 import { SpecialSection } from '@/components/home/SpecialSection';
-import { SupportButton } from '@/components/home/SupportButton';
 import { AdSlot } from '@/components/ads/AdSlot';
 import { useSiteSetting } from '@/hooks/useSiteSettings';
 import { BRAND_NAME } from '@/config/brand';
@@ -78,9 +77,6 @@ export function HomePage() {
 
       {/* Market Ticker */}
       <MarketTicker />
-
-      {/* Support */}
-      <SupportButton />
     </div>
   );
 }
