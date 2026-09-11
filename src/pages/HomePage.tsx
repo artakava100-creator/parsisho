@@ -44,7 +44,7 @@ export function HomePage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60 bg-primary-400" />
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary-600" />
             </span>
-            <h1 className="text-sm sm:text-base sm:text-lg font-extrabold text-neutral-800">
+            <h1 className="text-sm sm:text-base lg:text-lg font-extrabold text-neutral-800">
               {auctionTitle}
             </h1>
           </div>
