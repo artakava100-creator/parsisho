@@ -47,7 +47,7 @@ export function Footer() {
   const cred = credentials ?? defaultCredentials;
 
   return (
-    <footer className="border-t border-neutral-200 bg-neutral-100 mt-8 sm:mt-12">
+    <footer className="border-t border-neutral-200 bg-neutral-100 mt-2 sm:mt-4">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 sm:gap-6 lg:gap-5">
           {/* Brand column */}
