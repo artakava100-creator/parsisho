@@ -1,52 +1,34 @@
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { useMemo } from 'react';
+import { TrendingUp, TrendingDown, Minus, Coins, DollarSign, Bitcoin } from 'lucide-react';
 import { toPersianDigits } from '@/lib/persian';
+import { useMarketPrices, type MarketPrice } from '@/hooks/useMarketPrices';
+import { Skeleton } from '@/components/ui/Skeleton';
 
-interface MarketItem {
+interface DisplayItem {
   name: string;
   price: string;
   unit: string;
   change: number;
+  category: string;
 }
 
-const MARKET_ITEMS: MarketItem[] = [
-  // Gold & Coins
-  { name: 'طلا ۱۸ عیار', price: '۴٬۵۲۰٬۰۰۰', unit: 'تومان', change: 1.53 },
-  { name: 'سکه امامی', price: '۴۵٬۲۰۰٬۰۰۰', unit: 'تومان', change: 0.91 },
-  { name: 'مثقال طلا', price: '۳۵٬۴۰۰٬۰۰۰', unit: 'تومان', change: 1.12 },
-  { name: 'سکه بهار آزادی', price: '۴۳٬۸۰۰٬۰۰۰', unit: 'تومان', change: 0.74 },
-  { name: 'طلای آب‌شده', price: '۴٬۴۸۰٬۰۰۰', unit: 'تومان', change: 1.38 },
-  { name: 'انس طلا', price: '۲٬۴۸۰', unit: 'دلار', change: 0.62 },
-  { name: 'انس نقره', price: '۲۹٫۸', unit: 'دلار', change: -0.43 },
-  { name: 'پلاتین', price: '۹۸۵', unit: 'دلار', change: 0.28 },
-  // Major Currencies
-  { name: 'دلار آمریکا', price: '۶۰٬۲۵۰', unit: 'تومان', change: 0.82 },
-  { name: 'یورو', price: '۶۵٬۴۸۰', unit: 'تومان', change: -0.31 },
-  { name: 'پوند انگلیس', price: '۷۶٬۱۲۰', unit: 'تومان', change: 0.54 },
-  { name: 'درهم امارات', price: '۱۶٬۳۸۰', unit: 'تومان', change: -0.12 },
-  { name: 'لیر ترکیه', price: '۱٬۸۵۰', unit: 'تومان', change: -1.24 },
-  { name: 'یوان چین', price: '۸٬۲۱۰', unit: 'تومان', change: 0.19 },
-  { name: 'ین ژاپن', price: '۴۱۰', unit: 'تومان', change: 0.07 },
-  { name: 'روبل روسیه', price: '۶۸۰', unit: 'تومان', change: -0.45 },
-  { name: 'دلار کانادا', price: '۴۴٬۸۰۰', unit: 'تومان', change: 0.33 },
-  { name: 'دلار استرالیا', price: '۴۰٬۱۰۰', unit: 'تومان', change: -0.22 },
-  { name: 'فرانک سوئیس', price: '۶۸٬۹۰۰', unit: 'تومان', change: 0.15 },
-  { name: 'کرون سوئد', price: '۵٬۸۰۰', unit: 'تومان', change: -0.08 },
-  // Cryptocurrencies
-  { name: 'بیت‌کوین', price: '۴٬۱۸۰٬۰۰۰٬۰۰۰', unit: 'تومان', change: -2.14 },
-  { name: 'اتریوم', price: '۱۴۸٬۵۰۰٬۰۰۰', unit: 'تومان', change: 3.27 },
-  { name: 'تتر', price: '۶۰٬۵۰۰', unit: 'تومان', change: -0.05 },
-  { name: 'بایننس کوین', price: '۱۲٬۸۰۰٬۰۰۰', unit: 'تومان', change: 0.67 },
-  { name: 'سولانا', price: '۸۲۰٬۰۰۰', unit: 'تومان', change: 2.43 },
-  { name: 'ریپل', price: '۱۸٬۹۰۰', unit: 'تومان', change: -1.08 },
-  { name: 'کاردانو', price: '۲٬۸۵۰', unit: 'تومان', change: 1.76 },
-  { name: 'دوج کوین', price: '۱۰٬۲۵۰', unit: 'تومان', change: 4.61 },
-  { name: 'آوالانچ', price: '۱٬۲۴۰٬۰۰۰', unit: 'تومان', change: -0.92 },
-  { name: 'پالیگان', price: '۸٬۹۰۰', unit: 'تومان', change: 0.54 },
-  { name: 'چین لینک', price: '۲۸٬۵۰۰', unit: 'تومان', change: 1.23 },
-  { name: 'ترون', price: '۶٬۸۵۰', unit: 'تومان', change: 0.11 },
-];
+const CATEGORY_LABELS: Record<string, { label: string; icon: typeof Coins }> = {
+  gold: { label: 'طلا و سکه', icon: Coins },
+  currency: { label: 'ارزها', icon: DollarSign },
+  crypto: { label: 'ارز دیجیتال', icon: Bitcoin },
+};
 
-function MarketCell({ item }: { item: MarketItem }) {
+function formatPrice(value: number): string {
+  if (value >= 1_000_000_000) {
+    return toPersianDigits((value / 1_000_000_000).toFixed(2)) + ' میلیارد';
+  }
+  if (value >= 1_000_000) {
+    return toPersianDigits((value / 1_000_000).toFixed(1)) + ' میلیون';
+  }
+  return toPersianDigits(Math.round(value).toLocaleString('en-US'));
+}
+
+function MarketCell({ item }: { item: DisplayItem }) {
   const isUp = item.change > 0;
   const isDown = item.change < 0;
 
@@ -87,8 +69,111 @@ function MarketCell({ item }: { item: MarketItem }) {
   );
 }
 
+function CategoryBadge({ category }: { category: string }) {
+  const info = CATEGORY_LABELS[category];
+  if (!info) return null;
+  const Icon = info.icon;
+  return (
+    <div className="flex items-center gap-1.5 px-3 shrink-0 bg-primary-50/80 rounded-lg mx-1">
+      <Icon className="w-4 h-4 text-primary-600" />
+      <span className="text-xs font-bold text-primary-700 whitespace-nowrap">{info.label}</span>
+    </div>
+  );
+}
+
+function TickerSkeleton() {
+  return (
+    <section className="bg-gradient-to-b from-white to-neutral-50/60 border-y border-neutral-200">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-5">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <div className="flex items-center gap-2.5">
+            <span className="relative flex h-2.5 w-2.5" aria-hidden="true">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60 bg-success-400" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success-500" />
+            </span>
+            <h2 className="text-sm sm:text-base font-extrabold text-neutral-800">نرخ ارزها لحظه‌ای</h2>
+          </div>
+        </div>
+        <div className="rounded-xl bg-white border border-neutral-200/60 shadow-sm py-3">
+          <Skeleton className="h-8 w-full" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function MarketTicker() {
-  const items = [...MARKET_ITEMS, ...MARKET_ITEMS, ...MARKET_ITEMS];
+  const { data: prices, isLoading, isError } = useMarketPrices();
+
+  const displayItems = useMemo<DisplayItem[]>(() => {
+    if (!prices || prices.length === 0) return [];
+
+    const items: DisplayItem[] = [];
+    let currentCategory = '';
+
+    for (const p of prices) {
+      if (p.category !== currentCategory) {
+        currentCategory = p.category;
+        // We don't add the badge here — it's rendered inline in the ticker
+      }
+      items.push({
+        name: p.name_fa,
+        price: formatPrice(Number(p.price)),
+        unit: p.unit,
+        change: Number(p.change_percent),
+        category: p.category,
+      });
+    }
+    return items;
+  }, [prices]);
+
+  // Build ticker content: category badge before each group, then items
+  const tickerContent = useMemo(() => {
+    if (displayItems.length === 0) return [];
+
+    const segments: { type: 'badge' | 'item'; category: string; item?: DisplayItem }[] = [];
+    let lastCategory = '';
+
+    for (const item of displayItems) {
+      if (item.category !== lastCategory) {
+        segments.push({ type: 'badge', category: item.category });
+        lastCategory = item.category;
+      }
+      segments.push({ type: 'item', category: item.category, item });
+    }
+    return segments;
+  }, [displayItems]);
+
+  const lastUpdate = useMemo(() => {
+    if (!prices || prices.length === 0) return null;
+    const latest = prices.reduce((max, p) => {
+      const ts = new Date(p.updated_at).getTime();
+      return ts > max ? ts : max;
+    }, 0);
+    if (!latest) return null;
+    const diff = Math.round((Date.now() - latest) / 1000);
+    if (diff < 60) return 'لحظاتی پیش';
+    if (diff < 3600) return toPersianDigits(Math.floor(diff / 60)) + ' دقیقه پیش';
+    return toPersianDigits(Math.floor(diff / 3600)) + ' ساعت پیش';
+  }, [prices]);
+
+  // Fallback to static data if fetch fails
+  const hasData = displayItems.length > 0;
+
+  if (isLoading && !hasData) return <TickerSkeleton />;
+
+  if (isError && !hasData) {
+    return (
+      <section className="bg-gradient-to-b from-white to-neutral-50/60 border-y border-neutral-200">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-5 text-center text-sm text-neutral-400">
+          نرخ‌ها در حال حاضر در دسترس نیست
+        </div>
+      </section>
+    );
+  }
+
+  // Duplicate content exactly twice for seamless infinite loop
+  const loopContent = [...tickerContent, ...tickerContent];
 
   return (
     <section className="bg-gradient-to-b from-white to-neutral-50/60 border-y border-neutral-200">
@@ -103,20 +188,28 @@ export function MarketTicker() {
             <h2 className="text-sm sm:text-base font-extrabold text-neutral-800">نرخ ارزها لحظه‌ای</h2>
           </div>
           <div className="flex items-center gap-2 text-neutral-400">
-            <span className="text-[10px] sm:text-xs font-medium">آخرین بروزرسانی: اکنون</span>
+            <span className="text-[10px] sm:text-xs font-medium">
+              {lastUpdate ? `آخرین بروزرسانی: ${lastUpdate}` : 'در حال بارگذاری...'}
+            </span>
           </div>
         </div>
 
-        {/* Ticker strip */}
+        {/* Ticker strip — seamless infinite scroll */}
         <div className="relative overflow-hidden group rounded-xl bg-white border border-neutral-200/60 shadow-sm">
           {/* Edge fade masks */}
           <div className="absolute right-0 top-0 bottom-0 w-10 sm:w-16 bg-gradient-to-l from-white via-white/90 to-transparent z-10 pointer-events-none" />
           <div className="absolute left-0 top-0 bottom-0 w-10 sm:w-16 bg-gradient-to-r from-white via-white/90 to-transparent z-10 pointer-events-none" />
 
           <div className="flex w-max animate-ticker-scroll group-hover:[animation-play-state:paused] py-2.5">
-            {items.map((item, idx) => (
+            {loopContent.map((seg, idx) => (
               <div key={idx} className="flex items-center shrink-0">
-                <MarketCell item={item} />
+                {seg.type === 'badge' ? (
+                  <CategoryBadge category={seg.category} />
+                ) : (
+                  <>
+                    <MarketCell item={seg.item!} />
+                  </>
+                )}
                 <div className="h-9 w-px bg-neutral-200/70 shrink-0" />
               </div>
             ))}

@@ -369,13 +369,16 @@
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
   .scrollbar-hide::-webkit-scrollbar { display: none; }
 
-  /* Market ticker — seamless right-to-left infinite scroll */
+  /* Market ticker — seamless right-to-left infinite scroll.
+     Content is duplicated exactly twice, so translating by -50%
+     creates a perfectly seamless loop with no blank gap. */
   @keyframes ticker-scroll {
     from { transform: translateX(0); }
-    to { transform: translateX(-66.6667%); }
+    to { transform: translateX(-50%); }
   }
   .animate-ticker-scroll {
-    animation: ticker-scroll 80s linear infinite;
+    animation: ticker-scroll 60s linear infinite;
+    will-change: transform;
   }
 
   @media (prefers-reduced-motion: reduce) {
