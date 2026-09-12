@@ -19,6 +19,7 @@ import { footerGroups as defaultFooterGroups, type FooterLinkGroup } from '@/con
 import { SocialIcon, socialPlatformConfigs, type SocialPlatform } from '@/components/ui/SocialIcon';
 
 const SETTINGS_KEYS = [
+  'header_logo',
   'homepage_intro',
   'homepage_intro_bg',
   'homepage_auction_title',
@@ -35,6 +36,13 @@ const SETTINGS_KEYS = [
   'homepage_special_section',
   'homepage_sponsor_banners',
 ];
+
+interface HeaderLogoConfig {
+  image_url: string | null;
+}
+
+const MAX_LOGO_SIZE = 2 * 1024 * 1024;
+const ALLOWED_LOGO_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
 
 interface IntroConfig {
   title: string;
@@ -155,6 +163,9 @@ export function AdminHomepagePage() {
   const updateSetting = useUpdateSiteSetting();
   const toast = useToast();
 
+  const [headerLogo, setHeaderLogo] = useState<HeaderLogoConfig>({ image_url: null });
+  const [logoUploading, setLogoUploading] = useState(false);
+  const logoFileRef = useRef<HTMLInputElement>(null);
   const [intro, setIntro] = useState<IntroConfig>({ title: '', subtitle: '', description: '', visible: true });
   const [introBg, setIntroBg] = useState<IntroBgConfig>({ image_url: null });
   const [uploading, setUploading] = useState(false);
@@ -193,6 +204,7 @@ export function AdminHomepagePage() {
 
   useEffect(() => {
     if (!allSettings) return;
+    if (allSettings.header_logo) setHeaderLogo(allSettings.header_logo as HeaderLogoConfig);
     if (allSettings.homepage_intro) setIntro(allSettings.homepage_intro as IntroConfig);
     if (allSettings.homepage_intro_bg) setIntroBg(allSettings.homepage_intro_bg as IntroBgConfig);
     if (allSettings.homepage_auction_title) setAuctionTitle(allSettings.homepage_auction_title as AuctionTitleConfig);
@@ -227,6 +239,39 @@ export function AdminHomepagePage() {
     if (allSettings.homepage_special_section) setSpecialSection(allSettings.homepage_special_section as SpecialSectionConfig);
     if (allSettings.homepage_sponsor_banners) setSponsorBanners(allSettings.homepage_sponsor_banners as SponsorBannerConfig);
   }, [allSettings]);
+
+  const handleUploadLogo = async (file: File) => {
+    if (!ALLOWED_LOGO_TYPES.includes(file.type)) {
+      toast.error('فقط فرمت‌های PNG، JPEG، WebP و SVG مجاز است');
+      return;
+    }
+    if (file.size > MAX_LOGO_SIZE) {
+      toast.error('حجم تصویر نباید بیشتر از ۲ مگابایت باشد');
+      return;
+    }
+    setLogoUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'png';
+      const fileName = `header-logo-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('homepage-images')
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage
+        .from('homepage-images')
+        .getPublicUrl(fileName);
+      setHeaderLogo({ image_url: pub.publicUrl });
+      toast.success('لوگوی هدر آپلود شد');
+    } catch {
+      toast.error('خطا در آپلود لوگو');
+    } finally {
+      setLogoUploading(false);
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    setHeaderLogo({ image_url: null });
+  };
 
   const handleUploadBg = async (file: File) => {
     if (!file.type.startsWith('image/')) {
@@ -359,6 +404,7 @@ export function AdminHomepagePage() {
     setSaving(true);
     try {
       await Promise.all([
+        updateSetting.mutateAsync({ key: 'header_logo', value: headerLogo }),
         updateSetting.mutateAsync({ key: 'homepage_intro', value: intro }),
         updateSetting.mutateAsync({ key: 'homepage_intro_bg', value: introBg }),
         updateSetting.mutateAsync({ key: 'homepage_auction_title', value: auctionTitle }),
@@ -408,6 +454,56 @@ export function AdminHomepagePage() {
           ذخیره تغییرات
         </Button>
       </div>
+
+      {/* HEADER LOGO */}
+      <SectionCard title="لوگوی هدر">
+        <p className="text-xs text-neutral-400 mb-3">
+          لوگوی اصلی هدر سایت. اگر تصویری آپلود نشود، لوگوی پیش‌فرض نمایش داده می‌شود. فرمت‌های مجاز: PNG، JPEG، WebP، SVG. حداکثر حجم: ۲ مگابایت.
+        </p>
+        <div className="flex items-start gap-4">
+          {/* Preview */}
+          <div className="w-32 h-16 rounded-xl border border-neutral-200 overflow-hidden bg-white flex-shrink-0 flex items-center justify-center p-2">
+            {headerLogo.image_url ? (
+              <img src={headerLogo.image_url} alt="پیش‌نمایش لوگو" className="max-w-full max-h-full object-contain" />
+            ) : (
+              <div className="flex flex-col items-center gap-1 text-neutral-300">
+                <ImageIcon className="w-6 h-6" />
+                <span className="text-[0.625rem]">لوگوی پیش‌فرض</span>
+              </div>
+            )}
+          </div>
+          {/* Upload / Remove */}
+          <div className="flex flex-col gap-2 flex-1">
+            <input
+              ref={logoFileRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/svg+xml"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleUploadLogo(file);
+                e.target.value = '';
+              }}
+            />
+            <div className="flex items-center gap-2">
+              <Button
+                variant="secondary"
+                onClick={() => logoFileRef.current?.click()}
+                disabled={logoUploading}
+              >
+                {logoUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+                {logoUploading ? 'در حال آپلود...' : headerLogo.image_url ? 'تغییر لوگو' : 'آپلود لوگو'}
+              </Button>
+              {headerLogo.image_url && (
+                <Button variant="ghost" onClick={handleRemoveLogo} disabled={logoUploading}>
+                  <Trash2 className="w-4 h-4" />
+                  حذف
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      </SectionCard>
 
       {/* INTRO SECTION */}
       <SectionCard title="بخش معرفی">

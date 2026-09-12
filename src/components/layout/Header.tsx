@@ -13,6 +13,7 @@ import { useCartStore } from '@/stores/cart-store';
 import { Avatar } from '@/components/ui/Avatar';
 import { toPersianDigits } from '@/lib/persian';
 import { BRAND_NAME } from '@/config/brand';
+import { useSiteSetting } from '@/hooks/useSiteSettings';
 
 const navItems = [
   { to: '/', label: 'خانه', end: true },
@@ -27,6 +28,8 @@ export function Header() {
   const navigate = useNavigate();
   const { data: wallet } = useWallet();
   const cartCount = useCartStore((s) => s.totalItems());
+  const { data: logoSetting } = useSiteSetting<{ image_url: string | null }>('header_logo');
+  const logoUrl = logoSetting?.image_url ?? null;
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -52,17 +55,27 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-200/80 shadow-sm">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-200/80 shadow-sm pt-[env(safe-area-inset-top)]">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-20 lg:h-24 gap-1.5 sm:gap-3">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 sm:gap-3 shrink-0 group">
-            <div className="w-9 h-9 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
-              <span className="text-white font-extrabold text-lg sm:text-3xl lg:text-4xl leading-none">پ</span>
-            </div>
-            <span className="text-base sm:text-2xl lg:text-[1.7rem] font-extrabold text-neutral-800 hidden sm:block tracking-tight whitespace-nowrap">
-              {BRAND_NAME}
-            </span>
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={BRAND_NAME}
+                className="h-9 sm:h-14 lg:h-16 w-auto max-w-[160px] object-contain rounded-lg"
+              />
+            ) : (
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0 group">
+                <div className="w-9 h-9 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center shadow-lg group-hover:shadow-xl transition-shadow">
+                  <span className="text-white font-extrabold text-lg sm:text-3xl lg:text-4xl leading-none">پ</span>
+                </div>
+                <span className="text-base sm:text-2xl lg:text-[1.7rem] font-extrabold text-neutral-800 hidden sm:block tracking-tight whitespace-nowrap">
+                  {BRAND_NAME}
+                </span>
+              </div>
+            )}
           </Link>
 
           {/* Desktop nav */}
@@ -93,7 +106,7 @@ export function Header() {
           {/* Search bar — expands inline */}
           <div className="hidden sm:flex flex-1 max-w-md mx-3">
             <form onSubmit={handleSearch} className="relative w-full">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-neutral-400 pointer-events-none" />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
               <input
                 ref={searchRef}
                 type="search"
@@ -201,7 +214,7 @@ export function Header() {
         {searchOpen && (
           <div className="sm:hidden pb-3 animate-fade-in">
             <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-neutral-400 pointer-events-none" />
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
               <input
                 ref={searchRef}
                 type="search"

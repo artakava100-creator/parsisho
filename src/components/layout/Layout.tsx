@@ -8,7 +8,7 @@ export function Layout() {
   return (
     <div className="min-h-screen bg-surface flex flex-col">
       <Header />
-      <main className="flex-1 pb-20 lg:pb-0">
+      <main className="flex-1 pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0">
         <Outlet />
       </main>
       <Footer />
