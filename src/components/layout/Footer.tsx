@@ -176,9 +176,7 @@ export function Footer() {
                     <span className="text-white font-extrabold text-lg leading-none">پ</span>
                   </div>
                 )}
-                {!logoUrl && (
-                  <span className="text-lg font-extrabold text-neutral-800">{BRAND_NAME}</span>
-                )}
+                <span className="text-lg font-extrabold text-neutral-800">{BRAND_NAME}</span>
               </div>
               <p className="text-sm text-neutral-500 leading-relaxed mb-3">
                 {br.description}
