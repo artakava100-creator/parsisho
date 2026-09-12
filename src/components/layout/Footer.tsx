@@ -61,10 +61,10 @@ const socialPlatformMap: Record<string, SocialPlatform> = {
 
 const defaultSocial: FooterSocial = {
   links: [
-    { id: 'instagram', title: 'اینستاگرام', url: '#', icon: 'instagram', visible: true },
-    { id: 'aparat', title: 'آپارات', url: '#', icon: 'aparat', visible: true },
-    { id: 'telegram', title: 'تلگرام', url: '#', icon: 'telegram', visible: true },
-    { id: 'eitaa', title: 'ایتا', url: '#', icon: 'eitaa', visible: true },
+    { id: 'instagram', title: 'اینستاگرام', url: 'https://instagram.com/parsisho', icon: 'instagram', visible: true },
+    { id: 'aparat', title: 'آپارات', url: 'https://aparat.com/parsisho', icon: 'aparat', visible: true },
+    { id: 'telegram', title: 'تلگرام', url: 'https://t.me/parsisho', icon: 'telegram', visible: true },
+    { id: 'eitaa', title: 'ایتا', url: 'https://eitaa.com/parsisho', icon: 'eitaa', visible: true },
   ],
 };
 const defaultCopyright: FooterCopyright = {
@@ -173,7 +173,7 @@ export function Footer() {
                       target="_blank"
                       rel="noopener noreferrer"
                       title={link.title}
-                      className="w-10 h-10 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-neutral-300 transition-all duration-200 hover:-translate-y-0.5"
+                      className="group w-10 h-10 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-neutral-300 transition-all duration-200 hover:-translate-y-0.5"
                     >
                       <SocialIcon platform={platform} className="w-5 h-5 text-neutral-400" />
                     </a>
