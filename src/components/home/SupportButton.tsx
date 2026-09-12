@@ -7,16 +7,15 @@ export function SupportButton() {
 
   return (
     <>
-      {/* Floating fixed support button */}
       <button
         onClick={() => setPanelOpen(!panelOpen)}
-        className="fixed bottom-20 sm:bottom-24 lg:bottom-6 right-3 sm:right-4 lg:right-6 z-[60] flex items-center gap-2 h-11 sm:h-12 ps-3 sm:ps-3.5 pe-4 sm:pe-5 rounded-full bg-primary-700 text-white shadow-lg shadow-primary-800/20 hover:bg-primary-600 hover:shadow-xl hover:shadow-primary-700/25 transition-all duration-300 group support-glow-ring"
+        className="fixed bottom-[4.75rem] lg:bottom-5 right-5 z-[60] flex items-center gap-2 h-11 ps-3.5 pe-4 rounded-full bg-primary-700 text-white shadow-lg shadow-primary-900/20 hover:bg-primary-600 hover:shadow-xl hover:shadow-primary-700/30 transition-all duration-300 group"
         aria-label="پشتیبانی زنده"
       >
-        <span className="relative flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 shrink-0">
+        <span className="relative flex items-center justify-center w-6 h-6 shrink-0">
           {panelOpen
-            ? <X className="w-5 h-5 sm:w-6 sm:h-6" />
-            : <Headset className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform" />
+            ? <X className="w-5 h-5" />
+            : <Headset className="w-5 h-5 group-hover:scale-110 transition-transform" />
           }
         </span>
         <span className="text-sm font-bold whitespace-nowrap leading-none">
@@ -24,9 +23,8 @@ export function SupportButton() {
         </span>
       </button>
 
-      {/* Support panel */}
       {panelOpen && (
-        <div className="fixed bottom-[5.75rem] sm:bottom-[6.75rem] lg:bottom-[4.5rem] right-3 sm:right-4 lg:right-6 z-[60] w-[calc(100vw-1.5rem)] sm:w-[300px] sm:w-[340px] bg-white rounded-xl sm:rounded-2xl shadow-lg border border-neutral-200 animate-scale-in overflow-hidden">
+        <div className="fixed bottom-[7.75rem] lg:bottom-[3.75rem] right-5 z-[60] w-[calc(100vw-2.5rem)] sm:w-[320px] bg-white rounded-2xl shadow-2xl border border-neutral-200 animate-scale-in overflow-hidden">
           <div className="bg-primary-700 text-white px-4 py-3 flex items-center gap-2">
             <Headset className="w-5 h-5" />
             <span className="text-sm font-bold">پشتیبانی آنلاین پارسی شو</span>
