@@ -114,7 +114,7 @@ interface AppDownloadConfig {
   appstore: { href: string; image_url: string };
 }
 
-interface HallCategory {
+interface HallTab {
   id: string;
   label: string;
   icon: string;
@@ -123,8 +123,27 @@ interface HallCategory {
 }
 
 interface HallConfig {
-  categories: HallCategory[];
+  tabs: HallTab[];
 }
+
+const defaultHallTabs: HallTab[] = [
+  { id: 'upcoming_auctions', label: 'مزایده‌های آینده', icon: 'gavel', visible: true, sort_order: 1 },
+  { id: 'best_selling', label: 'پرفروش‌ترین فروشگاه‌ها', icon: 'store', visible: true, sort_order: 2 },
+  { id: 'local_businesses', label: 'کسب‌وکارهای محلی', icon: 'building', visible: true, sort_order: 3 },
+  { id: 'all', label: 'همه', icon: 'grid', visible: true, sort_order: 4 },
+];
+
+const hallTabIconOptions = [
+  { value: 'gavel', label: 'چکش مزایده' },
+  { value: 'store', label: 'فروشگاه' },
+  { value: 'building', label: 'ساختمان' },
+  { value: 'grid', label: 'شبکه' },
+  { value: 'clock', label: 'ساعت' },
+  { value: 'trending', label: 'روند صعودی' },
+  { value: 'star', label: 'ستاره' },
+  { value: 'package', label: 'بسته' },
+  { value: 'mapPin', label: 'نشان مکان' },
+];
 
 interface SponsorBannerItem {
   image_url: string;
@@ -196,7 +215,7 @@ export function AdminHomepagePage() {
   });
   const badgeFileRefs = useRef<(HTMLInputElement | null)[]>([]);
   const appBadgeFileRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const [hall, setHall] = useState<HallConfig>({ categories: [] });
+  const [hall, setHall] = useState<HallConfig>({ tabs: defaultHallTabs });
   const [quickAccess, setQuickAccess] = useState<QuickAccessConfig>({ items: defaultQuickAccessItems });
   const [specialSection, setSpecialSection] = useState<SpecialSectionConfig>(defaultSpecialSectionConfig);
   const [sponsorBanners, setSponsorBanners] = useState<SponsorBannerConfig>({ banners: Array.from({ length: 5 }, () => ({ image_url: '', link_url: '', visible: true })) });
@@ -234,7 +253,17 @@ export function AdminHomepagePage() {
       if (fl.groups && Array.isArray(fl.groups)) setFooterLinks({ groups: fl.groups });
     }
     if (allSettings.footer_app_download) setAppDownload(allSettings.footer_app_download as AppDownloadConfig);
-    if (allSettings.auction_hall_categories) setHall(allSettings.auction_hall_categories as HallConfig);
+    if (allSettings.auction_hall_categories) {
+      const raw = allSettings.auction_hall_categories as HallConfig;
+      if (raw.tabs && Array.isArray(raw.tabs)) {
+        setHall({ tabs: raw.tabs });
+      } else if ((raw as unknown as { categories?: HallTab[] }).categories) {
+        const legacy = (raw as unknown as { categories: HallTab[] }).categories;
+        setHall({ tabs: legacy });
+      } else {
+        setHall({ tabs: defaultHallTabs });
+      }
+    }
     if (allSettings.homepage_quick_access) setQuickAccess(allSettings.homepage_quick_access as QuickAccessConfig);
     if (allSettings.homepage_special_section) setSpecialSection(allSettings.homepage_special_section as SpecialSectionConfig);
     if (allSettings.homepage_sponsor_banners) setSponsorBanners(allSettings.homepage_sponsor_banners as SponsorBannerConfig);
@@ -580,46 +609,75 @@ export function AdminHomepagePage() {
         <Field label="عنوان نمایشی" value={auctionTitle.title} onChange={(v) => setAuctionTitle({ title: v })} placeholder="مزایده آنلاین پارسی شو" />
       </SectionCard>
 
-      {/* AUCTION HALL CATEGORIES */}
-      <SectionCard title="دسته‌بندی‌های تالار مزایده">
+      {/* AUCTION HALL TABS */}
+      <SectionCard title="تب‌های تالار مزایده">
+        <p className="text-xs text-neutral-400 mb-3">
+          مدیریت عنوان، ترتیب و فعال‌سازی تب‌های تالار مزایده. محتوای هر تب به‌صورت خودکار از داده‌های واقعی سیستم تولید می‌شود.
+        </p>
         <div className="space-y-3">
-          {hall.categories.map((cat, idx) => (
-            <div key={cat.id} className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 border border-neutral-100">
+          {hall.tabs.map((tab, idx) => (
+            <div key={tab.id} className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 border border-neutral-100">
               <span className="text-sm font-bold text-neutral-500 w-6 text-center">{idx + 1}</span>
               <input
-                value={cat.label}
+                value={tab.label}
                 onChange={(e) => {
-                  const updated = [...hall.categories];
-                  updated[idx] = { ...cat, label: e.target.value };
-                  setHall({ categories: updated });
+                  const updated = [...hall.tabs];
+                  updated[idx] = { ...tab, label: e.target.value };
+                  setHall({ tabs: updated });
                 }}
                 className="flex-1 h-9 px-3 rounded-lg border border-neutral-200 bg-white text-sm"
+                placeholder="عنوان تب"
               />
               <select
-                value={cat.icon}
+                value={tab.icon}
                 onChange={(e) => {
-                  const updated = [...hall.categories];
-                  updated[idx] = { ...cat, icon: e.target.value };
-                  setHall({ categories: updated });
+                  const updated = [...hall.tabs];
+                  updated[idx] = { ...tab, icon: e.target.value };
+                  setHall({ tabs: updated });
                 }}
                 className="h-9 px-2 rounded-lg border border-neutral-200 bg-white text-sm"
               >
-                <option value="flame">آتش</option>
-                <option value="calendar">تقویم</option>
-                <option value="star">ستاره</option>
-                <option value="sparkles">درخشش</option>
-                <option value="gavel">چکش</option>
-                <option value="clock">ساعت</option>
+                {hallTabIconOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
               </select>
               <button
                 onClick={() => {
-                  const updated = [...hall.categories];
-                  updated[idx] = { ...cat, visible: !cat.visible };
-                  setHall({ categories: updated });
+                  if (idx > 0) {
+                    const updated = [...hall.tabs];
+                    [updated[idx - 1], updated[idx]] = [updated[idx], updated[idx - 1]];
+                    const renumbered = updated.map((t, i) => ({ ...t, sort_order: i + 1 }));
+                    setHall({ tabs: renumbered });
+                  }
                 }}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors ${cat.visible ? 'bg-success-50 border-success-300 text-success-600' : 'bg-neutral-50 border-neutral-200 text-neutral-400'}`}
+                disabled={idx === 0}
+                className="w-8 h-8 rounded-lg border border-neutral-200 bg-white flex items-center justify-center text-neutral-500 hover:text-primary-600 disabled:opacity-30 transition-colors shrink-0"
               >
-                {cat.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                <ChevronUp className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => {
+                  if (idx < hall.tabs.length - 1) {
+                    const updated = [...hall.tabs];
+                    [updated[idx + 1], updated[idx]] = [updated[idx], updated[idx + 1]];
+                    const renumbered = updated.map((t, i) => ({ ...t, sort_order: i + 1 }));
+                    setHall({ tabs: renumbered });
+                  }
+                }}
+                disabled={idx === hall.tabs.length - 1}
+                className="w-8 h-8 rounded-lg border border-neutral-200 bg-white flex items-center justify-center text-neutral-500 hover:text-primary-600 disabled:opacity-30 transition-colors shrink-0"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => {
+                  const updated = [...hall.tabs];
+                  updated[idx] = { ...tab, visible: !tab.visible };
+                  setHall({ tabs: updated });
+                }}
+                className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors shrink-0 ${tab.visible ? 'bg-success-50 border-success-300 text-success-600' : 'bg-neutral-50 border-neutral-200 text-neutral-400'}`}
+              >
+                {tab.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
               </button>
             </div>
           ))}
