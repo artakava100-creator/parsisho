@@ -6,6 +6,7 @@ import { footerGroups as defaultFooterGroups, type FooterLinkGroup } from '@/con
 import { useSiteSetting } from '@/hooks/useSiteSettings';
 import { toPersianDigits } from '@/lib/persian';
 import { useToast } from '@/providers/useToast';
+import { AppStoreBadge } from '@/components/ui/AppStoreBadge';
 
 interface SocialLink {
   id: string;
@@ -247,33 +248,47 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Bottom bar: copyright + contact in one row */}
-        <div className="border-t border-neutral-200 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-neutral-400">
-            <span>{cr.text}</span>
-            <span className="text-neutral-300 hidden sm:inline">|</span>
-            <span>نسخه {cr.version}</span>
-            <span className="text-neutral-300 hidden sm:inline">|</span>
-            <span className="flex items-center gap-1">
-              <ArrowLeft className="w-3 h-3 text-primary-400" />
-              تیم {BRAND_NAME}
-            </span>
+        {/* Download section + bottom bar */}
+        <div className="border-t border-neutral-200 pt-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          {/* Download section: right on desktop, last on mobile */}
+          <div className="order-2 sm:order-1 flex flex-col items-center sm:items-start gap-2">
+            <h4 className="text-sm font-bold text-neutral-800">دانلود اپلیکیشن پارسی شو</h4>
+            <p className="text-xs text-neutral-500">روش سریع‌تر برای خرید و مزایده، روی گوشی شما</p>
+            <div className="flex flex-col sm:flex-row gap-2 mt-1">
+              <AppStoreBadge store="bazaar" href="#" />
+              <AppStoreBadge store="myket" href="#" />
+              <AppStoreBadge store="ios" href="#" />
+            </div>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-neutral-500">
-            <a
-              href={`tel:${ct.phone}`}
-              className="flex items-center gap-1.5 hover:text-primary-600 transition-colors"
-            >
-              <Phone className="w-3.5 h-3.5 text-neutral-400" />
-              {toPersianDigits(ct.phone)}
-            </a>
-            <a
-              href={`mailto:${ct.email}`}
-              className="flex items-center gap-1.5 hover:text-primary-600 transition-colors"
-            >
-              <Mail className="w-3.5 h-3.5 text-neutral-400" />
-              {ct.email}
-            </a>
+
+          {/* Copyright + contact: left on desktop, first on mobile */}
+          <div className="order-1 sm:order-2 flex flex-col items-center gap-3 sm:self-end">
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-neutral-400">
+              <span>{cr.text}</span>
+              <span className="text-neutral-300 hidden sm:inline">|</span>
+              <span>نسخه {cr.version}</span>
+              <span className="text-neutral-300 hidden sm:inline">|</span>
+              <span className="flex items-center gap-1">
+                <ArrowLeft className="w-3 h-3 text-primary-400" />
+                تیم {BRAND_NAME}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-neutral-500">
+              <a
+                href={`tel:${ct.phone}`}
+                className="flex items-center gap-1.5 hover:text-primary-600 transition-colors"
+              >
+                <Phone className="w-3.5 h-3.5 text-neutral-400" />
+                {toPersianDigits(ct.phone)}
+              </a>
+              <a
+                href={`mailto:${ct.email}`}
+                className="flex items-center gap-1.5 hover:text-primary-600 transition-colors"
+              >
+                <Mail className="w-3.5 h-3.5 text-neutral-400" />
+                {ct.email}
+              </a>
+            </div>
           </div>
         </div>
       </div>
