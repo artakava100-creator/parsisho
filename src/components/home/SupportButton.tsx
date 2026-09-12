@@ -9,23 +9,28 @@ export function SupportButton() {
     <>
       <button
         onClick={() => setPanelOpen(!panelOpen)}
-        className="fixed bottom-[4.75rem] lg:bottom-5 right-5 z-[60] flex items-center gap-2 h-11 ps-3.5 pe-4 rounded-full bg-primary-700 text-white shadow-lg shadow-primary-900/20 hover:bg-primary-600 hover:shadow-xl hover:shadow-primary-700/30 transition-all duration-300 group"
+        className="support-btn-glow fixed bottom-[4.75rem] lg:bottom-5 right-5 z-[60] flex items-center gap-2 h-11 ps-3.5 pe-4 rounded-full bg-gradient-to-br from-primary-700 to-primary-800 text-white shadow-lg shadow-primary-900/25 hover:from-primary-600 hover:to-primary-700 hover:-translate-y-0.5 group"
         aria-label="پشتیبانی زنده"
       >
         <span className="relative flex items-center justify-center w-6 h-6 shrink-0">
-          {panelOpen
-            ? <X className="w-5 h-5" />
-            : <Headset className="w-5 h-5 group-hover:scale-110 transition-transform" />
-          }
+          {panelOpen ? (
+            <X className="w-5 h-5" />
+          ) : (
+            <>
+              <Headset className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+              <span className="support-ring-ping absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-success-400" />
+              <span className="support-dot-pulse absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-success-400 ring-2 ring-primary-800" />
+            </>
+          )}
         </span>
-        <span className="text-sm font-bold whitespace-nowrap leading-none">
+        <span className="text-sm font-bold whitespace-nowrap leading-none tracking-tight">
           پشتیبانی زنده
         </span>
       </button>
 
       {panelOpen && (
         <div className="fixed bottom-[7.75rem] lg:bottom-[3.75rem] right-5 z-[60] w-[calc(100vw-2.5rem)] sm:w-[320px] bg-white rounded-2xl shadow-2xl border border-neutral-200 animate-scale-in overflow-hidden">
-          <div className="bg-primary-700 text-white px-4 py-3 flex items-center gap-2">
+          <div className="bg-gradient-to-br from-primary-700 to-primary-800 text-white px-4 py-3 flex items-center gap-2">
             <Headset className="w-5 h-5" />
             <span className="text-sm font-bold">پشتیبانی آنلاین پارسی شو</span>
           </div>
