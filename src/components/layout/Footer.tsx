@@ -40,6 +40,14 @@ interface FooterBrandingConfig {
 interface FooterLinksConfig {
   groups: FooterLinkGroup[];
 }
+interface AppDownloadConfig {
+  title: string;
+  subtitle: string;
+  visible: boolean;
+  bazaar: { href: string; image_url: string };
+  myket: { href: string; image_url: string };
+  appstore: { href: string; image_url: string };
+}
 
 const BADGE_COUNT = 4;
 
@@ -77,6 +85,14 @@ const defaultBranding: FooterBrandingConfig = {
   description: `پلتفرم مزایده آنلاین، خرید مستقیم، سرگرمی و اقتصاد محلی ${BRAND_NAME}`,
 };
 const defaultLinks: FooterLinksConfig = { groups: defaultFooterGroups };
+const defaultAppDownload: AppDownloadConfig = {
+  title: 'دانلود اپلیکیشن پارسی شو',
+  subtitle: 'روش سریع‌تر برای خرید و مزایده، روی گوشی شما',
+  visible: true,
+  bazaar: { href: '#', image_url: '' },
+  myket: { href: '#', image_url: '' },
+  appstore: { href: '#', image_url: '' },
+};
 
 const badgeFallbackIcons = [ShieldCheck, Award, ShieldCheck, Award];
 
@@ -88,6 +104,7 @@ export function Footer() {
   const { data: contact } = useSiteSetting<FooterContactConfig>('footer_contact', defaultContact);
   const { data: branding } = useSiteSetting<FooterBrandingConfig>('footer_branding', defaultBranding);
   const { data: linksConfig } = useSiteSetting<FooterLinksConfig>('footer_links', defaultLinks);
+  const { data: appDownload } = useSiteSetting<AppDownloadConfig>('footer_app_download', defaultAppDownload);
   const toast = useToast();
 
   const [email, setEmail] = useState('');
@@ -98,6 +115,7 @@ export function Footer() {
   const ct = contact ?? defaultContact;
   const br = branding ?? defaultBranding;
   const groups = linksConfig?.groups ?? defaultFooterGroups;
+  const ad = appDownload ?? defaultAppDownload;
 
   const credBadges: CredentialItem[] = (() => {
     if (credentials && Array.isArray(credentials.badges)) {
@@ -248,48 +266,50 @@ export function Footer() {
           ))}
 
           {/* Download column — same width as link columns */}
-          <div className="col-span-2 sm:col-span-1 lg:col-span-1 flex flex-col items-center lg:items-start">
-            <h4 className="text-xs font-bold text-neutral-800 mb-1">دانلود اپلیکیشن پارسی شو</h4>
-            <p className="text-xs text-neutral-500 mb-2.5 leading-relaxed text-center lg:text-right">
-              روش سریع‌تر برای خرید و مزایده، روی گوشی شما
-            </p>
-            <div className="flex flex-col gap-2 w-full max-w-[200px] lg:max-w-none">
-              <AppStoreBadge store="bazaar" href="#" />
-              <AppStoreBadge store="myket" href="#" />
-              <AppStoreBadge store="appstore" href="#" />
+          {ad.visible && (
+            <div className="col-span-2 sm:col-span-1 lg:col-span-1 flex flex-col items-center lg:items-start">
+              <h4 className="text-xs font-bold text-neutral-800 mb-1">{ad.title}</h4>
+              <p className="text-xs text-neutral-500 mb-2.5 leading-relaxed text-center lg:text-right">
+                {ad.subtitle}
+              </p>
+              <div className="flex flex-col gap-1.5 w-full max-w-[180px] lg:max-w-none">
+                <AppStoreBadge store="bazaar" href={ad.bazaar.href} imageSrc={ad.bazaar.image_url || undefined} />
+                <AppStoreBadge store="myket" href={ad.myket.href} imageSrc={ad.myket.image_url || undefined} />
+                <AppStoreBadge store="appstore" href={ad.appstore.href} imageSrc={ad.appstore.image_url || undefined} />
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Bottom bar: copyright + contact */}
+        {/* Bottom bar: copyright on right, contact on left */}
         <div className="border-t border-neutral-200 pt-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div className="flex flex-col items-center gap-3 sm:self-end">
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-neutral-400">
-              <span>{cr.text}</span>
-              <span className="text-neutral-300 hidden sm:inline">|</span>
-              <span>نسخه {cr.version}</span>
-              <span className="text-neutral-300 hidden sm:inline">|</span>
-              <span className="flex items-center gap-1">
-                <ArrowLeft className="w-3 h-3 text-primary-400" />
-                تیم {BRAND_NAME}
-              </span>
-            </div>
-            <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-neutral-500">
-              <a
-                href={`tel:${ct.phone}`}
-                className="flex items-center gap-1.5 hover:text-primary-600 transition-colors"
-              >
-                <Phone className="w-3.5 h-3.5 text-neutral-400" />
-                {toPersianDigits(ct.phone)}
-              </a>
-              <a
-                href={`mailto:${ct.email}`}
-                className="flex items-center gap-1.5 hover:text-primary-600 transition-colors"
-              >
-                <Mail className="w-3.5 h-3.5 text-neutral-400" />
-                {ct.email}
-              </a>
-            </div>
+          {/* Right: copyright */}
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-neutral-400 sm:self-end">
+            <span>{cr.text}</span>
+            <span className="text-neutral-300 hidden sm:inline">|</span>
+            <span>نسخه {cr.version}</span>
+            <span className="text-neutral-300 hidden sm:inline">|</span>
+            <span className="flex items-center gap-1">
+              <ArrowLeft className="w-3 h-3 text-primary-400" />
+              تیم {BRAND_NAME}
+            </span>
+          </div>
+          {/* Left: contact info */}
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-neutral-500">
+            <a
+              href={`tel:${ct.phone}`}
+              className="flex items-center gap-1.5 hover:text-primary-600 transition-colors"
+            >
+              <Phone className="w-3.5 h-3.5 text-neutral-400" />
+              {toPersianDigits(ct.phone)}
+            </a>
+            <a
+              href={`mailto:${ct.email}`}
+              className="flex items-center gap-1.5 hover:text-primary-600 transition-colors"
+            >
+              <Mail className="w-3.5 h-3.5 text-neutral-400" />
+              {ct.email}
+            </a>
           </div>
         </div>
       </div>

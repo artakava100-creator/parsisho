@@ -6,6 +6,7 @@ export type AppStore = 'bazaar' | 'myket' | 'appstore';
 interface AppStoreBadgeProps {
   store: AppStore;
   href: string;
+  imageSrc?: string;
   className?: string;
 }
 
@@ -58,24 +59,42 @@ const storeConfigs: Record<AppStore, StoreConfig> = {
     bg: 'bg-[#1B7A43]',
     hoverBg: 'hover:bg-[#186D3C]',
     label: 'کافه بازار',
-    icon: <BazaarIcon className="w-5 h-5 text-white shrink-0" />,
+    icon: <BazaarIcon className="w-4 h-4 text-white shrink-0" />,
   },
   myket: {
     bg: 'bg-[#1E88E5]',
     hoverBg: 'hover:bg-[#1976D2]',
     label: 'مایکت',
-    icon: <MyketIcon className="w-5 h-5 text-white shrink-0" />,
+    icon: <MyketIcon className="w-4 h-4 text-white shrink-0" />,
   },
   appstore: {
     bg: 'bg-[#0F172A]',
     hoverBg: 'hover:bg-[#1E293B]',
     label: 'اپ استور',
-    icon: <AppleIcon className="w-5 h-5 text-white shrink-0" />,
+    icon: <AppleIcon className="w-4 h-4 text-white shrink-0" />,
   },
 };
 
-export function AppStoreBadge({ store, href, className }: AppStoreBadgeProps) {
+export function AppStoreBadge({ store, href, imageSrc, className }: AppStoreBadgeProps) {
   const config = storeConfigs[store];
+
+  if (imageSrc) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(
+          'flex items-center h-9 rounded-md overflow-hidden w-full',
+          'shadow-sm transition-all duration-normal ease-out',
+          'hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]',
+          className,
+        )}
+      >
+        <img src={imageSrc} alt={config.label} className="w-full h-full object-contain" />
+      </a>
+    );
+  }
 
   return (
     <a
@@ -83,7 +102,7 @@ export function AppStoreBadge({ store, href, className }: AppStoreBadgeProps) {
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        'flex items-center justify-between h-11 px-3.5 rounded-md text-white w-full',
+        'flex items-center justify-between h-9 px-3 rounded-md text-white w-full',
         'shadow-sm transition-all duration-normal ease-out',
         'hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]',
         config.bg,
@@ -91,7 +110,7 @@ export function AppStoreBadge({ store, href, className }: AppStoreBadgeProps) {
         className,
       )}
     >
-      <span className="text-sm font-bold leading-none">{config.label}</span>
+      <span className="text-xs font-bold leading-none">{config.label}</span>
       {config.icon}
     </a>
   );
