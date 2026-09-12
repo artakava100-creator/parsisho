@@ -32,4 +32,13 @@ export const footerGroups: FooterLinkGroup[] = [
       { label: 'گزارش مشکل', to: '/report' },
     ],
   },
+  {
+    title: 'لینکدونی',
+    links: [
+      { label: 'بلاگ', to: '/blog' },
+      { label: 'همکاری در فروش', to: '/affiliate' },
+      { label: 'فرصت‌های شغلی', to: '/careers' },
+      { label: 'نقشه سایت', to: '/sitemap' },
+    ],
+  },
 ];

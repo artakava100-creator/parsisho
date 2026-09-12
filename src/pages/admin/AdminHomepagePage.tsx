@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Home, Save, Loader2, Eye, EyeOff, Upload, Trash2, ImageIcon } from 'lucide-react';
+import { Home, Save, Loader2, Eye, EyeOff, Upload, Trash2, ImageIcon, Plus, ChevronUp, ChevronDown, X } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -15,6 +15,7 @@ import {
   type QuickAccessConfigItem,
   type SpecialSectionConfig,
 } from '@/config/home-sections';
+import { footerGroups as defaultFooterGroups, type FooterLinkGroup } from '@/config/footer-links';
 
 const SETTINGS_KEYS = [
   'homepage_intro',
@@ -24,6 +25,9 @@ const SETTINGS_KEYS = [
   'footer_social_links',
   'footer_credentials',
   'footer_newsletter',
+  'footer_contact',
+  'footer_branding',
+  'footer_links',
   'auction_hall_categories',
   'homepage_quick_access',
   'homepage_special_section',
@@ -76,6 +80,19 @@ interface NewsletterConfig {
   title: string;
   subtitle: string;
   visible: boolean;
+}
+
+interface FooterContactConfig {
+  phone: string;
+  email: string;
+}
+
+interface FooterBrandingConfig {
+  description: string;
+}
+
+interface FooterLinksConfig {
+  groups: FooterLinkGroup[];
 }
 
 interface HallCategory {
@@ -139,6 +156,9 @@ export function AdminHomepagePage() {
     badges: Array.from({ length: 6 }, () => ({ image_url: '', link: '', visible: true })),
   });
   const [newsletter, setNewsletter] = useState<NewsletterConfig>({ title: 'خبرنامه پارسی شو', subtitle: 'جدیدترین مزایده‌ها، تخفیف‌ها و رویدادها را اول از همه دریافت کنید.', visible: true });
+  const [footerContact, setFooterContact] = useState<FooterContactConfig>({ phone: '09374847500', email: 'info@parsisho.ir' });
+  const [footerBranding, setFooterBranding] = useState<FooterBrandingConfig>({ description: '' });
+  const [footerLinks, setFooterLinks] = useState<FooterLinksConfig>({ groups: defaultFooterGroups });
   const badgeFileRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [hall, setHall] = useState<HallConfig>({ categories: [] });
   const [quickAccess, setQuickAccess] = useState<QuickAccessConfig>({ items: defaultQuickAccessItems });
@@ -170,6 +190,12 @@ export function AdminHomepagePage() {
       }
     }
     if (allSettings.footer_newsletter) setNewsletter(allSettings.footer_newsletter as NewsletterConfig);
+    if (allSettings.footer_contact) setFooterContact(allSettings.footer_contact as FooterContactConfig);
+    if (allSettings.footer_branding) setFooterBranding(allSettings.footer_branding as FooterBrandingConfig);
+    if (allSettings.footer_links) {
+      const fl = allSettings.footer_links as FooterLinksConfig;
+      if (fl.groups && Array.isArray(fl.groups)) setFooterLinks({ groups: fl.groups });
+    }
     if (allSettings.auction_hall_categories) setHall(allSettings.auction_hall_categories as HallConfig);
     if (allSettings.homepage_quick_access) setQuickAccess(allSettings.homepage_quick_access as QuickAccessConfig);
     if (allSettings.homepage_special_section) setSpecialSection(allSettings.homepage_special_section as SpecialSectionConfig);
@@ -282,6 +308,9 @@ export function AdminHomepagePage() {
         updateSetting.mutateAsync({ key: 'footer_social_links', value: social }),
         updateSetting.mutateAsync({ key: 'footer_credentials', value: credentials }),
         updateSetting.mutateAsync({ key: 'footer_newsletter', value: newsletter }),
+        updateSetting.mutateAsync({ key: 'footer_contact', value: footerContact }),
+        updateSetting.mutateAsync({ key: 'footer_branding', value: footerBranding }),
+        updateSetting.mutateAsync({ key: 'footer_links', value: footerLinks }),
         updateSetting.mutateAsync({ key: 'auction_hall_categories', value: hall }),
         updateSetting.mutateAsync({ key: 'homepage_quick_access', value: quickAccess }),
         updateSetting.mutateAsync({ key: 'homepage_special_section', value: specialSection }),
@@ -663,8 +692,146 @@ export function AdminHomepagePage() {
         </div>
       </SectionCard>
 
-      {/* NEWSLETTER */}
-      <SectionCard title="خبرنامه فوتر">
+      {/* ===== FOOTER MANAGEMENT ===== */}
+
+      {/* FOOTER BRANDING */}
+      <SectionCard title="مدیریت فوتر — برند و توضیحات">
+        <div className="space-y-3">
+          <Field label="توضیحات فوتر" value={footerBranding.description} onChange={(v) => setFooterBranding({ description: v })} placeholder="پلتفرم مزایده آنلاین، خرید مستقیم، سرگرمی و اقتصاد محلی پارسی شو" />
+        </div>
+      </SectionCard>
+
+      {/* FOOTER LINK GROUPS */}
+      <SectionCard title="مدیریت فوتر — دسته‌بندی لینک‌ها">
+        <div className="space-y-4">
+          {footerLinks.groups.map((group, gIdx) => (
+            <div key={gIdx} className="p-3 rounded-xl bg-neutral-50 border border-neutral-100">
+              <div className="flex items-center gap-2 mb-3">
+                <input
+                  value={group.title}
+                  onChange={(e) => {
+                    const updated = [...footerLinks.groups];
+                    updated[gIdx] = { ...group, title: e.target.value };
+                    setFooterLinks({ groups: updated });
+                  }}
+                  className="flex-1 h-9 px-3 rounded-lg border border-neutral-200 bg-white text-sm font-bold"
+                  placeholder="عنوان دسته"
+                />
+                <button
+                  onClick={() => {
+                    const updated = [...footerLinks.groups];
+                    if (gIdx > 0) {
+                      [updated[gIdx - 1], updated[gIdx]] = [updated[gIdx], updated[gIdx - 1]];
+                      setFooterLinks({ groups: updated });
+                    }
+                  }}
+                  disabled={gIdx === 0}
+                  className="w-8 h-8 rounded-lg border border-neutral-200 bg-white flex items-center justify-center text-neutral-500 hover:text-primary-600 disabled:opacity-30 transition-colors"
+                >
+                  <ChevronUp className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    const updated = [...footerLinks.groups];
+                    if (gIdx < updated.length - 1) {
+                      [updated[gIdx + 1], updated[gIdx]] = [updated[gIdx], updated[gIdx + 1]];
+                      setFooterLinks({ groups: updated });
+                    }
+                  }}
+                  disabled={gIdx === footerLinks.groups.length - 1}
+                  className="w-8 h-8 rounded-lg border border-neutral-200 bg-white flex items-center justify-center text-neutral-500 hover:text-primary-600 disabled:opacity-30 transition-colors"
+                >
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    const updated = footerLinks.groups.filter((_, i) => i !== gIdx);
+                    setFooterLinks({ groups: updated });
+                  }}
+                  className="w-8 h-8 rounded-lg border border-error-200 bg-error-50 flex items-center justify-center text-error-500 hover:bg-error-100 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div className="space-y-2">
+                {group.links.map((link, lIdx) => (
+                  <div key={lIdx} className="flex items-center gap-2">
+                    <input
+                      value={link.label}
+                      onChange={(e) => {
+                        const updated = [...footerLinks.groups];
+                        const newLinks = [...group.links];
+                        newLinks[lIdx] = { ...link, label: e.target.value };
+                        updated[gIdx] = { ...group, links: newLinks };
+                        setFooterLinks({ groups: updated });
+                      }}
+                      className="flex-1 h-8 px-2.5 rounded-lg border border-neutral-200 bg-white text-xs"
+                      placeholder="عنوان لینک"
+                    />
+                    <input
+                      value={link.to}
+                      onChange={(e) => {
+                        const updated = [...footerLinks.groups];
+                        const newLinks = [...group.links];
+                        newLinks[lIdx] = { ...link, to: e.target.value };
+                        updated[gIdx] = { ...group, links: newLinks };
+                        setFooterLinks({ groups: updated });
+                      }}
+                      className="w-28 h-8 px-2.5 rounded-lg border border-neutral-200 bg-white text-xs"
+                      placeholder="/مسیر"
+                      dir="ltr"
+                    />
+                    <button
+                      onClick={() => {
+                        const updated = [...footerLinks.groups];
+                        const newLinks = group.links.filter((_, i) => i !== lIdx);
+                        updated[gIdx] = { ...group, links: newLinks };
+                        setFooterLinks({ groups: updated });
+                      }}
+                      className="w-7 h-7 rounded border border-neutral-200 bg-white flex items-center justify-center text-neutral-400 hover:text-error-500 transition-colors shrink-0"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => {
+                    const updated = [...footerLinks.groups];
+                    updated[gIdx] = { ...group, links: [...group.links, { label: '', to: '/' }] };
+                    setFooterLinks({ groups: updated });
+                  }}
+                  className="flex items-center gap-1 text-xs text-primary-600 hover:text-primary-700 font-medium mt-1"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  افزودن لینک
+                </button>
+              </div>
+            </div>
+          ))}
+          <button
+            onClick={() => {
+              setFooterLinks({
+                groups: [...footerLinks.groups, { title: '', links: [{ label: '', to: '/' }] }],
+              });
+            }}
+            className="flex items-center gap-1.5 text-sm text-primary-600 hover:text-primary-700 font-bold"
+          >
+            <Plus className="w-4 h-4" />
+            افزودن دسته‌بندی
+          </button>
+        </div>
+      </SectionCard>
+
+      {/* FOOTER CONTACT */}
+      <SectionCard title="مدیریت فوتر — اطلاعات تماس">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Field label="شماره تماس" value={footerContact.phone} onChange={(v) => setFooterContact((p) => ({ ...p, phone: v }))} placeholder="09374847500" dir="ltr" />
+          <Field label="ایمیل" value={footerContact.email} onChange={(v) => setFooterContact((p) => ({ ...p, email: v }))} placeholder="info@parsisho.ir" dir="ltr" />
+        </div>
+      </SectionCard>
+
+      {/* FOOTER NEWSLETTER */}
+      <SectionCard title="مدیریت فوتر — خبرنامه">
         <div className="space-y-3">
           <div className="flex items-center gap-3 mb-2">
             <label className="text-sm font-medium text-neutral-600">نمایش</label>

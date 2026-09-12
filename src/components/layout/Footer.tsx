@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, Send, MessageCircle, ShieldCheck, Award, Globe, ArrowLeft } from 'lucide-react';
-import { BRAND_NAME, BRAND_EMAIL, BRAND_PHONE } from '@/config/brand';
-import { footerGroups } from '@/config/footer-links';
+import { BRAND_NAME } from '@/config/brand';
+import { footerGroups as defaultFooterGroups, type FooterLinkGroup } from '@/config/footer-links';
 import { useSiteSetting } from '@/hooks/useSiteSettings';
-import { useUpdateSiteSetting } from '@/hooks/useSiteSettings';
 import { toPersianDigits } from '@/lib/persian';
 import { useToast } from '@/providers/useToast';
 
@@ -30,6 +29,16 @@ interface NewsletterConfig {
   subtitle: string;
   visible: boolean;
 }
+interface FooterContactConfig {
+  phone: string;
+  email: string;
+}
+interface FooterBrandingConfig {
+  description: string;
+}
+interface FooterLinksConfig {
+  groups: FooterLinkGroup[];
+}
 
 const socialIconMap: Record<string, typeof Globe> = {
   eitaa: MessageCircle,
@@ -54,9 +63,17 @@ const defaultCredentials: FooterCredentials = {
 };
 const defaultNewsletter: NewsletterConfig = {
   title: 'خبرنامه پارسی شو',
-  subtitle: 'جدیدترین مزایده‌ها، تخفیف‌ها و رویدادها را اول از همه دریافت کنید.',
+  subtitle: 'جدیدترین مزایده‌ها و تخفیف‌ها را اول از همه دریافت کنید.',
   visible: true,
 };
+const defaultContact: FooterContactConfig = {
+  phone: '09374847500',
+  email: 'info@parsisho.ir',
+};
+const defaultBranding: FooterBrandingConfig = {
+  description: `پلتفرم مزایده آنلاین، خرید مستقیم، سرگرمی و اقتصاد محلی ${BRAND_NAME}`,
+};
+const defaultLinks: FooterLinksConfig = { groups: defaultFooterGroups };
 
 const badgeFallbackIcons = [ShieldCheck, Award, ShieldCheck, Award, ShieldCheck, Award];
 
@@ -65,7 +82,9 @@ export function Footer() {
   const { data: copyright } = useSiteSetting<FooterCopyright>('footer_copyright', defaultCopyright);
   const { data: credentials } = useSiteSetting<FooterCredentials>('footer_credentials', defaultCredentials);
   const { data: newsletter } = useSiteSetting<NewsletterConfig>('footer_newsletter', defaultNewsletter);
-  const updateSetting = useUpdateSiteSetting();
+  const { data: contact } = useSiteSetting<FooterContactConfig>('footer_contact', defaultContact);
+  const { data: branding } = useSiteSetting<FooterBrandingConfig>('footer_branding', defaultBranding);
+  const { data: linksConfig } = useSiteSetting<FooterLinksConfig>('footer_links', defaultLinks);
   const toast = useToast();
 
   const [email, setEmail] = useState('');
@@ -73,17 +92,27 @@ export function Footer() {
   const s = social ?? defaultSocial;
   const cr = copyright ?? defaultCopyright;
   const nl = newsletter ?? defaultNewsletter;
+  const ct = contact ?? defaultContact;
+  const br = branding ?? defaultBranding;
+  const groups = linksConfig?.groups ?? defaultFooterGroups;
 
   const credBadges: CredentialItem[] = (() => {
-    if (credentials && Array.isArray(credentials.badges)) return credentials.badges;
-    if (credentials && (credentials.enamad || credentials.business_license)) {
+    if (credentials && Array.isArray(credentials.badges)) {
+      const padded = [...credentials.badges];
+      while (padded.length < 6) padded.push({ image_url: '', link: '', visible: true });
+      return padded.slice(0, 6);
+    }
+    if (credentials && (credentials as unknown as { enamad?: CredentialItem }).enamad) {
       const legacy = credentials as unknown as { enamad?: CredentialItem; business_license?: CredentialItem };
-      return [legacy.enamad, legacy.business_license].filter(Boolean) as CredentialItem[];
+      const migrated: CredentialItem[] = [
+        legacy.enamad ?? { image_url: '', link: '', visible: true },
+        legacy.business_license ?? { image_url: '', link: '', visible: true },
+      ];
+      while (migrated.length < 6) migrated.push({ image_url: '', link: '', visible: true });
+      return migrated;
     }
     return defaultCredentials.badges;
   })();
-
-  const visibleBadges = credBadges.filter((b) => b.visible);
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,47 +123,11 @@ export function Footer() {
 
   return (
     <footer className="border-t border-neutral-200 bg-neutral-100 mt-0">
-      {/* Newsletter strip */}
-      {nl.visible && (
-        <div className="bg-gradient-to-br from-primary-800 to-primary-900 text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-8">
-            <div className="flex flex-col lg:flex-row items-center gap-5 lg:gap-8">
-              <div className="text-center lg:text-right lg:flex-1 lg:ps-2">
-                <h3 className="text-base sm:text-lg font-extrabold mb-1">{nl.title}</h3>
-                <p className="text-xs sm:text-sm text-primary-200 leading-relaxed max-w-md mx-auto lg:mx-0">
-                  {nl.subtitle}
-                </p>
-              </div>
-              <form onSubmit={handleSubscribe} className="w-full lg:w-auto lg:flex-1 lg:max-w-md flex items-stretch gap-2">
-                <div className="relative flex-1">
-                  <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="ایمیل خود را وارد کنید"
-                    dir="rtl"
-                    className="w-full h-11 ps-3 pe-10 rounded-xl bg-white/95 border border-white/20 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-accent-400/50 focus:border-transparent"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="h-11 px-5 rounded-xl bg-accent-500 hover:bg-accent-600 text-white text-sm font-bold flex items-center gap-1.5 shrink-0 transition-colors"
-                >
-                  <Send className="w-4 h-4" />
-                  <span className="hidden sm:inline">عضویت</span>
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Main footer body */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-6 lg:gap-8">
-          {/* Brand column */}
-          <div className="lg:col-span-4">
+        {/* Top row: brand + newsletter */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-8">
+          {/* Brand */}
+          <div className="lg:col-span-5">
             <div className="flex items-center gap-2.5 mb-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center shadow-sm shadow-primary-900/15">
                 <span className="text-white font-extrabold text-lg leading-none">پ</span>
@@ -142,11 +135,10 @@ export function Footer() {
               <span className="text-lg font-extrabold text-neutral-800">{BRAND_NAME}</span>
             </div>
             <p className="text-sm text-neutral-500 leading-relaxed max-w-[300px] mb-4">
-              پلتفرم مزایده آنلاین، خرید مستقیم، سرگرمی و اقتصاد محلی {BRAND_NAME}
+              {br.description}
             </p>
-
             {/* Social icons */}
-            <div className="flex items-center gap-2.5 mb-5">
+            <div className="flex items-center gap-2">
               {s.links.filter((l) => l.visible).map((link) => {
                 const Icon = socialIconMap[link.icon] ?? Globe;
                 return (
@@ -156,47 +148,60 @@ export function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     title={link.title}
-                    className="w-9 h-9 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-primary-600 hover:border-primary-300 hover:shadow-sm transition-all"
+                    className="w-8 h-8 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-primary-600 hover:border-primary-300 hover:shadow-sm transition-all"
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-3.5 h-3.5" />
                   </a>
                 );
               })}
             </div>
-
-            {/* Contact info */}
-            <div className="space-y-2">
-              <a
-                href={`tel:${BRAND_PHONE}`}
-                className="flex items-center gap-2 text-sm text-neutral-500 hover:text-primary-600 transition-colors"
-              >
-                <span className="w-7 h-7 rounded-lg bg-white border border-neutral-200 flex items-center justify-center shrink-0">
-                  <Phone className="w-3.5 h-3.5" />
-                </span>
-                {toPersianDigits(BRAND_PHONE)}
-              </a>
-              <a
-                href={`mailto:${BRAND_EMAIL}`}
-                className="flex items-center gap-2 text-sm text-neutral-500 hover:text-primary-600 transition-colors"
-              >
-                <span className="w-7 h-7 rounded-lg bg-white border border-neutral-200 flex items-center justify-center shrink-0">
-                  <Mail className="w-3.5 h-3.5" />
-                </span>
-                {BRAND_EMAIL}
-              </a>
-            </div>
           </div>
 
+          {/* Newsletter */}
+          {nl.visible && (
+            <div className="lg:col-span-7">
+              <div className="rounded-2xl bg-gradient-to-br from-primary-50 to-accent-50/40 border border-primary-100/60 p-5 sm:p-6 h-full flex flex-col justify-center">
+                <h3 className="text-sm font-extrabold text-primary-800 mb-1">{nl.title}</h3>
+                <p className="text-xs text-neutral-500 leading-relaxed mb-3 max-w-md">
+                  {nl.subtitle}
+                </p>
+                <form onSubmit={handleSubscribe} className="flex items-stretch gap-2 max-w-md">
+                  <div className="relative flex-1">
+                    <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="ایمیل خود را وارد کنید"
+                      dir="rtl"
+                      className="w-full h-10 ps-3 pe-9 rounded-lg bg-white border border-neutral-200 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-300"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="h-10 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold flex items-center gap-1.5 shrink-0 transition-colors"
+                  >
+                    <Send className="w-3.5 h-3.5" />
+                    عضویت
+                  </button>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Middle row: link groups + badges */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-12 gap-5 lg:gap-6 mb-8">
           {/* Link groups */}
-          {footerGroups.map((group) => (
+          {groups.map((group) => (
             <div key={group.title} className="lg:col-span-2">
-              <h4 className="text-sm font-bold text-neutral-700 mb-3">{group.title}</h4>
-              <ul className="space-y-2">
-                {group.links.map((link) => (
-                  <li key={link.to}>
+              <h4 className="text-xs font-bold text-neutral-700 mb-2.5">{group.title}</h4>
+              <ul className="space-y-1.5">
+                {group.links.map((link, idx) => (
+                  <li key={`${link.to}-${idx}`}>
                     <Link
                       to={link.to}
-                      className="text-sm text-neutral-500 hover:text-primary-600 transition-colors"
+                      className="text-xs text-neutral-500 hover:text-primary-600 transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -206,28 +211,33 @@ export function Footer() {
             </div>
           ))}
 
-          {/* Trust badges */}
-          <div className="lg:col-span-4">
-            <h4 className="text-sm font-bold text-neutral-700 mb-3">نمادها و مجوزها</h4>
-            <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
-              {visibleBadges.map((badge, idx) => {
+          {/* Trust badges — compact, all 6 slots always shown */}
+          <div className="col-span-2 sm:col-span-3 lg:col-span-4">
+            <h4 className="text-xs font-bold text-neutral-700 mb-2.5">نمادها و مجوزها</h4>
+            <div className="grid grid-cols-6 sm:grid-cols-6 gap-1.5 sm:gap-2">
+              {credBadges.map((badge, idx) => {
                 const FallbackIcon = badgeFallbackIcons[idx % badgeFallbackIcons.length];
+                const hasContent = badge.visible && badge.image_url;
                 return (
                   <a
                     key={idx}
                     href={badge.link || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="aspect-square rounded-xl border border-neutral-200 bg-white flex items-center justify-center hover:shadow-md hover:border-primary-200 transition-all overflow-hidden group"
+                    className={`aspect-square rounded-lg border bg-white flex items-center justify-center overflow-hidden transition-all ${
+                      hasContent
+                        ? 'border-neutral-200 hover:shadow-md hover:border-primary-200'
+                        : 'border-neutral-200/70'
+                    } group`}
                   >
                     {badge.image_url ? (
                       <img
                         src={badge.image_url}
                         alt={`نماد ${idx + 1}`}
-                        className="w-full h-full object-contain p-1.5 group-hover:scale-105 transition-transform"
+                        className="w-full h-full object-contain p-1 group-hover:scale-105 transition-transform"
                       />
                     ) : (
-                      <FallbackIcon className="w-6 h-6 text-neutral-300" />
+                      <FallbackIcon className="w-4 h-4 text-neutral-300" />
                     )}
                   </a>
                 );
@@ -235,20 +245,34 @@ export function Footer() {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Bottom bar */}
-      <div className="border-t border-neutral-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-neutral-400">
+        {/* Bottom bar: copyright + contact in one row */}
+        <div className="border-t border-neutral-200 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-neutral-400">
             <span>{cr.text}</span>
-            <span className="text-neutral-300">|</span>
+            <span className="text-neutral-300 hidden sm:inline">|</span>
             <span>نسخه {cr.version}</span>
+            <span className="text-neutral-300 hidden sm:inline">|</span>
+            <span className="flex items-center gap-1">
+              <ArrowLeft className="w-3 h-3 text-primary-400" />
+              تیم {BRAND_NAME}
+            </span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-neutral-400">
-            <span>ساخته شده با</span>
-            <ArrowLeft className="w-3 h-3 text-primary-500" />
-            <span>تیم {BRAND_NAME}</span>
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-neutral-500">
+            <a
+              href={`tel:${ct.phone}`}
+              className="flex items-center gap-1.5 hover:text-primary-600 transition-colors"
+            >
+              <Phone className="w-3.5 h-3.5 text-neutral-400" />
+              {toPersianDigits(ct.phone)}
+            </a>
+            <a
+              href={`mailto:${ct.email}`}
+              className="flex items-center gap-1.5 hover:text-primary-600 transition-colors"
+            >
+              <Mail className="w-3.5 h-3.5 text-neutral-400" />
+              {ct.email}
+            </a>
           </div>
         </div>
       </div>
