@@ -462,13 +462,13 @@ export function AdminHomepagePage() {
         </p>
         <div className="flex items-start gap-4">
           {/* Preview */}
-          <div className="w-32 h-16 rounded-xl border border-neutral-200 overflow-hidden bg-white flex-shrink-0 flex items-center justify-center p-2">
+          <div className="w-56 h-28 rounded-xl border border-neutral-200 overflow-hidden bg-white flex-shrink-0 flex items-center justify-center p-3">
             {headerLogo.image_url ? (
               <img src={headerLogo.image_url} alt="پیش‌نمایش لوگو" className="max-w-full max-h-full object-contain" />
             ) : (
-              <div className="flex flex-col items-center gap-1 text-neutral-300">
-                <ImageIcon className="w-6 h-6" />
-                <span className="text-[0.625rem]">لوگوی پیش‌فرض</span>
+              <div className="flex flex-col items-center gap-1.5 text-neutral-300">
+                <ImageIcon className="w-10 h-10" />
+                <span className="text-xs">لوگوی پیش‌فرض</span>
               </div>
             )}
           </div>

@@ -100,6 +100,7 @@ const defaultAppDownload: AppDownloadConfig = {
 const badgeFallbackIcons = [ShieldCheck, Award, ShieldCheck, Award];
 
 export function Footer() {
+  const { data: headerLogo } = useSiteSetting<{ image_url: string | null }>('header_logo');
   const { data: social } = useSiteSetting<FooterSocial>('footer_social_links', defaultSocial);
   const { data: copyright } = useSiteSetting<FooterCopyright>('footer_copyright', defaultCopyright);
   const { data: credentials } = useSiteSetting<FooterCredentials>('footer_credentials', defaultCredentials);
@@ -120,6 +121,7 @@ export function Footer() {
   const br = branding ?? defaultBranding;
   const groups = linksConfig?.groups ?? defaultFooterGroups;
   const ad = appDownload ?? defaultAppDownload;
+  const logoUrl = headerLogo?.image_url ?? null;
 
   const credBadges: CredentialItem[] = (() => {
     if (credentials && Array.isArray(credentials.badges)) {
@@ -167,10 +169,16 @@ export function Footer() {
             {/* Brand */}
             <div className="sm:w-[260px] shrink-0">
               <div className="flex items-center gap-2.5 mb-2.5">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center shadow-sm shadow-primary-900/15">
-                  <span className="text-white font-extrabold text-lg leading-none">پ</span>
-                </div>
-                <span className="text-lg font-extrabold text-neutral-800">{BRAND_NAME}</span>
+                {logoUrl ? (
+                  <img src={logoUrl} alt={BRAND_NAME} className="h-12 w-auto max-w-[140px] object-contain rounded-lg" />
+                ) : (
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center shadow-sm shadow-primary-900/15">
+                    <span className="text-white font-extrabold text-lg leading-none">پ</span>
+                  </div>
+                )}
+                {!logoUrl && (
+                  <span className="text-lg font-extrabold text-neutral-800">{BRAND_NAME}</span>
+                )}
               </div>
               <p className="text-sm text-neutral-500 leading-relaxed mb-3">
                 {br.description}
