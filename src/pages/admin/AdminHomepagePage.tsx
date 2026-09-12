@@ -23,6 +23,7 @@ const SETTINGS_KEYS = [
   'footer_copyright',
   'footer_social_links',
   'footer_credentials',
+  'footer_newsletter',
   'auction_hall_categories',
   'homepage_quick_access',
   'homepage_special_section',
@@ -68,8 +69,13 @@ interface CredentialItem {
 }
 
 interface CredentialsConfig {
-  enamad: CredentialItem;
-  business_license: CredentialItem;
+  badges: CredentialItem[];
+}
+
+interface NewsletterConfig {
+  title: string;
+  subtitle: string;
+  visible: boolean;
 }
 
 interface HallCategory {
@@ -130,9 +136,10 @@ export function AdminHomepagePage() {
   const [copyright, setCopyright] = useState<CopyrightConfig>({ text: '', version: '' });
   const [social, setSocial] = useState<SocialConfig>({ links: [] });
   const [credentials, setCredentials] = useState<CredentialsConfig>({
-    enamad: { image_url: '', link: '', visible: true },
-    business_license: { image_url: '', link: '', visible: true },
+    badges: Array.from({ length: 6 }, () => ({ image_url: '', link: '', visible: true })),
   });
+  const [newsletter, setNewsletter] = useState<NewsletterConfig>({ title: 'خبرنامه پارسی شو', subtitle: 'جدیدترین مزایده‌ها، تخفیف‌ها و رویدادها را اول از همه دریافت کنید.', visible: true });
+  const badgeFileRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [hall, setHall] = useState<HallConfig>({ categories: [] });
   const [quickAccess, setQuickAccess] = useState<QuickAccessConfig>({ items: defaultQuickAccessItems });
   const [specialSection, setSpecialSection] = useState<SpecialSectionConfig>(defaultSpecialSectionConfig);
@@ -146,7 +153,23 @@ export function AdminHomepagePage() {
     if (allSettings.homepage_auction_title) setAuctionTitle(allSettings.homepage_auction_title as AuctionTitleConfig);
     if (allSettings.footer_copyright) setCopyright(allSettings.footer_copyright as CopyrightConfig);
     if (allSettings.footer_social_links) setSocial(allSettings.footer_social_links as SocialConfig);
-    if (allSettings.footer_credentials) setCredentials(allSettings.footer_credentials as CredentialsConfig);
+    if (allSettings.footer_credentials) {
+      const raw = allSettings.footer_credentials as CredentialsConfig;
+      if (raw.badges && Array.isArray(raw.badges)) {
+        const padded = [...raw.badges];
+        while (padded.length < 6) padded.push({ image_url: '', link: '', visible: true });
+        setCredentials({ badges: padded.slice(0, 6) });
+      } else {
+        const legacy = raw as unknown as { enamad?: CredentialItem; business_license?: CredentialItem };
+        const migrated: CredentialItem[] = [
+          legacy.enamad ?? { image_url: '', link: '', visible: true },
+          legacy.business_license ?? { image_url: '', link: '', visible: true },
+        ];
+        while (migrated.length < 6) migrated.push({ image_url: '', link: '', visible: true });
+        setCredentials({ badges: migrated });
+      }
+    }
+    if (allSettings.footer_newsletter) setNewsletter(allSettings.footer_newsletter as NewsletterConfig);
     if (allSettings.auction_hall_categories) setHall(allSettings.auction_hall_categories as HallConfig);
     if (allSettings.homepage_quick_access) setQuickAccess(allSettings.homepage_quick_access as QuickAccessConfig);
     if (allSettings.homepage_special_section) setSpecialSection(allSettings.homepage_special_section as SpecialSectionConfig);
@@ -180,6 +203,39 @@ export function AdminHomepagePage() {
 
   const handleRemoveBg = () => {
     setIntroBg({ image_url: null });
+  };
+
+  const handleUploadBadge = async (file: File, index: number) => {
+    if (!file.type.startsWith('image/')) {
+      toast.error('فقط فایل تصویری مجاز است');
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const fileName = `badge-${index}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from('homepage-images')
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+      if (upErr) throw upErr;
+      const { data: pub } = supabase.storage
+        .from('homepage-images')
+        .getPublicUrl(fileName);
+      const updated = [...credentials.badges];
+      updated[index] = { ...updated[index], image_url: pub.publicUrl };
+      setCredentials({ badges: updated });
+      toast.success(`تصویر نماد ${index + 1} آپلود شد`);
+    } catch {
+      toast.error('خطا در آپلود تصویر');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemoveBadge = (index: number) => {
+    const updated = [...credentials.badges];
+    updated[index] = { ...updated[index], image_url: '' };
+    setCredentials({ badges: updated });
   };
 
   const handleUploadBanner = async (file: File, index: number) => {
@@ -225,6 +281,7 @@ export function AdminHomepagePage() {
         updateSetting.mutateAsync({ key: 'footer_copyright', value: copyright }),
         updateSetting.mutateAsync({ key: 'footer_social_links', value: social }),
         updateSetting.mutateAsync({ key: 'footer_credentials', value: credentials }),
+        updateSetting.mutateAsync({ key: 'footer_newsletter', value: newsletter }),
         updateSetting.mutateAsync({ key: 'auction_hall_categories', value: hall }),
         updateSetting.mutateAsync({ key: 'homepage_quick_access', value: quickAccess }),
         updateSetting.mutateAsync({ key: 'homepage_special_section', value: specialSection }),
@@ -606,35 +663,93 @@ export function AdminHomepagePage() {
         </div>
       </SectionCard>
 
+      {/* NEWSLETTER */}
+      <SectionCard title="خبرنامه فوتر">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 mb-2">
+            <label className="text-sm font-medium text-neutral-600">نمایش</label>
+            <button
+              onClick={() => setNewsletter((p) => ({ ...p, visible: !p.visible }))}
+              className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors ${newsletter.visible ? 'bg-success-50 border-success-300 text-success-600' : 'bg-neutral-50 border-neutral-200 text-neutral-400'}`}
+            >
+              {newsletter.visible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+            </button>
+          </div>
+          <Field label="عنوان" value={newsletter.title} onChange={(v) => setNewsletter((p) => ({ ...p, title: v }))} placeholder="خبرنامه پارسی شو" />
+          <Field label="توضیحات" value={newsletter.subtitle} onChange={(v) => setNewsletter((p) => ({ ...p, subtitle: v }))} placeholder="جدیدترین مزایده‌ها و تخفیف‌ها..." />
+        </div>
+      </SectionCard>
+
       {/* CREDENTIALS */}
       <SectionCard title="نمادها و مجوزها">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-2 p-3 rounded-xl bg-neutral-50 border border-neutral-100">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-bold text-neutral-700">اینماد</h4>
-              <button
-                onClick={() => setCredentials((p) => ({ ...p, enamad: { ...p.enamad, visible: !p.enamad.visible } }))}
-                className={`w-7 h-7 rounded-lg flex items-center justify-center border text-xs ${credentials.enamad.visible ? 'bg-success-50 border-success-300 text-success-600' : 'bg-neutral-50 border-neutral-200 text-neutral-400'}`}
-              >
-                {credentials.enamad.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-              </button>
+        <p className="text-xs text-neutral-400 mb-3">۶ جایگاه برای نمادها و مجوزهای فوتر. فقط نمادهایی که تصویر دارند و فعال هستند نمایش داده می‌شوند.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {credentials.badges.map((badge, idx) => (
+            <div key={idx} className="space-y-2 p-3 rounded-xl bg-neutral-50 border border-neutral-100">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-bold text-neutral-700">نماد {idx + 1}</h4>
+                <button
+                  onClick={() => {
+                    const updated = [...credentials.badges];
+                    updated[idx] = { ...badge, visible: !badge.visible };
+                    setCredentials({ badges: updated });
+                  }}
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center border text-xs transition-colors ${badge.visible ? 'bg-success-50 border-success-300 text-success-600' : 'bg-neutral-50 border-neutral-200 text-neutral-400'}`}
+                >
+                  {badge.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                </button>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-16 h-16 rounded-lg border border-neutral-200 overflow-hidden bg-white flex-shrink-0 flex items-center justify-center">
+                  {badge.image_url ? (
+                    <img src={badge.image_url} alt={`نماد ${idx + 1}`} className="w-full h-full object-contain p-1" />
+                  ) : (
+                    <ImageIcon className="w-5 h-5 text-neutral-300" />
+                  )}
+                </div>
+                <div className="flex flex-col gap-1.5 flex-1">
+                  <input
+                    ref={(el) => { badgeFileRefs.current[idx] = el; }}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleUploadBadge(file, idx);
+                      e.target.value = '';
+                    }}
+                  />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => badgeFileRefs.current[idx]?.click()}
+                      disabled={uploading}
+                    >
+                      {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+                      {badge.image_url ? 'تغییر' : 'آپلود'}
+                    </Button>
+                    {badge.image_url && (
+                      <Button variant="ghost" size="sm" onClick={() => handleRemoveBadge(idx)} disabled={uploading}>
+                        <Trash2 className="w-3.5 h-3.5" /> حذف
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <input
+                value={badge.link}
+                onChange={(e) => {
+                  const updated = [...credentials.badges];
+                  updated[idx] = { ...badge, link: e.target.value };
+                  setCredentials({ badges: updated });
+                }}
+                className="w-full h-9 px-3 rounded-lg border border-neutral-200 bg-white text-sm"
+                placeholder="لینک مقصد"
+                dir="ltr"
+              />
             </div>
-            <Field label="لینک تصویر" value={credentials.enamad.image_url} onChange={(v) => setCredentials((p) => ({ ...p, enamad: { ...p.enamad, image_url: v } }))} dir="ltr" />
-            <Field label="لینک مقصد" value={credentials.enamad.link} onChange={(v) => setCredentials((p) => ({ ...p, enamad: { ...p.enamad, link: v } }))} dir="ltr" />
-          </div>
-          <div className="space-y-2 p-3 rounded-xl bg-neutral-50 border border-neutral-100">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-bold text-neutral-700">مجوز کسب‌وکار</h4>
-              <button
-                onClick={() => setCredentials((p) => ({ ...p, business_license: { ...p.business_license, visible: !p.business_license.visible } }))}
-                className={`w-7 h-7 rounded-lg flex items-center justify-center border text-xs ${credentials.business_license.visible ? 'bg-success-50 border-success-300 text-success-600' : 'bg-neutral-50 border-neutral-200 text-neutral-400'}`}
-              >
-                {credentials.business_license.visible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-              </button>
-            </div>
-            <Field label="لینک تصویر" value={credentials.business_license.image_url} onChange={(v) => setCredentials((p) => ({ ...p, business_license: { ...p.business_license, image_url: v } }))} dir="ltr" />
-            <Field label="لینک مقصد" value={credentials.business_license.link} onChange={(v) => setCredentials((p) => ({ ...p, business_license: { ...p.business_license, link: v } }))} dir="ltr" />
-          </div>
+          ))}
         </div>
       </SectionCard>
     </div>
