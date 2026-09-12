@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
 
-export type AppStore = 'bazaar' | 'myket' | 'ios';
+export type AppStore = 'bazaar' | 'myket' | 'appstore';
 
 interface AppStoreBadgeProps {
   store: AppStore;
@@ -12,8 +12,7 @@ interface AppStoreBadgeProps {
 interface StoreConfig {
   bg: string;
   hoverBg: string;
-  topLabel: string;
-  name: string;
+  label: string;
   icon: ReactNode;
 }
 
@@ -57,24 +56,21 @@ function AppleIcon({ className }: { className?: string }) {
 const storeConfigs: Record<AppStore, StoreConfig> = {
   bazaar: {
     bg: 'bg-[#1B7A43]',
-    hoverBg: 'hover:bg-[#1A6D3C]',
-    topLabel: 'GET IT ON',
-    name: 'Café Bazaar',
-    icon: <BazaarIcon className="w-6 h-6 text-white" />,
+    hoverBg: 'hover:bg-[#186D3C]',
+    label: 'کافه بازار',
+    icon: <BazaarIcon className="w-5 h-5 text-white shrink-0" />,
   },
   myket: {
     bg: 'bg-[#1E88E5]',
     hoverBg: 'hover:bg-[#1976D2]',
-    topLabel: 'GET IT ON',
-    name: 'Myket',
-    icon: <MyketIcon className="w-6 h-6 text-white" />,
+    label: 'مایکت',
+    icon: <MyketIcon className="w-5 h-5 text-white shrink-0" />,
   },
-  ios: {
+  appstore: {
     bg: 'bg-[#0F172A]',
     hoverBg: 'hover:bg-[#1E293B]',
-    topLabel: 'Download on the',
-    name: 'App Store',
-    icon: <AppleIcon className="w-6 h-6 text-white" />,
+    label: 'اپ استور',
+    icon: <AppleIcon className="w-5 h-5 text-white shrink-0" />,
   },
 };
 
@@ -87,7 +83,7 @@ export function AppStoreBadge({ store, href, className }: AppStoreBadgeProps) {
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        'inline-flex items-center gap-2.5 h-12 px-4 rounded-md text-white',
+        'flex items-center justify-between h-11 px-3.5 rounded-md text-white w-full',
         'shadow-sm transition-all duration-normal ease-out',
         'hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]',
         config.bg,
@@ -95,12 +91,7 @@ export function AppStoreBadge({ store, href, className }: AppStoreBadgeProps) {
         className,
       )}
     >
-      <span className="flex flex-col items-start leading-none">
-        <span className="text-[0.625rem] font-medium text-white/70 uppercase tracking-wide">
-          {config.topLabel}
-        </span>
-        <span className="text-sm font-bold mt-0.5">{config.name}</span>
-      </span>
+      <span className="text-sm font-bold leading-none">{config.label}</span>
       {config.icon}
     </a>
   );

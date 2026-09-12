@@ -227,7 +227,7 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom section: link groups — symmetric */}
+        {/* Bottom section: link groups + download column — symmetric */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 lg:gap-6 mb-6">
           {groups.map((group) => (
             <div key={group.title}>
@@ -246,23 +246,24 @@ export function Footer() {
               </ul>
             </div>
           ))}
-        </div>
 
-        {/* Download section + bottom bar */}
-        <div className="border-t border-neutral-200 pt-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          {/* Download section: right on desktop, last on mobile */}
-          <div className="order-2 sm:order-1 flex flex-col items-center sm:items-start gap-2">
-            <h4 className="text-sm font-bold text-neutral-800">دانلود اپلیکیشن پارسی شو</h4>
-            <p className="text-xs text-neutral-500">روش سریع‌تر برای خرید و مزایده، روی گوشی شما</p>
-            <div className="flex flex-col sm:flex-row gap-2 mt-1">
+          {/* Download column — same width as link columns */}
+          <div className="col-span-2 sm:col-span-1 lg:col-span-1 flex flex-col items-center lg:items-start">
+            <h4 className="text-xs font-bold text-neutral-800 mb-1">دانلود اپلیکیشن پارسی شو</h4>
+            <p className="text-xs text-neutral-500 mb-2.5 leading-relaxed text-center lg:text-right">
+              روش سریع‌تر برای خرید و مزایده، روی گوشی شما
+            </p>
+            <div className="flex flex-col gap-2 w-full max-w-[200px] lg:max-w-none">
               <AppStoreBadge store="bazaar" href="#" />
               <AppStoreBadge store="myket" href="#" />
-              <AppStoreBadge store="ios" href="#" />
+              <AppStoreBadge store="appstore" href="#" />
             </div>
           </div>
+        </div>
 
-          {/* Copyright + contact: left on desktop, first on mobile */}
-          <div className="order-1 sm:order-2 flex flex-col items-center gap-3 sm:self-end">
+        {/* Bottom bar: copyright + contact */}
+        <div className="border-t border-neutral-200 pt-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div className="flex flex-col items-center gap-3 sm:self-end">
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-neutral-400">
               <span>{cr.text}</span>
               <span className="text-neutral-300 hidden sm:inline">|</span>
