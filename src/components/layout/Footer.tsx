@@ -72,10 +72,18 @@ export function Footer() {
 
   const s = social ?? defaultSocial;
   const cr = copyright ?? defaultCopyright;
-  const cred = credentials ?? defaultCredentials;
   const nl = newsletter ?? defaultNewsletter;
 
-  const visibleBadges = cred.badges.filter((b) => b.visible);
+  const credBadges: CredentialItem[] = (() => {
+    if (credentials && Array.isArray(credentials.badges)) return credentials.badges;
+    if (credentials && (credentials.enamad || credentials.business_license)) {
+      const legacy = credentials as unknown as { enamad?: CredentialItem; business_license?: CredentialItem };
+      return [legacy.enamad, legacy.business_license].filter(Boolean) as CredentialItem[];
+    }
+    return defaultCredentials.badges;
+  })();
+
+  const visibleBadges = credBadges.filter((b) => b.visible);
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault();
