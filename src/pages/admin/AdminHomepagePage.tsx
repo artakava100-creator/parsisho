@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Home, Save, Loader2, Eye, EyeOff, Upload, Trash2, ImageIcon, Plus, ChevronUp, ChevronDown, X } from 'lucide-react';
+import { Home, Save, Loader2, Eye, EyeOff, Upload, Trash2, ImageIcon, Plus, ChevronUp, ChevronDown, X, Globe } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -16,6 +16,7 @@ import {
   type SpecialSectionConfig,
 } from '@/config/home-sections';
 import { footerGroups as defaultFooterGroups, type FooterLinkGroup } from '@/config/footer-links';
+import { SocialIcon, socialPlatformConfigs, type SocialPlatform } from '@/components/ui/SocialIcon';
 
 const SETTINGS_KEYS = [
   'homepage_intro',
@@ -161,7 +162,12 @@ export function AdminHomepagePage() {
   const bannerFileRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [auctionTitle, setAuctionTitle] = useState<AuctionTitleConfig>({ title: '' });
   const [copyright, setCopyright] = useState<CopyrightConfig>({ text: '', version: '' });
-  const [social, setSocial] = useState<SocialConfig>({ links: [] });
+  const [social, setSocial] = useState<SocialConfig>({ links: [
+    { id: 'instagram', title: 'اینستاگرام', url: '#', icon: 'instagram', visible: true },
+    { id: 'aparat', title: 'آپارات', url: '#', icon: 'aparat', visible: true },
+    { id: 'telegram', title: 'تلگرام', url: '#', icon: 'telegram', visible: true },
+    { id: 'eitaa', title: 'ایتا', url: '#', icon: 'eitaa', visible: true },
+  ] });
   const [credentials, setCredentials] = useState<CredentialsConfig>({
     badges: Array.from({ length: 4 }, () => ({ image_url: '', link: '', visible: true })),
   });
@@ -705,43 +711,92 @@ export function AdminHomepagePage() {
       </SectionCard>
 
       {/* SOCIAL LINKS */}
-      <SectionCard title="شبکه‌های اجتماعی">
+      <SectionCard title="مدیریت فوتر — شبکه‌های اجتماعی">
+        <p className="text-xs text-neutral-400 mb-4">
+          ۴ شبکه اجتماعی فوتر را مدیریت کنید. لینک هر شبکه را وارد کنید، ترتیب نمایش را تغییر دهید و فعال/غیرفعال بودن هر مورد را کنترل کنید.
+        </p>
         <div className="space-y-3">
-          {social.links.map((link, idx) => (
-            <div key={link.id} className="flex items-center gap-3 p-3 rounded-xl bg-neutral-50 border border-neutral-100">
-              <input
-                value={link.title}
-                onChange={(e) => {
-                  const updated = [...social.links];
-                  updated[idx] = { ...link, title: e.target.value };
-                  setSocial({ links: updated });
-                }}
-                className="w-24 h-9 px-3 rounded-lg border border-neutral-200 bg-white text-sm"
-                placeholder="عنوان"
-              />
-              <input
-                value={link.url}
-                onChange={(e) => {
-                  const updated = [...social.links];
-                  updated[idx] = { ...link, url: e.target.value };
-                  setSocial({ links: updated });
-                }}
-                className="flex-1 h-9 px-3 rounded-lg border border-neutral-200 bg-white text-sm"
-                placeholder="آدرس"
-                dir="ltr"
-              />
-              <button
-                onClick={() => {
-                  const updated = [...social.links];
-                  updated[idx] = { ...link, visible: !link.visible };
-                  setSocial({ links: updated });
-                }}
-                className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors ${link.visible ? 'bg-success-50 border-success-300 text-success-600' : 'bg-neutral-50 border-neutral-200 text-neutral-400'}`}
-              >
-                {link.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-              </button>
-            </div>
-          ))}
+          {social.links.map((link, idx) => {
+            const platform = socialPlatformConfigs[link.icon as SocialPlatform];
+            const isUrlValid = !link.url || link.url === '#' || /^https?:\/\/.+/.test(link.url);
+            return (
+              <div key={link.id} className="p-3 rounded-xl bg-neutral-50 border border-neutral-100">
+                <div className="flex items-center gap-3">
+                  {/* Icon preview */}
+                  <div className="w-10 h-10 rounded-full bg-white border border-neutral-200 flex items-center justify-center shrink-0">
+                    {platform ? (
+                      <SocialIcon platform={link.icon as SocialPlatform} className="w-5 h-5 text-neutral-500" />
+                    ) : (
+                      <Globe className="w-4 h-4 text-neutral-300" />
+                    )}
+                  </div>
+
+                  {/* Title (read-only for known platforms) */}
+                  <span className="text-sm font-bold text-neutral-700 w-20 shrink-0">
+                    {platform?.label ?? link.title}
+                  </span>
+
+                  {/* URL input */}
+                  <div className="flex-1">
+                    <input
+                      value={link.url}
+                      onChange={(e) => {
+                        const updated = [...social.links];
+                        updated[idx] = { ...link, url: e.target.value };
+                        setSocial({ links: updated });
+                      }}
+                      className={`w-full h-9 px-3 rounded-lg border bg-white text-sm ${isUrlValid ? 'border-neutral-200' : 'border-error-300'} focus:outline-none focus:ring-2 focus:ring-primary-200`}
+                      placeholder="https://instagram.com/parsisho"
+                      dir="ltr"
+                    />
+                    {!isUrlValid && (
+                      <p className="text-xs text-error-500 mt-1">آدرس باید با http:// یا https:// شروع شود</p>
+                    )}
+                  </div>
+
+                  {/* Reorder buttons */}
+                  <button
+                    onClick={() => {
+                      if (idx > 0) {
+                        const updated = [...social.links];
+                        [updated[idx - 1], updated[idx]] = [updated[idx], updated[idx - 1]];
+                        setSocial({ links: updated });
+                      }
+                    }}
+                    disabled={idx === 0}
+                    className="w-8 h-8 rounded-lg border border-neutral-200 bg-white flex items-center justify-center text-neutral-500 hover:text-primary-600 disabled:opacity-30 transition-colors shrink-0"
+                  >
+                    <ChevronUp className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (idx < social.links.length - 1) {
+                        const updated = [...social.links];
+                        [updated[idx + 1], updated[idx]] = [updated[idx], updated[idx + 1]];
+                        setSocial({ links: updated });
+                      }
+                    }}
+                    disabled={idx === social.links.length - 1}
+                    className="w-8 h-8 rounded-lg border border-neutral-200 bg-white flex items-center justify-center text-neutral-500 hover:text-primary-600 disabled:opacity-30 transition-colors shrink-0"
+                  >
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+
+                  {/* Visibility toggle */}
+                  <button
+                    onClick={() => {
+                      const updated = [...social.links];
+                      updated[idx] = { ...link, visible: !link.visible };
+                      setSocial({ links: updated });
+                    }}
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center border transition-colors shrink-0 ${link.visible ? 'bg-success-50 border-success-300 text-success-600' : 'bg-neutral-50 border-neutral-200 text-neutral-400'}`}
+                  >
+                    {link.visible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </SectionCard>
 

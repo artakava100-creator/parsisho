@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, Send, MessageCircle, ShieldCheck, Award, Globe, ArrowLeft } from 'lucide-react';
+import { Mail, Phone, Send, ShieldCheck, Award, ArrowLeft } from 'lucide-react';
 import { BRAND_NAME } from '@/config/brand';
 import { footerGroups as defaultFooterGroups, type FooterLinkGroup } from '@/config/footer-links';
 import { useSiteSetting } from '@/hooks/useSiteSettings';
 import { toPersianDigits } from '@/lib/persian';
 import { useToast } from '@/providers/useToast';
 import { AppStoreBadge } from '@/components/ui/AppStoreBadge';
+import { SocialIcon, type SocialPlatform } from '@/components/ui/SocialIcon';
 
 interface SocialLink {
   id: string;
@@ -51,18 +52,19 @@ interface AppDownloadConfig {
 
 const BADGE_COUNT = 4;
 
-const socialIconMap: Record<string, typeof Globe> = {
-  eitaa: MessageCircle,
-  telegram: Send,
-  globe: Globe,
-  website: Globe,
+const socialPlatformMap: Record<string, SocialPlatform> = {
+  instagram: 'instagram',
+  aparat: 'aparat',
+  telegram: 'telegram',
+  eitaa: 'eitaa',
 };
 
 const defaultSocial: FooterSocial = {
   links: [
-    { id: 'eitaa', title: 'ایتا', url: '#', icon: 'eitaa', visible: true },
+    { id: 'instagram', title: 'اینستاگرام', url: '#', icon: 'instagram', visible: true },
+    { id: 'aparat', title: 'آپارات', url: '#', icon: 'aparat', visible: true },
     { id: 'telegram', title: 'تلگرام', url: '#', icon: 'telegram', visible: true },
-    { id: 'website', title: 'وبسایت', url: '#', icon: 'globe', visible: true },
+    { id: 'eitaa', title: 'ایتا', url: '#', icon: 'eitaa', visible: true },
   ],
 };
 const defaultCopyright: FooterCopyright = {
@@ -160,9 +162,10 @@ export function Footer() {
               <p className="text-xs text-neutral-500 leading-relaxed mb-3">
                 {br.description}
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 {s.links.filter((l) => l.visible).map((link) => {
-                  const Icon = socialIconMap[link.icon] ?? Globe;
+                  const platform = socialPlatformMap[link.icon];
+                  if (!platform) return null;
                   return (
                     <a
                       key={link.id}
@@ -170,9 +173,9 @@ export function Footer() {
                       target="_blank"
                       rel="noopener noreferrer"
                       title={link.title}
-                      className="w-8 h-8 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-primary-600 hover:border-primary-300 hover:shadow-sm transition-all"
+                      className="w-10 h-10 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-neutral-300 transition-all duration-200 hover:-translate-y-0.5"
                     >
-                      <Icon className="w-3.5 h-3.5" />
+                      <SocialIcon platform={platform} className="w-5 h-5 text-neutral-400" />
                     </a>
                   );
                 })}
