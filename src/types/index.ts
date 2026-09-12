@@ -1086,3 +1086,28 @@ export interface SpecialSectionConfig {
   title: string;
   maxVisible: number;
 }
+
+// ─── Newsletter Subscribers Types ────────────────────────────────
+
+export interface NewsletterSubscriber {
+  id: string;
+  email: string;
+  status: 'active' | 'unsubscribed';
+  subscribedAt: string;
+  unsubscribedAt: string | null;
+  updatedAt: string;
+  source: string;
+}
+
+export interface NewsletterStats {
+  total: number;
+  active: number;
+  unsubscribed: number;
+}
+
+export interface NewsletterListResult {
+  items: NewsletterSubscriber[];
+  total: number;
+  page: number;
+  pageSize: number;
+}

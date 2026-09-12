@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Mail, Phone, Send, ShieldCheck, Award, ArrowLeft } from 'lucide-react';
+import { Mail, Phone, Send, ShieldCheck, Award, ArrowLeft, Loader2 } from 'lucide-react';
 import { BRAND_NAME } from '@/config/brand';
 import { footerGroups as defaultFooterGroups, type FooterLinkGroup } from '@/config/footer-links';
 import { useSiteSetting } from '@/hooks/useSiteSettings';
+import { useSubscribeNewsletter } from '@/hooks/useAdminNewsletter';
 import { toPersianDigits } from '@/lib/persian';
 import { useToast } from '@/providers/useToast';
 import { AppStoreBadge } from '@/components/ui/AppStoreBadge';
@@ -108,6 +109,7 @@ export function Footer() {
   const { data: linksConfig } = useSiteSetting<FooterLinksConfig>('footer_links', defaultLinks);
   const { data: appDownload } = useSiteSetting<AppDownloadConfig>('footer_app_download', defaultAppDownload);
   const toast = useToast();
+  const subscribeMutation = useSubscribeNewsletter();
 
   const [email, setEmail] = useState('');
 
@@ -137,11 +139,22 @@ export function Footer() {
     return defaultCredentials.badges;
   })();
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
-    setEmail('');
-    toast.success('ایمیل شما در خبرنامه ثبت شد');
+    const trimmed = email.trim();
+    if (!trimmed) return;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmed)) {
+      toast.error('فرمت ایمیل نامعتبر است');
+      return;
+    }
+    try {
+      const message = await subscribeMutation.mutateAsync(trimmed);
+      toast.success(message);
+      setEmail('');
+    } catch (err) {
+      toast.error((err as { message?: string })?.message ?? 'خطا در ثبت اشتراک');
+    }
   };
 
   return (
@@ -159,7 +172,7 @@ export function Footer() {
                 </div>
                 <span className="text-lg font-extrabold text-neutral-800">{BRAND_NAME}</span>
               </div>
-              <p className="text-xs text-neutral-500 leading-relaxed mb-3">
+              <p className="text-sm text-neutral-500 leading-relaxed mb-3">
                 {br.description}
               </p>
               <div className="flex items-center gap-2.5">
@@ -185,8 +198,8 @@ export function Footer() {
             {/* Newsletter — compact, next to brand */}
             {nl.visible && (
               <div className="flex-1 rounded-xl bg-gradient-to-br from-primary-50 to-accent-50/30 border border-primary-100/50 p-4 sm:p-5 flex flex-col justify-center">
-                <h3 className="text-sm font-extrabold text-primary-800 mb-1">{nl.title}</h3>
-                <p className="text-xs text-neutral-500 leading-relaxed mb-3">
+                <h3 className="text-base font-extrabold text-primary-800 mb-1">{nl.title}</h3>
+                <p className="text-sm text-neutral-500 leading-relaxed mb-3">
                   {nl.subtitle}
                 </p>
                 <form onSubmit={handleSubscribe} className="flex items-stretch gap-2">
@@ -197,15 +210,17 @@ export function Footer() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="ایمیل خود را وارد کنید"
-                      dir="rtl"
-                      className="w-full h-10 ps-3 pe-9 rounded-lg bg-white border border-neutral-200 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-300"
+                      dir="ltr"
+                      disabled={subscribeMutation.isPending}
+                      className="w-full h-10 ps-3 pe-10 rounded-lg bg-white border border-neutral-200 text-sm text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-300 disabled:opacity-60"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="h-10 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold flex items-center gap-1.5 shrink-0 transition-colors"
+                    disabled={subscribeMutation.isPending}
+                    className="h-10 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-sm font-bold flex items-center gap-1.5 shrink-0 transition-colors disabled:opacity-60"
                   >
-                    <Send className="w-3.5 h-3.5" />
+                    {subscribeMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                     عضویت
                   </button>
                 </form>
@@ -215,7 +230,7 @@ export function Footer() {
 
           {/* Left: 4 trust badges in a horizontal row */}
           <div className="lg:col-span-4 flex flex-col">
-            <h4 className="text-xs font-bold text-neutral-700 mb-2.5">نمادها و مجوزها</h4>
+            <h4 className="text-sm font-bold text-neutral-700 mb-2.5">نمادها و مجوزها</h4>
             <div className="grid grid-cols-4 gap-2 flex-1">
               {credBadges.map((badge, idx) => {
                 const FallbackIcon = badgeFallbackIcons[idx % badgeFallbackIcons.length];
@@ -252,13 +267,13 @@ export function Footer() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 lg:gap-6 mb-6">
           {groups.map((group) => (
             <div key={group.title}>
-              <h4 className="text-xs font-bold text-neutral-700 mb-2.5">{group.title}</h4>
+              <h4 className="text-sm font-bold text-neutral-700 mb-2.5">{group.title}</h4>
               <ul className="space-y-1.5">
                 {group.links.map((link, idx) => (
                   <li key={`${link.to}-${idx}`}>
                     <Link
                       to={link.to}
-                      className="text-xs text-neutral-500 hover:text-primary-600 transition-colors"
+                      className="text-sm text-neutral-500 hover:text-primary-600 transition-colors"
                     >
                       {link.label}
                     </Link>
@@ -271,8 +286,8 @@ export function Footer() {
           {/* Download column — same width as link columns */}
           {ad.visible && (
             <div className="col-span-2 sm:col-span-1 lg:col-span-1 flex flex-col items-center lg:items-start">
-              <h4 className="text-xs font-bold text-neutral-800 mb-1">{ad.title}</h4>
-              <p className="text-xs text-neutral-500 mb-2.5 leading-relaxed text-center lg:text-right">
+              <h4 className="text-sm font-bold text-neutral-800 mb-1">{ad.title}</h4>
+              <p className="text-sm text-neutral-500 mb-2.5 leading-relaxed text-center lg:text-right">
                 {ad.subtitle}
               </p>
               <div className="flex flex-col gap-1.5 w-full max-w-[180px] lg:max-w-none">
@@ -287,7 +302,7 @@ export function Footer() {
         {/* Bottom bar: copyright on right, contact on left */}
         <div className="border-t border-neutral-200 pt-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           {/* Right: copyright */}
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-neutral-400 sm:self-end">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-neutral-400 sm:self-end">
             <span>{cr.text}</span>
             <span className="text-neutral-300 hidden sm:inline">|</span>
             <span>نسخه {cr.version}</span>
@@ -298,7 +313,7 @@ export function Footer() {
             </span>
           </div>
           {/* Left: contact info */}
-          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-neutral-500">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-sm text-neutral-500">
             <a
               href={`tel:${ct.phone}`}
               className="flex items-center gap-1.5 hover:text-primary-600 transition-colors"
