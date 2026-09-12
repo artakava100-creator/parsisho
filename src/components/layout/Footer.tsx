@@ -173,9 +173,9 @@ export function Footer() {
                       target="_blank"
                       rel="noopener noreferrer"
                       title={link.title}
-                      className="group w-10 h-10 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-neutral-300 transition-all duration-200 hover:-translate-y-0.5"
+                      className="group w-11 h-11 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-400 hover:border-neutral-300 transition-all duration-200 hover:-translate-y-0.5"
                     >
-                      <SocialIcon platform={platform} className="w-5 h-5 text-neutral-400" />
+                      <SocialIcon platform={platform} className="w-[22px] h-[22px] text-neutral-400" />
                     </a>
                   );
                 })}
