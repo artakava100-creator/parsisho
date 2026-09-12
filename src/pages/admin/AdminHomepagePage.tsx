@@ -153,7 +153,7 @@ export function AdminHomepagePage() {
   const [copyright, setCopyright] = useState<CopyrightConfig>({ text: '', version: '' });
   const [social, setSocial] = useState<SocialConfig>({ links: [] });
   const [credentials, setCredentials] = useState<CredentialsConfig>({
-    badges: Array.from({ length: 6 }, () => ({ image_url: '', link: '', visible: true })),
+    badges: Array.from({ length: 4 }, () => ({ image_url: '', link: '', visible: true })),
   });
   const [newsletter, setNewsletter] = useState<NewsletterConfig>({ title: 'خبرنامه پارسی شو', subtitle: 'جدیدترین مزایده‌ها، تخفیف‌ها و رویدادها را اول از همه دریافت کنید.', visible: true });
   const [footerContact, setFooterContact] = useState<FooterContactConfig>({ phone: '09374847500', email: 'info@parsisho.ir' });
@@ -177,15 +177,15 @@ export function AdminHomepagePage() {
       const raw = allSettings.footer_credentials as CredentialsConfig;
       if (raw.badges && Array.isArray(raw.badges)) {
         const padded = [...raw.badges];
-        while (padded.length < 6) padded.push({ image_url: '', link: '', visible: true });
-        setCredentials({ badges: padded.slice(0, 6) });
+        while (padded.length < 4) padded.push({ image_url: '', link: '', visible: true });
+        setCredentials({ badges: padded.slice(0, 4) });
       } else {
         const legacy = raw as unknown as { enamad?: CredentialItem; business_license?: CredentialItem };
         const migrated: CredentialItem[] = [
           legacy.enamad ?? { image_url: '', link: '', visible: true },
           legacy.business_license ?? { image_url: '', link: '', visible: true },
         ];
-        while (migrated.length < 6) migrated.push({ image_url: '', link: '', visible: true });
+        while (migrated.length < 4) migrated.push({ image_url: '', link: '', visible: true });
         setCredentials({ badges: migrated });
       }
     }
@@ -849,8 +849,8 @@ export function AdminHomepagePage() {
 
       {/* CREDENTIALS */}
       <SectionCard title="نمادها و مجوزها">
-        <p className="text-xs text-neutral-400 mb-3">۶ جایگاه برای نمادها و مجوزهای فوتر. فقط نمادهایی که تصویر دارند و فعال هستند نمایش داده می‌شوند.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <p className="text-xs text-neutral-400 mb-3">۴ جایگاه برای نمادها و مجوزهای فوتر. فقط نمادهایی که تصویر دارند و فعال هستند نمایش داده می‌شوند.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {credentials.badges.map((badge, idx) => (
             <div key={idx} className="space-y-2 p-3 rounded-xl bg-neutral-50 border border-neutral-100">
               <div className="flex items-center justify-between">

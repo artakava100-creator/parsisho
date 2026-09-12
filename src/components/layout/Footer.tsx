@@ -40,6 +40,8 @@ interface FooterLinksConfig {
   groups: FooterLinkGroup[];
 }
 
+const BADGE_COUNT = 4;
+
 const socialIconMap: Record<string, typeof Globe> = {
   eitaa: MessageCircle,
   telegram: Send,
@@ -59,7 +61,7 @@ const defaultCopyright: FooterCopyright = {
   version: '۴۰۵.۱',
 };
 const defaultCredentials: FooterCredentials = {
-  badges: Array.from({ length: 6 }, () => ({ image_url: '', link: '', visible: true })),
+  badges: Array.from({ length: BADGE_COUNT }, () => ({ image_url: '', link: '', visible: true })),
 };
 const defaultNewsletter: NewsletterConfig = {
   title: 'خبرنامه پارسی شو',
@@ -75,7 +77,7 @@ const defaultBranding: FooterBrandingConfig = {
 };
 const defaultLinks: FooterLinksConfig = { groups: defaultFooterGroups };
 
-const badgeFallbackIcons = [ShieldCheck, Award, ShieldCheck, Award, ShieldCheck, Award];
+const badgeFallbackIcons = [ShieldCheck, Award, ShieldCheck, Award];
 
 export function Footer() {
   const { data: social } = useSiteSetting<FooterSocial>('footer_social_links', defaultSocial);
@@ -99,8 +101,8 @@ export function Footer() {
   const credBadges: CredentialItem[] = (() => {
     if (credentials && Array.isArray(credentials.badges)) {
       const padded = [...credentials.badges];
-      while (padded.length < 6) padded.push({ image_url: '', link: '', visible: true });
-      return padded.slice(0, 6);
+      while (padded.length < BADGE_COUNT) padded.push({ image_url: '', link: '', visible: true });
+      return padded.slice(0, BADGE_COUNT);
     }
     if (credentials && (credentials as unknown as { enamad?: CredentialItem }).enamad) {
       const legacy = credentials as unknown as { enamad?: CredentialItem; business_license?: CredentialItem };
@@ -108,8 +110,8 @@ export function Footer() {
         legacy.enamad ?? { image_url: '', link: '', visible: true },
         legacy.business_license ?? { image_url: '', link: '', visible: true },
       ];
-      while (migrated.length < 6) migrated.push({ image_url: '', link: '', visible: true });
-      return migrated;
+      while (migrated.length < BADGE_COUNT) migrated.push({ image_url: '', link: '', visible: true });
+      return migrated.slice(0, BADGE_COUNT);
     }
     return defaultCredentials.badges;
   })();
@@ -124,48 +126,48 @@ export function Footer() {
   return (
     <footer className="border-t border-neutral-200 bg-neutral-100 mt-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        {/* Top row: brand + newsletter */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-8">
-          {/* Brand */}
-          <div className="lg:col-span-5">
-            <div className="flex items-center gap-2.5 mb-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center shadow-sm shadow-primary-900/15">
-                <span className="text-white font-extrabold text-lg leading-none">پ</span>
+        {/* Top section: brand+newsletter on right, badges on left */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-8 pb-8 border-b border-neutral-200">
+          {/* Right: brand + newsletter */}
+          <div className="lg:col-span-8 flex flex-col sm:flex-row gap-5">
+            {/* Brand */}
+            <div className="sm:w-[260px] shrink-0">
+              <div className="flex items-center gap-2.5 mb-2.5">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-primary-800 flex items-center justify-center shadow-sm shadow-primary-900/15">
+                  <span className="text-white font-extrabold text-lg leading-none">پ</span>
+                </div>
+                <span className="text-lg font-extrabold text-neutral-800">{BRAND_NAME}</span>
               </div>
-              <span className="text-lg font-extrabold text-neutral-800">{BRAND_NAME}</span>
+              <p className="text-xs text-neutral-500 leading-relaxed mb-3">
+                {br.description}
+              </p>
+              <div className="flex items-center gap-2">
+                {s.links.filter((l) => l.visible).map((link) => {
+                  const Icon = socialIconMap[link.icon] ?? Globe;
+                  return (
+                    <a
+                      key={link.id}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={link.title}
+                      className="w-8 h-8 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-primary-600 hover:border-primary-300 hover:shadow-sm transition-all"
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                    </a>
+                  );
+                })}
+              </div>
             </div>
-            <p className="text-sm text-neutral-500 leading-relaxed max-w-[300px] mb-4">
-              {br.description}
-            </p>
-            {/* Social icons */}
-            <div className="flex items-center gap-2">
-              {s.links.filter((l) => l.visible).map((link) => {
-                const Icon = socialIconMap[link.icon] ?? Globe;
-                return (
-                  <a
-                    key={link.id}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title={link.title}
-                    className="w-8 h-8 rounded-full bg-white border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-primary-600 hover:border-primary-300 hover:shadow-sm transition-all"
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                  </a>
-                );
-              })}
-            </div>
-          </div>
 
-          {/* Newsletter */}
-          {nl.visible && (
-            <div className="lg:col-span-7">
-              <div className="rounded-2xl bg-gradient-to-br from-primary-50 to-accent-50/40 border border-primary-100/60 p-5 sm:p-6 h-full flex flex-col justify-center">
+            {/* Newsletter — compact, next to brand */}
+            {nl.visible && (
+              <div className="flex-1 rounded-xl bg-gradient-to-br from-primary-50 to-accent-50/30 border border-primary-100/50 p-4 sm:p-5 flex flex-col justify-center">
                 <h3 className="text-sm font-extrabold text-primary-800 mb-1">{nl.title}</h3>
-                <p className="text-xs text-neutral-500 leading-relaxed mb-3 max-w-md">
+                <p className="text-xs text-neutral-500 leading-relaxed mb-3">
                   {nl.subtitle}
                 </p>
-                <form onSubmit={handleSubscribe} className="flex items-stretch gap-2 max-w-md">
+                <form onSubmit={handleSubscribe} className="flex items-stretch gap-2">
                   <div className="relative flex-1">
                     <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
                     <input
@@ -186,35 +188,13 @@ export function Footer() {
                   </button>
                 </form>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        {/* Middle row: link groups + badges */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-12 gap-5 lg:gap-6 mb-8">
-          {/* Link groups */}
-          {groups.map((group) => (
-            <div key={group.title} className="lg:col-span-2">
-              <h4 className="text-xs font-bold text-neutral-700 mb-2.5">{group.title}</h4>
-              <ul className="space-y-1.5">
-                {group.links.map((link, idx) => (
-                  <li key={`${link.to}-${idx}`}>
-                    <Link
-                      to={link.to}
-                      className="text-xs text-neutral-500 hover:text-primary-600 transition-colors"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-
-          {/* Trust badges — compact, all 6 slots always shown */}
-          <div className="col-span-2 sm:col-span-3 lg:col-span-4">
+          {/* Left: 4 trust badges in a horizontal row */}
+          <div className="lg:col-span-4 flex flex-col">
             <h4 className="text-xs font-bold text-neutral-700 mb-2.5">نمادها و مجوزها</h4>
-            <div className="grid grid-cols-6 sm:grid-cols-6 gap-1.5 sm:gap-2">
+            <div className="grid grid-cols-4 gap-2 flex-1">
               {credBadges.map((badge, idx) => {
                 const FallbackIcon = badgeFallbackIcons[idx % badgeFallbackIcons.length];
                 const hasContent = badge.visible && badge.image_url;
@@ -244,6 +224,27 @@ export function Footer() {
               })}
             </div>
           </div>
+        </div>
+
+        {/* Bottom section: link groups — symmetric */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 lg:gap-6 mb-6">
+          {groups.map((group) => (
+            <div key={group.title}>
+              <h4 className="text-xs font-bold text-neutral-700 mb-2.5">{group.title}</h4>
+              <ul className="space-y-1.5">
+                {group.links.map((link, idx) => (
+                  <li key={`${link.to}-${idx}`}>
+                    <Link
+                      to={link.to}
+                      className="text-xs text-neutral-500 hover:text-primary-600 transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
         {/* Bottom bar: copyright + contact in one row */}
