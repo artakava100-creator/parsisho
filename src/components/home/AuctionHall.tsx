@@ -284,7 +284,13 @@ function ErrorState({ message }: { message: string }) {
 
 export function AuctionHall() {
   const { data: hallConfig } = useSiteSetting<HallConfig>('auction_hall_categories', defaultHallConfig);
-  const config = hallConfig ?? defaultHallConfig;
+  const config = useMemo<HallConfig>(() => {
+    const raw = hallConfig ?? defaultHallConfig;
+    if (raw.tabs && Array.isArray(raw.tabs)) return { tabs: raw.tabs };
+    const legacy = raw as unknown as { categories?: HallTabConfig[] };
+    if (legacy.categories && Array.isArray(legacy.categories)) return { tabs: legacy.categories };
+    return defaultHallConfig;
+  }, [hallConfig]);
   const visibleTabs = useMemo(
     () => config.tabs.filter((t) => t.visible).sort((a, b) => a.sort_order - b.sort_order),
     [config.tabs],
