@@ -113,18 +113,18 @@
     --color-info-900: #07121F;
     --color-info-950: #040A14;
 
-    /* ---- Semantic surface tokens — warm terracotta (ajri) ---- */
-    --color-background: #E89B6C;
+    /* ---- Semantic surface tokens — warm beige (nokhodi), slightly richer ---- */
+    --color-background: #F5E6D0;
     --color-surface: #FFFFFF;
-    --color-surface-soft: #F2AE80;
-    --color-surface-overlay: #F5C098;
-    --color-surface-sunken: #D8875A;
-    --color-border: #D4A88E;
+    --color-surface-soft: #FBF1E2;
+    --color-surface-overlay: #F7E8D5;
+    --color-surface-sunken: #EFD9BE;
+    --color-border: #DCC9AE;
 
     /* ---- Semantic text tokens ---- */
-    --color-text-primary: #2D1810;
-    --color-text-secondary: #6B4A3A;
-    --color-text-muted: #8A6B5B;
+    --color-text-primary: #17212B;
+    --color-text-secondary: #5F6B76;
+    --color-text-muted: #8A949E;
 
     /* ---- Semantic action tokens ---- */
     --color-primary: #155A8A;
@@ -196,7 +196,7 @@
   }
 
   ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-track { background: var(--color-surface-soft); }
+  ::-webkit-scrollbar-track { background: var(--color-background); }
   ::-webkit-scrollbar-thumb { background: var(--color-neutral-300); border-radius: var(--radius-full); }
   ::-webkit-scrollbar-thumb:hover { background: var(--color-neutral-400); }
 

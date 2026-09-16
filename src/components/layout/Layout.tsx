@@ -6,7 +6,7 @@ import { SupportButton } from '@/components/home/SupportButton';
 
 export function Layout() {
   return (
-    <div className="min-h-screen bg-background text-neutral-900 flex flex-col">
+    <div className="min-h-screen bg-surface flex flex-col">
       <Header />
       <main className="flex-1 pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0">
         <Outlet />
