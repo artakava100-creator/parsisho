@@ -113,18 +113,18 @@
     --color-info-900: #07121F;
     --color-info-950: #040A14;
 
-    /* ---- Semantic surface tokens — deep terracotta brick ---- */
-    --color-background: #7A2E1C;
+    /* ---- Semantic surface tokens — warm terracotta (ajri) ---- */
+    --color-background: #E89B6C;
     --color-surface: #FFFFFF;
-    --color-surface-soft: #8B3D2A;
-    --color-surface-overlay: #9C4A38;
-    --color-surface-sunken: #5C1E12;
-    --color-border: #A85D4E;
+    --color-surface-soft: #F2AE80;
+    --color-surface-overlay: #F5C098;
+    --color-surface-sunken: #D8875A;
+    --color-border: #D4A88E;
 
     /* ---- Semantic text tokens ---- */
-    --color-text-primary: #FDF5F0;
-    --color-text-secondary: #E8C9BE;
-    --color-text-muted: #C4A89E;
+    --color-text-primary: #2D1810;
+    --color-text-secondary: #6B4A3A;
+    --color-text-muted: #8A6B5B;
 
     /* ---- Semantic action tokens ---- */
     --color-primary: #155A8A;

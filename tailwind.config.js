@@ -125,11 +125,11 @@ export default {
           950: '#040A14',
         },
         surface: {
-          DEFAULT: '#7A2E1C',
+          DEFAULT: '#E89B6C',
           raised: '#FFFFFF',
-          soft: '#8B3D2A',
-          overlay: '#9C4A38',
-          sunken: '#5C1E12',
+          soft: '#F2AE80',
+          overlay: '#F5C098',
+          sunken: '#D8875A',
         },
       },
       borderRadius: {
