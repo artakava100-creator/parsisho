@@ -116,10 +116,10 @@
     /* ---- Semantic surface tokens — warm beige (nokhodi), slightly richer ---- */
     --color-background: #F5E6D0;
     --color-surface: #FFFFFF;
-    --color-surface-soft: #FBF1E2;
-    --color-surface-overlay: #F7E8D5;
-    --color-surface-sunken: #EFD9BE;
-    --color-border: #DCC9AE;
+    --color-surface-soft: #FFF8F2;
+    --color-surface-overlay: #FAEEE2;
+    --color-surface-sunken: #F5E8DA;
+    --color-border: #E8DDD2;
 
     /* ---- Semantic text tokens ---- */
     --color-text-primary: #17212B;

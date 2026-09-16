@@ -127,9 +127,9 @@ export default {
         surface: {
           DEFAULT: '#F5E6D0',
           raised: '#FFFFFF',
-          soft: '#FBF1E2',
-          overlay: '#F7E8D5',
-          sunken: '#EFD9BE',
+          soft: '#FFF8F2',
+          overlay: '#FAEEE2',
+          sunken: '#F5E8DA',
         },
       },
       borderRadius: {
