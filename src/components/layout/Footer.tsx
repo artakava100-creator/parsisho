@@ -160,7 +160,7 @@ export function Footer() {
   };
 
   return (
-    <footer className="border-t border-neutral-200 bg-neutral-100 mt-0">
+    <footer className="border-t border-neutral-200/10 bg-surface-soft text-neutral-200 mt-0">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
         {/* Top section: brand+newsletter on right, badges on left */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mb-8 pb-8 border-b border-neutral-200">

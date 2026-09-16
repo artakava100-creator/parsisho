@@ -113,18 +113,18 @@
     --color-info-900: #07121F;
     --color-info-950: #040A14;
 
-    /* ---- Semantic surface tokens — warm brick-orange tint ---- */
-    --color-background: #FDF6F0;
+    /* ---- Semantic surface tokens — deep terracotta brick ---- */
+    --color-background: #7A2E1C;
     --color-surface: #FFFFFF;
-    --color-surface-soft: #FFF8F2;
-    --color-surface-overlay: #FAEEE2;
-    --color-surface-sunken: #F5E8DA;
-    --color-border: #E8DDD2;
+    --color-surface-soft: #8B3D2A;
+    --color-surface-overlay: #9C4A38;
+    --color-surface-sunken: #5C1E12;
+    --color-border: #A85D4E;
 
     /* ---- Semantic text tokens ---- */
-    --color-text-primary: #17212B;
-    --color-text-secondary: #5F6B76;
-    --color-text-muted: #8A949E;
+    --color-text-primary: #FDF5F0;
+    --color-text-secondary: #E8C9BE;
+    --color-text-muted: #C4A89E;
 
     /* ---- Semantic action tokens ---- */
     --color-primary: #155A8A;
@@ -196,7 +196,7 @@
   }
 
   ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-track { background: var(--color-background); }
+  ::-webkit-scrollbar-track { background: var(--color-surface-soft); }
   ::-webkit-scrollbar-thumb { background: var(--color-neutral-300); border-radius: var(--radius-full); }
   ::-webkit-scrollbar-thumb:hover { background: var(--color-neutral-400); }
 
