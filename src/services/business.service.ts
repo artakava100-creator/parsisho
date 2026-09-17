@@ -1,6 +1,6 @@
 import { BaseService } from './base.service';
 import { normalizeError } from './api-error';
-import type { BusinessCategory, BusinessSummary, BusinessDetail, ApiError } from '@/types';
+import type { BusinessCategory, BusinessSummary, BusinessDetail, BusinessImage, ApiError } from '@/types';
 
 interface CategoriesResult {
   success: boolean;
@@ -58,6 +58,11 @@ interface BusinessBySlugResult {
     is_featured: boolean;
     created_at: string;
   };
+  images?: Array<{
+    id: string;
+    image_path: string;
+    sort_order: number;
+  }>;
 }
 
 function mapCategory(row: CategoriesResult['categories'] extends (infer T)[] | undefined ? T : never): BusinessCategory {
@@ -88,7 +93,10 @@ function mapBusinessSummary(row: BusinessesResult['businesses'] extends (infer T
   };
 }
 
-function mapBusinessDetail(row: NonNullable<BusinessBySlugResult['business']>): BusinessDetail {
+function mapBusinessDetail(
+  row: NonNullable<BusinessBySlugResult['business']>,
+  images: BusinessBySlugResult['images'],
+): BusinessDetail {
   return {
     id: row.id,
     name: row.name,
@@ -108,6 +116,11 @@ function mapBusinessDetail(row: NonNullable<BusinessBySlugResult['business']>): 
     status: row.status as BusinessDetail['status'],
     isFeatured: row.is_featured,
     createdAt: row.created_at,
+    images: (images ?? []).map((img) => ({
+      id: img.id,
+      imagePath: img.image_path,
+      sortOrder: img.sort_order,
+    })),
   };
 }
 
@@ -167,7 +180,7 @@ export class BusinessService extends BaseService {
       return null;
     }
 
-    return mapBusinessDetail(result.business);
+    return mapBusinessDetail(result.business, result.images);
   }
 }
 

@@ -76,3 +76,52 @@ export function useDeleteBusiness() {
     },
   });
 }
+
+export function useAdminBusinessImages(businessId: string | null) {
+  return useQuery({
+    queryKey: ['admin-business-images', businessId],
+    queryFn: () => {
+      if (!businessId) return [];
+      return adminBusinessService.listImages(businessId);
+    },
+    enabled: !!businessId,
+  });
+}
+
+export function useAddBusinessImage() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: ({ businessId, imagePath }: { businessId: string; imagePath: string }) =>
+      adminBusinessService.addImage(businessId, imagePath),
+    onSuccess: (_, { businessId }) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-business-images', businessId] });
+      queryClient.invalidateQueries({ queryKey: ['business'] });
+      toast.success('تصویر اضافه شد', 'تصویر با موفقیت افزوده شد');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'خطا در افزودن تصویر';
+      toast.error('خطا', msg);
+    },
+  });
+}
+
+export function useDeleteBusinessImage() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: ({ imageId, businessId }: { imageId: string; businessId: string }) =>
+      adminBusinessService.deleteImage(imageId),
+    onSuccess: (_, { businessId }) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-business-images', businessId] });
+      queryClient.invalidateQueries({ queryKey: ['business'] });
+      toast.success('تصویر حذف شد', 'تصویر با موفقیت حذف شد');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'خطا در حذف تصویر';
+      toast.error('خطا', msg);
+    },
+  });
+}

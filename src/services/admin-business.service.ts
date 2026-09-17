@@ -3,6 +3,7 @@ import { normalizeError } from './api-error';
 import type {
   BusinessCategoryWithActive,
   BusinessAdminRow,
+  BusinessImage,
   CreateBusinessInput,
   UpdateBusinessInput,
   ApiError,
@@ -184,6 +185,54 @@ export class AdminBusinessService extends BaseService {
     const result = data as AdminMutationResult;
     if (!result.success) {
       throw { message: result.error ?? 'خطا در حذف کسب‌وکار' } as ApiError;
+    }
+  }
+
+  async listImages(businessId: string): Promise<BusinessImage[]> {
+    const { data, error } = await this.client.rpc('admin_list_business_images', {
+      p_business_id: businessId,
+    });
+
+    if (error) throw normalizeError(error);
+
+    const result = data as { success: boolean; error?: string; images?: Array<{ id: string; image_path: string; sort_order: number }> };
+    if (!result.success) {
+      throw { message: result.error ?? 'خطا در دریافت تصاویر' } as ApiError;
+    }
+
+    return (result.images ?? []).map((img) => ({
+      id: img.id,
+      imagePath: img.image_path,
+      sortOrder: img.sort_order,
+    }));
+  }
+
+  async addImage(businessId: string, imagePath: string): Promise<string> {
+    const { data, error } = await this.client.rpc('admin_add_business_image', {
+      p_business_id: businessId,
+      p_image_path: imagePath,
+    });
+
+    if (error) throw normalizeError(error);
+
+    const result = data as { success: boolean; error?: string; image_id?: string };
+    if (!result.success) {
+      throw { message: result.error ?? 'خطا در افزودن تصویر' } as ApiError;
+    }
+
+    return result.image_id!;
+  }
+
+  async deleteImage(imageId: string): Promise<void> {
+    const { data, error } = await this.client.rpc('admin_delete_business_image', {
+      p_image_id: imageId,
+    });
+
+    if (error) throw normalizeError(error);
+
+    const result = data as { success: boolean; error?: string };
+    if (!result.success) {
+      throw { message: result.error ?? 'خطا در حذف تصویر' } as ApiError;
     }
   }
 }

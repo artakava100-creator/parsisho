@@ -2,10 +2,12 @@ import { useState, useMemo, useCallback } from 'react';
 import {
   Building2, Plus, Edit3, Star, AlertCircle, Search, Trash2,
   Image as ImageIcon, Loader2, X, Upload, MapPin, Phone, Globe,
+  ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import {
   useAdminBusinesses, useAdminBusinessCategories,
   useCreateBusiness, useUpdateBusiness, useDeleteBusiness,
+  useAdminBusinessImages, useAddBusinessImage, useDeleteBusinessImage,
 } from '@/hooks/useAdminBusiness';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -21,7 +23,7 @@ import { StatusBadge } from '@/components/admin/StatusBadge';
 import { env } from '@/config/env';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/cn';
-import type { BusinessAdminRow, BusinessCategoryWithActive, BusinessStatus } from '@/types';
+import type { BusinessAdminRow, BusinessCategoryWithActive, BusinessImage, BusinessStatus } from '@/types';
 
 const STATUS_LABELS: Record<BusinessStatus, string> = {
   pending: 'در انتظار',
@@ -48,7 +50,7 @@ function slugify(text: string): string {
     .replace(/^-|-$/g, '');
 }
 
-async function uploadBusinessImage(file: File, folder: 'logos' | 'covers'): Promise<string> {
+async function uploadBusinessImage(file: File, folder: 'logos' | 'covers' | 'gallery'): Promise<string> {
   const ext = file.name.split('.').pop() || 'jpg';
   const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
@@ -316,7 +318,7 @@ interface ImageUploadFieldProps {
   label: string;
   path: string | null;
   onPathChange: (path: string | null) => void;
-  folder: 'logos' | 'covers';
+  folder: 'logos' | 'covers' | 'gallery';
   aspect?: 'square' | 'wide';
   hint?: string;
 }

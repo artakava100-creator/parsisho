@@ -1,6 +1,8 @@
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   Building2, MapPin, Phone, Globe, Star, ArrowRight, AlertCircle, Tag,
+  ChevronLeft, ChevronRight, Image as ImageIcon,
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -9,11 +11,20 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 import { useBusinessBySlug } from '@/hooks/useBusinesses';
 import { env } from '@/config/env';
+import { cn } from '@/lib/cn';
 
-function getBusinessImageUrl(logoPath: string | null, coverPath: string | null): string | null {
-  const path = logoPath ?? coverPath;
-  if (!path) return null;
-  return `${env.supabaseUrl}/storage/v1/object/public/businesses/${path}`;
+function getLogoUrl(logoPath: string | null): string | null {
+  if (!logoPath) return null;
+  return `${env.supabaseUrl}/storage/v1/object/public/businesses/${logoPath}`;
+}
+
+function getCoverUrl(coverPath: string | null): string | null {
+  if (!coverPath) return null;
+  return `${env.supabaseUrl}/storage/v1/object/public/businesses/${coverPath}`;
+}
+
+function getGalleryUrl(imagePath: string): string {
+  return `${env.supabaseUrl}/storage/v1/object/public/businesses/${imagePath}`;
 }
 
 export function BusinessDetailPage() {
@@ -62,22 +73,27 @@ export function BusinessDetailPage() {
     );
   }
 
-  const imageUrl = getBusinessImageUrl(business.logoPath, business.coverPath);
+  const logoUrl = getLogoUrl(business.logoPath);
+  const coverUrl = getCoverUrl(business.coverPath);
+  const galleryImages = business.images?.map((img) => getGalleryUrl(img.imagePath)) ?? [];
 
   return (
     <div className="animate-fade-in pb-12">
-      {/* Cover */}
+      {/* Cover + Logo */}
       <div className="max-w-5xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6">
         <div className="aspect-[16/9] sm:aspect-[21/9] lg:aspect-[3/1] rounded-2xl bg-gradient-to-br from-neutral-200 to-neutral-400 relative overflow-hidden">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={business.name}
-              className="w-full h-full object-cover"
-            />
+          {coverUrl ? (
+            <img src={coverUrl} alt={business.name} className="w-full h-full object-cover" />
+          ) : galleryImages.length > 0 ? (
+            <img src={galleryImages[0]} alt={business.name} className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Building2 className="w-16 h-16 text-neutral-700" />
+            </div>
+          )}
+          {logoUrl && (
+            <div className="absolute bottom-3 right-3 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-surface shadow-lg bg-surface">
+              <img src={logoUrl} alt={business.name} className="w-full h-full object-cover" />
             </div>
           )}
           {business.isFeatured && (
@@ -121,6 +137,11 @@ export function BusinessDetailPage() {
           <p className="text-sm sm:text-base text-neutral-600 leading-relaxed mb-4 sm:mb-6">
             {business.shortDescription}
           </p>
+        )}
+
+        {/* Gallery */}
+        {galleryImages.length > 0 && (
+          <Gallery images={galleryImages} name={business.name} />
         )}
 
         {business.description && (
@@ -180,6 +201,151 @@ export function BusinessDetailPage() {
           </div>
         </Card>
       </div>
+    </div>
+  );
+}
+
+// ─── Swipeable Gallery ────────────────────────────────────────────
+
+function Gallery({ images, name }: { images: string[]; name: string }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [lightbox, setLightbox] = useState<number | null>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+
+  const scrollToIndex = useCallback((index: number) => {
+    const track = trackRef.current;
+    if (!track) return;
+    const clamped = Math.max(0, Math.min(index, images.length - 1));
+    track.scrollTo({ left: clamped * track.clientWidth, behavior: 'smooth' });
+    setActiveIndex(clamped);
+  }, [images.length]);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    let ticking = false;
+    const handleScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        const idx = Math.round(track.scrollLeft / track.clientWidth);
+        setActiveIndex(Math.max(0, Math.min(idx, images.length - 1)));
+        ticking = false;
+      });
+    };
+    track.addEventListener('scroll', handleScroll, { passive: true });
+    return () => track.removeEventListener('scroll', handleScroll);
+  }, [images.length]);
+
+  const goPrev = () => scrollToIndex(activeIndex - 1);
+  const goNext = () => scrollToIndex(activeIndex + 1);
+
+  return (
+    <div className="mb-4 sm:mb-6">
+      {/* Main carousel */}
+      <div className="relative rounded-2xl overflow-hidden bg-neutral-900 group">
+        <div
+          ref={trackRef}
+          className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+          style={{ scrollbarWidth: 'none' }}
+        >
+          {images.map((src, i) => (
+            <div
+              key={i}
+              className="shrink-0 w-full snap-center aspect-[16/10] sm:aspect-[2/1] relative cursor-pointer"
+              onClick={() => setLightbox(i)}
+            >
+              <img src={src} alt={`${name} - تصویر ${i + 1}`} className="w-full h-full object-cover" loading={i === 0 ? 'eager' : 'lazy'} />
+            </div>
+          ))}
+        </div>
+
+        {/* Nav arrows */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={goPrev}
+              disabled={activeIndex === 0}
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-neutral-900/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0"
+              aria-label="قبلی"
+            >
+              <ChevronRight className="w-5 h-5" />
+            </button>
+            <button
+              onClick={goNext}
+              disabled={activeIndex === images.length - 1}
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-neutral-900/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0"
+              aria-label="بعدی"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          </>
+        )}
+
+        {/* Counter */}
+        {images.length > 1 && (
+          <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-full bg-neutral-900/60 text-white text-xs font-medium">
+            {activeIndex + 1} / {images.length}
+          </div>
+        )}
+      </div>
+
+      {/* Thumbnails */}
+      {images.length > 1 && (
+        <div className="flex gap-2 mt-2.5 overflow-x-auto scrollbar-hide">
+          {images.map((src, i) => (
+            <button
+              key={i}
+              onClick={() => scrollToIndex(i)}
+              className={cn(
+                'shrink-0 w-16 h-12 rounded-lg overflow-hidden border-2 transition-colors',
+                activeIndex === i ? 'border-primary-500' : 'border-transparent opacity-60 hover:opacity-100',
+              )}
+            >
+              <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightbox !== null && (
+        <div
+          className="fixed inset-0 z-[90] bg-neutral-900/90 flex items-center justify-center p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <button
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-neutral-800/60 text-white flex items-center justify-center"
+            aria-label="بستن"
+          >
+            <span className="text-xl">×</span>
+          </button>
+          <img
+            src={images[lightbox]}
+            alt={`${name} - تصویر بزرگ`}
+            className="max-w-full max-h-full object-contain rounded-lg"
+            onClick={(e) => e.stopPropagation()}
+          />
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); setLightbox(Math.max(0, lightbox - 1)); }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-neutral-800/60 text-white flex items-center justify-center"
+                aria-label="قبلی"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); setLightbox(Math.min(images.length - 1, lightbox + 1)); }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-neutral-800/60 text-white flex items-center justify-center"
+                aria-label="بعدی"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -692,6 +692,12 @@ export interface BusinessSummary {
   isFeatured: boolean;
 }
 
+export interface BusinessImage {
+  id: string;
+  imagePath: string;
+  sortOrder: number;
+}
+
 export interface BusinessDetail {
   id: string;
   name: string;
@@ -711,6 +717,7 @@ export interface BusinessDetail {
   status: BusinessStatus;
   isFeatured: boolean;
   createdAt: string;
+  images: BusinessImage[];
 }
 
 export interface BusinessAdminRow extends BusinessSummary {

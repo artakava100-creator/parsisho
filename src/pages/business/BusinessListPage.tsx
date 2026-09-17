@@ -21,22 +21,28 @@ const CATEGORY_ICONS: Record<string, typeof Store> = {
   Building2,
 };
 
-function getBusinessImageUrl(logoPath: string | null, coverPath: string | null): string | null {
-  const path = logoPath ?? coverPath;
-  if (!path) return null;
-  return `${env.supabaseUrl}/storage/v1/object/public/businesses/${path}`;
+function getLogoUrl(logoPath: string | null): string | null {
+  if (!logoPath) return null;
+  return `${env.supabaseUrl}/storage/v1/object/public/businesses/${logoPath}`;
+}
+
+function getCoverUrl(coverPath: string | null): string | null {
+  if (!coverPath) return null;
+  return `${env.supabaseUrl}/storage/v1/object/public/businesses/${coverPath}`;
 }
 
 function BusinessCard({ business }: { business: BusinessSummary }) {
-  const imageUrl = getBusinessImageUrl(business.logoPath, business.coverPath);
+  const coverUrl = getCoverUrl(business.coverPath);
+  const logoUrl = getLogoUrl(business.logoPath);
+  const cardImageUrl = coverUrl ?? logoUrl;
 
   return (
     <Link to={`/businesses/${business.slug}`} className="block group animate-fade-in-up">
       <Card hover className="p-0 overflow-hidden h-full flex flex-col">
         <div className="aspect-[16/10] bg-gradient-to-br from-neutral-200 to-neutral-400 relative overflow-hidden">
-          {imageUrl ? (
+          {cardImageUrl ? (
             <img
-              src={imageUrl}
+              src={cardImageUrl}
               alt={business.name}
               loading="lazy"
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-slow ease-out"
@@ -44,6 +50,11 @@ function BusinessCard({ business }: { business: BusinessSummary }) {
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Building2 className="w-10 h-10 text-neutral-700" />
+            </div>
+          )}
+          {logoUrl && (
+            <div className="absolute bottom-2.5 right-2.5 w-10 h-10 rounded-lg overflow-hidden border-2 border-surface shadow-md bg-surface">
+              <img src={logoUrl} alt={business.name} className="w-full h-full object-cover" />
             </div>
           )}
           {business.isFeatured && (

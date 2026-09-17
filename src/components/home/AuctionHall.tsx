@@ -14,10 +14,22 @@ import { useBusinesses } from '@/hooks/useBusinesses';
 import { useBestSellingStores } from '@/hooks/useBestSellingStores';
 import { useSiteSetting } from '@/hooks/useSiteSettings';
 import { SectionEmptyState } from './SectionEmptyState';
+import { env } from '@/config/env';
 import { cn } from '@/lib/cn';
 import type { LucideIcon } from 'lucide-react';
 import type { Auction, BusinessSummary } from '@/types';
 import type { BestSellingStore } from '@/hooks/useBestSellingStores';
+
+function getBusinessImageUrl(logoPath: string | null, coverPath: string | null): string | null {
+  const path = coverPath ?? logoPath;
+  if (!path) return null;
+  return `${env.supabaseUrl}/storage/v1/object/public/businesses/${path}`;
+}
+
+function getLogoUrl(logoPath: string | null): string | null {
+  if (!logoPath) return null;
+  return `${env.supabaseUrl}/storage/v1/object/public/businesses/${logoPath}`;
+}
 
 // ─── Config Types ──────────────────────────────────────────────────
 
@@ -192,20 +204,16 @@ function StoreCard({ store, rank }: { store: BestSellingStore; rank: number }) {
 // ─── Local Business Card ────────────────────────────────────────────
 
 function BusinessCard({ business }: { business: BusinessSummary }) {
+  const coverUrl = getBusinessImageUrl(business.logoPath, business.coverPath);
+  const logoUrl = getLogoUrl(business.logoPath);
+
   return (
     <Link to={`/businesses/${business.slug}`} className="block group">
       <Card hover glass={false} className="p-0 h-full overflow-hidden transition-all duration-300 rounded-2xl border border-neutral-200/80 hover:border-local-300/60 hover:shadow-lg">
         <div className="aspect-[16/9] bg-gradient-to-br from-local-50 to-neutral-100 relative overflow-hidden">
-          {business.logoPath ? (
+          {coverUrl ? (
             <img
-              src={business.logoPath}
-              alt={business.name}
-              className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
-              loading="lazy"
-            />
-          ) : business.coverPath ? (
-            <img
-              src={business.coverPath}
+              src={coverUrl}
               alt={business.name}
               className="w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
               loading="lazy"
@@ -216,6 +224,11 @@ function BusinessCard({ business }: { business: BusinessSummary }) {
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent" />
+          {logoUrl && (
+            <div className="absolute bottom-2.5 right-2.5 w-10 h-10 rounded-lg overflow-hidden border-2 border-white/90 shadow-md bg-white">
+              <img src={logoUrl} alt={business.name} className="w-full h-full object-cover" loading="lazy" />
+            </div>
+          )}
           {business.isFeatured && (
             <div className="absolute top-3 right-3 z-10">
               <Badge tone="warning" variant="solid" className="text-[10px] font-bold shadow-sm">
