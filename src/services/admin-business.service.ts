@@ -39,6 +39,7 @@ interface AdminListResult {
     is_featured: boolean;
     display_order: number;
     logo_path: string | null;
+    cover_path: string | null;
     created_at: string;
   }>;
 }
@@ -73,7 +74,7 @@ function mapAdminRow(row: AdminListResult['businesses'] extends (infer T)[] | un
     city: row.city,
     locality: row.locality,
     logoPath: row.logo_path,
-    coverPath: null,
+    coverPath: row.cover_path ?? null,
     isFeatured: row.is_featured,
     status: row.status as BusinessAdminRow['status'],
     displayOrder: row.display_order,
@@ -170,6 +171,19 @@ export class AdminBusinessService extends BaseService {
     const result = data as AdminMutationResult;
     if (!result.success) {
       throw { message: result.error ?? 'خطا در ویرایش کسب‌وکار' } as ApiError;
+    }
+  }
+
+  async delete(businessId: string): Promise<void> {
+    const { data, error } = await this.client.rpc('admin_delete_business', {
+      p_business_id: businessId,
+    });
+
+    if (error) throw normalizeError(error);
+
+    const result = data as AdminMutationResult;
+    if (!result.success) {
+      throw { message: result.error ?? 'خطا در حذف کسب‌وکار' } as ApiError;
     }
   }
 }

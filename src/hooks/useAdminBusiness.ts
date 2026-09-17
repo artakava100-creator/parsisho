@@ -58,3 +58,21 @@ export function useUpdateBusiness() {
     },
   });
 }
+
+export function useDeleteBusiness() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (businessId: string) => adminBusinessService.delete(businessId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-businesses'] });
+      queryClient.invalidateQueries({ queryKey: ['businesses'] });
+      toast.success('کسب‌وکار حذف شد', 'کسب‌وکار با موفقیت حذف شد');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'خطا در حذف کسب‌وکار';
+      toast.error('خطا', msg);
+    },
+  });
+}

@@ -1,18 +1,26 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
-  Building2, Plus, Edit3, Star, AlertCircle, Search, Filter,
+  Building2, Plus, Edit3, Star, AlertCircle, Search, Trash2,
+  Image as ImageIcon, Loader2, X, Upload, MapPin, Phone, Globe,
 } from 'lucide-react';
 import {
-  useAdminBusinesses, useAdminBusinessCategories, useCreateBusiness, useUpdateBusiness,
+  useAdminBusinesses, useAdminBusinessCategories,
+  useCreateBusiness, useUpdateBusiness, useDeleteBusiness,
 } from '@/hooks/useAdminBusiness';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Modal } from '@/components/ui/Modal';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader';
+import { Drawer } from '@/components/admin/Drawer';
+import { ConfirmDialog } from '@/components/admin/ConfirmDialog';
+import { FormSection, FormField, FormRow, FormActions } from '@/components/admin/FormControls';
+import { StatusBadge } from '@/components/admin/StatusBadge';
 import { env } from '@/config/env';
+import { supabase } from '@/lib/supabase';
+import { cn } from '@/lib/cn';
 import type { BusinessAdminRow, BusinessCategoryWithActive, BusinessStatus } from '@/types';
 
 const STATUS_LABELS: Record<BusinessStatus, string> = {
@@ -21,15 +29,40 @@ const STATUS_LABELS: Record<BusinessStatus, string> = {
   inactive: 'غیرفعال',
 };
 
-function statusTone(status: BusinessStatus): 'success' | 'warning' | 'neutral' {
-  if (status === 'active') return 'success';
-  if (status === 'pending') return 'warning';
-  return 'neutral';
-}
-
 function getLogoUrl(logoPath: string | null): string | null {
   if (!logoPath) return null;
   return `${env.supabaseUrl}/storage/v1/object/public/businesses/${logoPath}`;
+}
+
+function getCoverUrl(coverPath: string | null): string | null {
+  if (!coverPath) return null;
+  return `${env.supabaseUrl}/storage/v1/object/public/businesses/${coverPath}`;
+}
+
+function slugify(text: string): string {
+  return text
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w\u0600-\u06FF-]+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+async function uploadBusinessImage(file: File, folder: 'logos' | 'covers'): Promise<string> {
+  const ext = file.name.split('.').pop() || 'jpg';
+  const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+  const { error } = await supabase.storage
+    .from('businesses')
+    .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+  if (error) throw error;
+  return fileName;
+}
+
+async function deleteBusinessImage(path: string | null): Promise<void> {
+  if (!path) return;
+  await supabase.storage.from('businesses').remove([path]);
 }
 
 export function AdminBusinessPage() {
@@ -38,6 +71,7 @@ export function AdminBusinessPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [showCreate, setShowCreate] = useState(false);
   const [editBiz, setEditBiz] = useState<BusinessAdminRow | null>(null);
+  const [deleteBiz, setDeleteBiz] = useState<BusinessAdminRow | null>(null);
 
   const { data: categories, isLoading: catLoading } = useAdminBusinessCategories();
 
@@ -51,23 +85,28 @@ export function AdminBusinessPage() {
 
   if (catLoading) return <FullPageSpinner />;
 
+  const totalCount = businesses?.length ?? 0;
+  const activeCount = businesses?.filter((b) => b.status === 'active').length ?? 0;
+  const featuredCount = businesses?.filter((b) => b.isFeatured).length ?? 0;
+
   return (
-    <div className="py-8 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary-50 border border-primary-300 flex items-center justify-center">
-            <Building2 className="w-5 h-5 text-primary-600" />
-          </div>
-          <div>
-            <h1 className="text-xl font-extrabold text-neutral-800">مدیریت کسب‌وکارها</h1>
-            <p className="text-sm text-neutral-500">ایجاد، ویرایش و مدیریت کسب‌وکارهای محلی</p>
-          </div>
-        </div>
-        <Button variant="primary" onClick={() => setShowCreate(true)}>
-          <Plus className="w-4 h-4" />
-          کسب‌وکار جدید
-        </Button>
+    <div className="max-w-6xl mx-auto">
+      <AdminPageHeader
+        title="مدیریت کسب‌وکارها"
+        description="ایجاد، ویرایش و مدیریت کسب‌وکارهای محلی"
+        actions={
+          <Button variant="primary" onClick={() => setShowCreate(true)}>
+            <Plus className="w-4 h-4" />
+            کسب‌وکار جدید
+          </Button>
+        }
+      />
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-3 mb-4">
+        <StatMini label="کل" value={totalCount} icon={<Building2 className="w-4 h-4 text-neutral-500" />} />
+        <StatMini label="فعال" value={activeCount} icon={<Building2 className="w-4 h-4 text-success-600" />} />
+        <StatMini label="ویژه" value={featuredCount} icon={<Star className="w-4 h-4 text-accent-500" />} />
       </div>
 
       {/* Filters */}
@@ -133,24 +172,65 @@ export function AdminBusinessPage() {
       ) : (
         <div className="space-y-3">
           {businesses.map((biz) => (
-            <BusinessRow key={biz.id} biz={biz} onEdit={() => setEditBiz(biz)} />
+            <BusinessRow
+              key={biz.id}
+              biz={biz}
+              onEdit={() => setEditBiz(biz)}
+              onDelete={() => setDeleteBiz(biz)}
+            />
           ))}
         </div>
       )}
 
       {showCreate && categories && (
-        <CreateBusinessModal categories={categories} onClose={() => setShowCreate(false)} />
+        <BusinessFormDrawer
+          mode="create"
+          categories={categories}
+          onClose={() => setShowCreate(false)}
+        />
       )}
       {editBiz && categories && (
-        <EditBusinessModal biz={editBiz} categories={categories} onClose={() => setEditBiz(null)} />
+        <BusinessFormDrawer
+          mode="edit"
+          biz={editBiz}
+          categories={categories}
+          onClose={() => setEditBiz(null)}
+        />
+      )}
+      {deleteBiz && (
+        <DeleteConfirmDialog
+          biz={deleteBiz}
+          onClose={() => setDeleteBiz(null)}
+        />
       )}
     </div>
   );
 }
 
-function BusinessRow({ biz, onEdit }: { biz: BusinessAdminRow; onEdit: () => void }) {
+function StatMini({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
+  return (
+    <Card className="p-3 flex items-center gap-3">
+      <div className="w-9 h-9 rounded-lg bg-neutral-100 flex items-center justify-center shrink-0">
+        {icon}
+      </div>
+      <div>
+        <p className="text-lg font-extrabold text-neutral-800 leading-none">{value}</p>
+        <p className="text-xs text-neutral-500 mt-1">{label}</p>
+      </div>
+    </Card>
+  );
+}
+
+function BusinessRow({
+  biz, onEdit, onDelete,
+}: {
+  biz: BusinessAdminRow;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
   const update = useUpdateBusiness();
   const logoUrl = getLogoUrl(biz.logoPath);
+  const coverUrl = getCoverUrl(biz.coverPath);
 
   const toggleActive = () => {
     const newStatus: BusinessStatus = biz.status === 'active' ? 'inactive' : 'active';
@@ -162,72 +242,227 @@ function BusinessRow({ biz, onEdit }: { biz: BusinessAdminRow; onEdit: () => voi
   };
 
   return (
-    <Card className="p-4">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3 flex-1 min-w-0">
-          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-neutral-700 to-neutral-300 flex items-center justify-center shrink-0 overflow-hidden">
-            {logoUrl ? (
-              <img src={logoUrl} alt={biz.name} className="w-full h-full object-cover" />
-            ) : (
-              <Building2 className="w-5 h-5 text-neutral-500" />
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-sm font-bold text-neutral-800 truncate">{biz.name}</h3>
-              <Badge tone={statusTone(biz.status)} variant="soft">
-                {STATUS_LABELS[biz.status]}
-              </Badge>
-              {biz.isFeatured && (
-                <Badge tone="accent" variant="outline">
-                  <Star className="w-3 h-3 fill-current" />
-                  ویژه
-                </Badge>
+    <Card className="p-0 overflow-hidden">
+      {/* Cover banner */}
+      <div className="relative h-20 bg-gradient-to-l from-primary-100 to-accent-50">
+        {coverUrl ? (
+          <img src={coverUrl} alt={biz.name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-l from-primary-50/40 to-accent-50/30" />
+        )}
+      </div>
+      <div className="p-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Logo */}
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-neutral-700 to-neutral-300 flex items-center justify-center shrink-0 overflow-hidden border-2 border-surface -mt-8 relative shadow-sm">
+              {logoUrl ? (
+                <img src={logoUrl} alt={biz.name} className="w-full h-full object-cover" />
+              ) : (
+                <Building2 className="w-5 h-5 text-neutral-400" />
               )}
             </div>
-            <div className="flex flex-wrap gap-3 text-xs text-neutral-500">
-              <span>{biz.categoryName}</span>
-              {biz.city && <span>، {biz.city}</span>}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <h3 className="text-sm font-bold text-neutral-800 truncate">{biz.name}</h3>
+                <StatusBadge status={biz.status} />
+                {biz.isFeatured && (
+                  <Badge tone="accent" variant="outline">
+                    <Star className="w-3 h-3 fill-current" />
+                    ویژه
+                  </Badge>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-3 text-xs text-neutral-500">
+                <span className="flex items-center gap-1">
+                  <ImageIcon className="w-3 h-3" />
+                  {biz.categoryName}
+                </span>
+                {biz.city && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-3 h-3" />
+                    {biz.city}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <Button variant="ghost" size="sm" onClick={toggleFeatured} loading={update.isPending}>
-            <Star className={biz.isFeatured ? 'w-3.5 h-3.5 fill-accent-500 text-accent-600' : 'w-3.5 h-3.5'} />
-            {biz.isFeatured ? 'بردن ویژه' : 'ویژه کردن'}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={toggleActive} loading={update.isPending}>
-            {biz.status === 'active' ? 'غیرفعال' : 'فعال'}
-          </Button>
-          <Button variant="ghost" size="sm" onClick={onEdit}>
-            <Edit3 className="w-3.5 h-3.5" />
-            ویرایش
-          </Button>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button variant="ghost" size="sm" onClick={toggleFeatured} loading={update.isPending}>
+              <Star className={biz.isFeatured ? 'w-3.5 h-3.5 fill-accent-500 text-accent-600' : 'w-3.5 h-3.5'} />
+              {biz.isFeatured ? 'بردن ویژه' : 'ویژه کردن'}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={toggleActive} loading={update.isPending}>
+              {biz.status === 'active' ? 'غیرفعال' : 'فعال'}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onEdit}>
+              <Edit3 className="w-3.5 h-3.5" />
+              ویرایش
+            </Button>
+            <Button variant="ghost" size="sm" onClick={onDelete} className="text-error-600 hover:bg-error-50">
+              <Trash2 className="w-3.5 h-3.5" />
+            </Button>
+          </div>
         </div>
       </div>
     </Card>
   );
 }
 
-function CreateBusinessModal({ categories, onClose }: { categories: BusinessCategoryWithActive[]; onClose: () => void }) {
-  const create = useCreateBusiness();
-  const activeCategories = categories.filter((c) => c.isActive);
+// ─── Image Upload Field ───────────────────────────────────────────
 
-  const [name, setName] = useState('');
-  const [slug, setSlug] = useState('');
-  const [categoryId, setCategoryId] = useState('');
-  const [shortDescription, setShortDescription] = useState('');
+interface ImageUploadFieldProps {
+  label: string;
+  path: string | null;
+  onPathChange: (path: string | null) => void;
+  folder: 'logos' | 'covers';
+  aspect?: 'square' | 'wide';
+  hint?: string;
+}
+
+function ImageUploadField({ label, path, onPathChange, folder, aspect = 'square', hint }: ImageUploadFieldProps) {
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
+
+  const imageUrl = path ? `${env.supabaseUrl}/storage/v1/object/public/businesses/${path}` : null;
+
+  const handleFile = async (file: File) => {
+    setUploadError(null);
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('حداکثر حجم فایل ۵ مگابایت است');
+      return;
+    }
+    setUploading(true);
+    try {
+      const oldPath = path;
+      const newPath = await uploadBusinessImage(file, folder);
+      onPathChange(newPath);
+      if (oldPath) {
+        await deleteBusinessImage(oldPath);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'خطا در آپلود تصویر';
+      setUploadError(msg);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    if (path) {
+      try {
+        await deleteBusinessImage(path);
+      } catch {
+        // ignore — DB will still be cleared
+      }
+    }
+    onPathChange(null);
+  };
+
+  return (
+    <FormField label={label} hint={hint} error={uploadError ?? undefined}>
+      <div className="flex items-start gap-3">
+        {/* Preview */}
+        <div
+          className={cn(
+            'relative group rounded-lg overflow-hidden border border-neutral-200 bg-neutral-50 shrink-0',
+            aspect === 'square' ? 'w-20 h-20' : 'w-32 h-20',
+          )}
+        >
+          {imageUrl ? (
+            <img src={imageUrl} alt={label} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageIcon className="w-6 h-6 text-neutral-300" />
+            </div>
+          )}
+          {imageUrl && !uploading && (
+            <button
+              onClick={handleRemove}
+              className="absolute top-1 left-1 w-6 h-6 rounded-full bg-neutral-900/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label="حذف تصویر"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+          {uploading && (
+            <div className="absolute inset-0 bg-neutral-900/40 flex items-center justify-center">
+              <Loader2 className="w-5 h-5 text-white animate-spin" />
+            </div>
+          )}
+        </div>
+
+        {/* Upload button */}
+        <div className="flex-1">
+          <input
+            ref={setInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleFile(file);
+              e.target.value = '';
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => inputRef?.click()}
+            disabled={uploading}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-neutral-300 text-sm text-neutral-600 hover:border-primary-400 hover:text-primary-600 hover:bg-primary-50/50 transition-colors disabled:opacity-50"
+          >
+            <Upload className="w-4 h-4" />
+            {imageUrl ? 'تغییر تصویر' : 'آپلود تصویر'}
+          </button>
+          <p className="text-xs text-neutral-400 mt-1.5">حداکثر ۵ مگابایت — JPG, PNG, WebP</p>
+        </div>
+      </div>
+    </FormField>
+  );
+}
+
+// ─── Business Form Drawer (Create + Edit) ─────────────────────────
+
+interface BusinessFormDrawerProps {
+  mode: 'create' | 'edit';
+  categories: BusinessCategoryWithActive[];
+  biz?: BusinessAdminRow;
+  onClose: () => void;
+}
+
+function BusinessFormDrawer({ mode, categories, biz, onClose }: BusinessFormDrawerProps) {
+  const create = useCreateBusiness();
+  const update = useUpdateBusiness();
+
+  const activeCategories = categories.filter((c) => c.isActive || (mode === 'edit' && c.id === biz?.categoryId));
+
+  const [name, setName] = useState(biz?.name ?? '');
+  const [slug, setSlug] = useState(biz?.slug ?? '');
+  const [slugTouched, setSlugTouched] = useState(mode === 'edit');
+  const [categoryId, setCategoryId] = useState(biz?.categoryId ?? '');
+  const [shortDescription, setShortDescription] = useState(biz?.shortDescription ?? '');
   const [description, setDescription] = useState('');
-  const [city, setCity] = useState('');
-  const [locality, setLocality] = useState('');
+  const [city, setCity] = useState(biz?.city ?? '');
+  const [locality, setLocality] = useState(biz?.locality ?? '');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [website, setWebsite] = useState('');
-  const [status, setStatus] = useState<BusinessStatus>('pending');
-  const [isFeatured, setIsFeatured] = useState(false);
-  const [displayOrder, setDisplayOrder] = useState('0');
+  const [logoPath, setLogoPath] = useState<string | null>(biz?.logoPath ?? null);
+  const [coverPath, setCoverPath] = useState<string | null>(biz?.coverPath ?? null);
+  const [status, setStatus] = useState<BusinessStatus>(biz?.status ?? 'pending');
+  const [isFeatured, setIsFeatured] = useState(biz?.isFeatured ?? false);
+  const [displayOrder, setDisplayOrder] = useState(String(biz?.displayOrder ?? '0'));
   const [formError, setFormError] = useState<string | null>(null);
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setName(val);
+    if (!slugTouched) {
+      setSlug(slugify(val));
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -238,7 +473,7 @@ function CreateBusinessModal({ categories, onClose }: { categories: BusinessCate
     if (!categoryId) { setFormError('دسته‌بندی الزامی است'); return; }
 
     try {
-      await create.mutateAsync({
+      const payload = {
         name: name.trim(),
         slug: slug.trim().toLowerCase(),
         categoryId,
@@ -249,20 +484,36 @@ function CreateBusinessModal({ categories, onClose }: { categories: BusinessCate
         address: address.trim() || null,
         phone: phone.trim() || null,
         website: website.trim() || null,
+        logoPath,
+        coverPath,
         status,
         isFeatured,
         displayOrder: parseInt(displayOrder, 10) || 0,
-      });
+      };
+
+      if (mode === 'create') {
+        await create.mutateAsync(payload);
+      } else if (biz) {
+        await update.mutateAsync({ businessId: biz.id, input: payload });
+      }
       onClose();
     } catch (err) {
-      const msg = err instanceof Error ? err.message : 'خطا در ایجاد کسب‌وکار';
+      const msg = err instanceof Error ? err.message : 'خطا در ذخیره کسب‌وکار';
       setFormError(msg);
     }
   };
 
+  const loading = create.isPending || update.isPending;
+
   return (
-    <Modal open={true} onClose={onClose} title="ایجاد کسب‌وکار" size="lg">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <Drawer
+      open
+      onClose={onClose}
+      title={mode === 'create' ? 'ایجاد کسب‌وکار' : 'ویرایش کسب‌وکار'}
+      side="right"
+      width="max-w-lg"
+    >
+      <form onSubmit={handleSubmit} className="p-5 space-y-6">
         {formError && (
           <div className="p-3 rounded-lg bg-error-50 border border-error-200 text-error-700 text-sm flex items-start gap-2" role="alert">
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -270,224 +521,180 @@ function CreateBusinessModal({ categories, onClose }: { categories: BusinessCate
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-3">
-          <Input label="نام کسب‌وکار *" value={name} onChange={(e) => setName(e.target.value)} placeholder="مثلاً: فروشگاه گل‌ها" />
-          <Input label="نامک (slug) *" value={slug} onChange={(e) => setSlug(e.target.value)} dir="ltr" placeholder="flowers-shop" />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-neutral-600 mb-2">دسته‌بندی *</label>
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full h-11 px-3 rounded-lg bg-surface-sunken border border-neutral-300 text-neutral-800 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-          >
-            <option value="">انتخاب دسته‌بندی...</option>
-            {activeCategories.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
-            ))}
-          </select>
-        </div>
-
-        <Input label="توضیح کوتاه" value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} placeholder="توضیح یک‌خطی برای کارت" />
-
-        <div>
-          <label className="block text-sm font-medium text-neutral-600 mb-2">توضیح کامل</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            className="w-full px-4 py-3 rounded-lg bg-surface-sunken border border-neutral-300 text-neutral-800 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 resize-none"
-            placeholder="توضیح کامل کسب‌وکار..."
+        {/* Images */}
+        <FormSection title="تصاویر" description="لوگو و تصویر کاور کسب‌وکار">
+          <ImageUploadField
+            label="لوگو"
+            path={logoPath}
+            onPathChange={setLogoPath}
+            folder="logos"
+            aspect="square"
+            hint="تصویر مربعی، حداقل ۲۰۰×۲۰۰ پیکسل"
           />
-        </div>
+          <ImageUploadField
+            label="تصویر کاور"
+            path={coverPath}
+            onPathChange={setCoverPath}
+            folder="covers"
+            aspect="wide"
+            hint="تصویر افقی، حداقل ۸۰۰×۳۰۰ پیکسل"
+          />
+        </FormSection>
 
-        <div className="grid grid-cols-2 gap-3">
-          <Input label="شهر" value={city} onChange={(e) => setCity(e.target.value)} placeholder="تهران" />
-          <Input label="محله" value={locality} onChange={(e) => setLocality(e.target.value)} placeholder="سعادت‌آباد" />
-        </div>
+        {/* Basic Info */}
+        <FormSection title="اطلاعات پایه">
+          <FormRow>
+            <FormField label="نام کسب‌وکار" required>
+              <Input
+                value={name}
+                onChange={handleNameChange}
+                placeholder="مثلاً: فروشگاه گل‌ها"
+              />
+            </FormField>
+            <FormField label="نامک (slug)" required hint="به انگلیسی، بدون فاصله">
+              <Input
+                value={slug}
+                onChange={(e) => {
+                  setSlug(e.target.value);
+                  setSlugTouched(true);
+                }}
+                dir="ltr"
+                placeholder="flowers-shop"
+              />
+            </FormField>
+          </FormRow>
 
-        <Input label="آدرس" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="آدرس کامل" />
-
-        <div className="grid grid-cols-2 gap-3">
-          <Input label="تلفن" value={phone} onChange={(e) => setPhone(e.target.value)} dir="ltr" placeholder="02112345678" />
-          <Input label="وب‌سایت" value={website} onChange={(e) => setWebsite(e.target.value)} dir="ltr" placeholder="example.com" />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-neutral-600 mb-2">وضعیت</label>
+          <FormField label="دسته‌بندی" required>
             <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as BusinessStatus)}
+              value={categoryId}
+              onChange={(e) => setCategoryId(e.target.value)}
               className="w-full h-11 px-3 rounded-lg bg-surface-sunken border border-neutral-300 text-neutral-800 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
             >
-              <option value="pending">در انتظار</option>
-              <option value="active">فعال</option>
-              <option value="inactive">غیرفعال</option>
+              <option value="">انتخاب دسته‌بندی...</option>
+              {activeCategories.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
             </select>
-          </div>
-          <Input label="ترتیب نمایش" type="number" inputMode="numeric" value={displayOrder} onChange={(e) => setDisplayOrder(e.target.value)} dir="ltr" placeholder="0" />
-        </div>
+          </FormField>
 
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={isFeatured}
-            onChange={(e) => setIsFeatured(e.target.checked)}
-            className="w-4 h-4 rounded border-neutral-300 bg-neutral-100 text-primary-500 focus:ring-primary-500/30"
-          />
-          <span className="text-sm text-neutral-600">کسب‌وکار ویژه</span>
-        </label>
+          <FormField label="توضیح کوتاه" hint="توضیح یک‌خطی برای کارت">
+            <Input
+              value={shortDescription}
+              onChange={(e) => setShortDescription(e.target.value)}
+              placeholder="توضیح کوتاه..."
+            />
+          </FormField>
 
-        <div className="flex gap-3 pt-2">
-          <Button type="submit" variant="primary" fullWidth loading={create.isPending}>
-            ایجاد کسب‌وکار
+          <FormField label="توضیح کامل">
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              className="w-full px-4 py-3 rounded-lg bg-surface-sunken border border-neutral-300 text-neutral-800 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 resize-none"
+              placeholder="توضیح کامل کسب‌وکار..."
+            />
+          </FormField>
+        </FormSection>
+
+        {/* Location */}
+        <FormSection title="موقعیت و تماس">
+          <FormRow>
+            <FormField label="شهر">
+              <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="تهران" />
+            </FormField>
+            <FormField label="محله">
+              <Input value={locality} onChange={(e) => setLocality(e.target.value)} placeholder="سعادت‌آباد" />
+            </FormField>
+          </FormRow>
+
+          <FormField label="آدرس">
+            <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="آدرس کامل" />
+          </FormField>
+
+          <FormRow>
+            <FormField label="تلفن">
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} dir="ltr" placeholder="02112345678" />
+            </FormField>
+            <FormField label="وب‌سایت">
+              <Input value={website} onChange={(e) => setWebsite(e.target.value)} dir="ltr" placeholder="example.com" />
+            </FormField>
+          </FormRow>
+        </FormSection>
+
+        {/* Status & Display */}
+        <FormSection title="وضعیت و نمایش">
+          <FormRow>
+            <FormField label="وضعیت">
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as BusinessStatus)}
+                className="w-full h-11 px-3 rounded-lg bg-surface-sunken border border-neutral-300 text-neutral-800 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
+              >
+                <option value="pending">در انتظار</option>
+                <option value="active">فعال</option>
+                <option value="inactive">غیرفعال</option>
+              </select>
+            </FormField>
+            <FormField label="ترتیب نمایش" hint="عدد کوچکتر = اولتر">
+              <Input
+                type="number"
+                inputMode="numeric"
+                value={displayOrder}
+                onChange={(e) => setDisplayOrder(e.target.value)}
+                dir="ltr"
+                placeholder="0"
+              />
+            </FormField>
+          </FormRow>
+
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
+              className="w-4 h-4 rounded border-neutral-300 bg-neutral-100 text-primary-500 focus:ring-primary-500/30"
+            />
+            <span className="text-sm text-neutral-600">کسب‌وکار ویژه</span>
+          </label>
+        </FormSection>
+
+        <FormActions>
+          <Button type="submit" variant="primary" loading={loading}>
+            {mode === 'create' ? 'ایجاد کسب‌وکار' : 'ذخیره تغییرات'}
           </Button>
           <Button type="button" variant="ghost" onClick={onClose}>انصراف</Button>
-        </div>
+        </FormActions>
       </form>
-    </Modal>
+    </Drawer>
   );
 }
 
-function EditBusinessModal({ biz, categories, onClose }: { biz: BusinessAdminRow; categories: BusinessCategoryWithActive[]; onClose: () => void }) {
-  const update = useUpdateBusiness();
+// ─── Delete Confirm ───────────────────────────────────────────────
 
-  const [name, setName] = useState(biz.name);
-  const [slug, setSlug] = useState(biz.slug);
-  const [categoryId, setCategoryId] = useState(biz.categoryId);
-  const [shortDescription, setShortDescription] = useState(biz.shortDescription ?? '');
-  const [description, setDescription] = useState('');
-  const [city, setCity] = useState(biz.city ?? '');
-  const [locality, setLocality] = useState(biz.locality ?? '');
-  const [address, setAddress] = useState('');
-  const [phone, setPhone] = useState('');
-  const [website, setWebsite] = useState('');
-  const [status, setStatus] = useState<BusinessStatus>(biz.status);
-  const [isFeatured, setIsFeatured] = useState(biz.isFeatured);
-  const [displayOrder, setDisplayOrder] = useState(String(biz.displayOrder));
-  const [formError, setFormError] = useState<string | null>(null);
+function DeleteConfirmDialog({ biz, onClose }: { biz: BusinessAdminRow; onClose: () => void }) {
+  const del = useDeleteBusiness();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
-
-    if (!name.trim()) { setFormError('نام کسب‌وکار الزامی است'); return; }
-    if (!slug.trim()) { setFormError('نامک الزامی است'); return; }
-    if (!categoryId) { setFormError('دسته‌بندی الزامی است'); return; }
-
+  const handleConfirm = async () => {
     try {
-      await update.mutateAsync({
-        businessId: biz.id,
-        input: {
-          name: name.trim(),
-          slug: slug.trim().toLowerCase(),
-          categoryId,
-          shortDescription: shortDescription.trim() || null,
-          description: description.trim() || null,
-          city: city.trim() || null,
-          locality: locality.trim() || null,
-          address: address.trim() || null,
-          phone: phone.trim() || null,
-          website: website.trim() || null,
-          status,
-          isFeatured,
-          displayOrder: parseInt(displayOrder, 10) || 0,
-        },
-      });
+      await del.mutateAsync(biz.id);
+      if (biz.logoPath) await deleteBusinessImage(biz.logoPath);
+      if (biz.coverPath) await deleteBusinessImage(biz.coverPath);
       onClose();
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'خطا در ویرایش کسب‌وکار';
-      setFormError(msg);
+    } catch {
+      // error toast handled by hook
     }
   };
 
   return (
-    <Modal open={true} onClose={onClose} title="ویرایش کسب‌وکار" size="lg">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {formError && (
-          <div className="p-3 rounded-lg bg-error-50 border border-error-200 text-error-700 text-sm flex items-start gap-2" role="alert">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-            <span>{formError}</span>
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-3">
-          <Input label="نام کسب‌وکار *" value={name} onChange={(e) => setName(e.target.value)} />
-          <Input label="نامک (slug) *" value={slug} onChange={(e) => setSlug(e.target.value)} dir="ltr" />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-neutral-600 mb-2">دسته‌بندی *</label>
-          <select
-            value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
-            className="w-full h-11 px-3 rounded-lg bg-surface-sunken border border-neutral-300 text-neutral-800 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-          >
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>{cat.name}</option>
-            ))}
-          </select>
-        </div>
-
-        <Input label="توضیح کوتاه" value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} />
-
-        <div>
-          <label className="block text-sm font-medium text-neutral-600 mb-2">توضیح کامل</label>
-          <textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={3}
-            className="w-full px-4 py-3 rounded-lg bg-surface-sunken border border-neutral-300 text-neutral-800 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 resize-none"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Input label="شهر" value={city} onChange={(e) => setCity(e.target.value)} />
-          <Input label="محله" value={locality} onChange={(e) => setLocality(e.target.value)} />
-        </div>
-
-        <Input label="آدرس" value={address} onChange={(e) => setAddress(e.target.value)} />
-
-        <div className="grid grid-cols-2 gap-3">
-          <Input label="تلفن" value={phone} onChange={(e) => setPhone(e.target.value)} dir="ltr" />
-          <Input label="وب‌سایت" value={website} onChange={(e) => setWebsite(e.target.value)} dir="ltr" />
-        </div>
-
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="block text-sm font-medium text-neutral-600 mb-2">وضعیت</label>
-            <select
-              value={status}
-              onChange={(e) => setStatus(e.target.value as BusinessStatus)}
-              className="w-full h-11 px-3 rounded-lg bg-surface-sunken border border-neutral-300 text-neutral-800 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500"
-            >
-              <option value="pending">در انتظار</option>
-              <option value="active">فعال</option>
-              <option value="inactive">غیرفعال</option>
-            </select>
-          </div>
-          <Input label="ترتیب نمایش" type="number" inputMode="numeric" value={displayOrder} onChange={(e) => setDisplayOrder(e.target.value)} dir="ltr" />
-        </div>
-
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={isFeatured}
-            onChange={(e) => setIsFeatured(e.target.checked)}
-            className="w-4 h-4 rounded border-neutral-300 bg-neutral-100 text-primary-500 focus:ring-primary-500/30"
-          />
-          <span className="text-sm text-neutral-600">کسب‌وکار ویژه</span>
-        </label>
-
-        <div className="flex gap-3 pt-2">
-          <Button type="submit" variant="primary" fullWidth loading={update.isPending}>
-            ذخیره تغییرات
-          </Button>
-          <Button type="button" variant="ghost" onClick={onClose}>انصراف</Button>
-        </div>
-      </form>
-    </Modal>
+    <ConfirmDialog
+      open
+      onClose={onClose}
+      onConfirm={handleConfirm}
+      title="حذف کسب‌وکار"
+      message={`آیا از حذف «${biz.name}» مطمئن هستید؟ این عملیات قابل بازگشت نیست.`}
+      confirmLabel="حذف"
+      variant="danger"
+      loading={del.isPending}
+    />
   );
 }
