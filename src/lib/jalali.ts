@@ -74,6 +74,55 @@ export function formatTime(date: Date): string {
   return `${h}:${m}`;
 }
 
+function jalaliToGregorian(jy: number, jm: number, jd: number): [number, number, number] {
+  const j_d_m = [0, 31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+  let gy = jy <= 979 ? 621 : 1600;
+  jy -= jy <= 979 ? 0 : 979;
+  let days = 365 * jy + Math.floor(jy / 33) * 12053 + Math.floor((jy % 33) / 4);
+  for (let i = 1; i < jm; i++) days += j_d_m[i];
+  days += jd;
+  gy += 400 * Math.floor(days / 146097);
+  days %= 146097;
+  if (days > 36524) {
+    gy += 100 * Math.floor(--days / 36524);
+    days %= 36524;
+    if (days >= 365) days++;
+  }
+  gy += 4 * Math.floor(days / 1461);
+  days %= 1461;
+  if (days > 365) {
+    gy += Math.floor((days - 1) / 365);
+    days = (days - 1) % 365;
+  }
+  let gd = days + 1;
+  const sal_a = [0, 31, ((gy % 4 === 0 && gy % 100 !== 0) || gy % 400 === 0) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  let gm = 0;
+  for (gm = 0; gm < 13 && gd > sal_a[gm]; gm++) gd -= sal_a[gm];
+  return [gy, gm, gd];
+}
+
+export function jalaliToISODate(jy: number, jm: number, jd: number): string {
+  const [gy, gm, gd] = jalaliToGregorian(jy, jm, jd);
+  return `${gy}-${String(gm).padStart(2, '0')}-${String(gd).padStart(2, '0')}T00:00:00+03:30`;
+}
+
+export function parseJalaliInput(input: string): { jy: number; jm: number; jd: number } | null {
+  const parts = input.trim().split(/[\/\-]/);
+  if (parts.length !== 3) return null;
+  const jy = parseInt(parts[0], 10);
+  const jm = parseInt(parts[1], 10);
+  const jd = parseInt(parts[2], 10);
+  if (isNaN(jy) || isNaN(jm) || isNaN(jd)) return null;
+  if (jm < 1 || jm > 12 || jd < 1 || jd > 31) return null;
+  return { jy, jm, jd };
+}
+
+export function formatJalaliInput(date: Date | null): string {
+  if (!date) return '';
+  const j = toJalali(date);
+  return `${toPersianDigits(j.year)}/${toPersianDigits(String(j.month).padStart(2, '0'))}/${toPersianDigits(String(j.day).padStart(2, '0'))}`;
+}
+
 export function formatRelativeTime(date: Date): string {
   const now = Date.now();
   const diff = now - date.getTime();

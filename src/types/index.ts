@@ -690,6 +690,8 @@ export interface BusinessSummary {
   logoPath: string | null;
   coverPath: string | null;
   isFeatured: boolean;
+  startDate: string | null;
+  endDate: string | null;
 }
 
 export interface BusinessImage {
@@ -717,6 +719,8 @@ export interface BusinessDetail {
   status: BusinessStatus;
   isFeatured: boolean;
   createdAt: string;
+  startDate: string | null;
+  endDate: string | null;
   images: BusinessImage[];
 }
 
@@ -724,6 +728,8 @@ export interface BusinessAdminRow extends BusinessSummary {
   status: BusinessStatus;
   displayOrder: number;
   createdAt: string;
+  startDate: string | null;
+  endDate: string | null;
 }
 
 export interface CreateBusinessInput {
@@ -742,6 +748,8 @@ export interface CreateBusinessInput {
   status?: BusinessStatus;
   isFeatured?: boolean;
   displayOrder?: number;
+  startDate?: string | null;
+  endDate?: string | null;
 }
 
 export interface UpdateBusinessInput {
@@ -760,6 +768,10 @@ export interface UpdateBusinessInput {
   status?: BusinessStatus | null;
   isFeatured?: boolean | null;
   displayOrder?: number | null;
+  startDate?: string | null;
+  endDate?: string | null;
+  clearStartDate?: boolean;
+  clearEndDate?: boolean;
 }
 
 export interface AdSlot {

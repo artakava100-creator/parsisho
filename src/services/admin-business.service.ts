@@ -41,6 +41,8 @@ interface AdminListResult {
     display_order: number;
     logo_path: string | null;
     cover_path: string | null;
+    start_date: string | null;
+    end_date: string | null;
     created_at: string;
   }>;
 }
@@ -80,6 +82,8 @@ function mapAdminRow(row: AdminListResult['businesses'] extends (infer T)[] | un
     status: row.status as BusinessAdminRow['status'],
     displayOrder: row.display_order,
     createdAt: row.created_at,
+    startDate: row.start_date,
+    endDate: row.end_date,
   };
 }
 
@@ -135,6 +139,8 @@ export class AdminBusinessService extends BaseService {
       p_status: input.status ?? 'pending',
       p_is_featured: input.isFeatured ?? false,
       p_display_order: input.displayOrder ?? 0,
+      p_start_date: input.startDate ?? null,
+      p_end_date: input.endDate ?? null,
     });
 
     if (error) throw normalizeError(error);
@@ -165,6 +171,10 @@ export class AdminBusinessService extends BaseService {
       p_status: input.status ?? null,
       p_is_featured: input.isFeatured ?? null,
       p_display_order: input.displayOrder ?? null,
+      p_start_date: input.startDate ?? null,
+      p_end_date: input.endDate ?? null,
+      p_clear_start_date: input.clearStartDate ?? false,
+      p_clear_end_date: input.clearEndDate ?? false,
     });
 
     if (error) throw normalizeError(error);

@@ -31,6 +31,8 @@ interface BusinessesResult {
     logo_path: string | null;
     cover_path: string | null;
     is_featured: boolean;
+    start_date: string | null;
+    end_date: string | null;
   }>;
   total?: number;
 }
@@ -56,6 +58,8 @@ interface BusinessBySlugResult {
     cover_path: string | null;
     status: string;
     is_featured: boolean;
+    start_date: string | null;
+    end_date: string | null;
     created_at: string;
   };
   images?: Array<{
@@ -90,6 +94,8 @@ function mapBusinessSummary(row: BusinessesResult['businesses'] extends (infer T
     logoPath: row.logo_path,
     coverPath: row.cover_path,
     isFeatured: row.is_featured,
+    startDate: row.start_date,
+    endDate: row.end_date,
   };
 }
 
@@ -116,6 +122,8 @@ function mapBusinessDetail(
     status: row.status as BusinessDetail['status'],
     isFeatured: row.is_featured,
     createdAt: row.created_at,
+    startDate: row.start_date,
+    endDate: row.end_date,
     images: (images ?? []).map((img) => ({
       id: img.id,
       imagePath: img.image_path,

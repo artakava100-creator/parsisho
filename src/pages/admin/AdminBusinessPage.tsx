@@ -2,7 +2,7 @@ import { useState, useMemo, useCallback } from 'react';
 import {
   Building2, Plus, Edit3, Star, AlertCircle, Search, Trash2,
   Image as ImageIcon, Loader2, X, Upload, MapPin, Phone, Globe,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Calendar, Clock,
 } from 'lucide-react';
 import {
   useAdminBusinesses, useAdminBusinessCategories,
@@ -23,6 +23,7 @@ import { StatusBadge } from '@/components/admin/StatusBadge';
 import { env } from '@/config/env';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/cn';
+import { toJalali, formatJalaliShort, formatJalaliInput, parseJalaliInput, jalaliToISODate, toPersianDigits } from '@/lib/jalali';
 import type { BusinessAdminRow, BusinessCategoryWithActive, BusinessImage, BusinessStatus } from '@/types';
 
 const STATUS_LABELS: Record<BusinessStatus, string> = {
@@ -39,6 +40,10 @@ function getLogoUrl(logoPath: string | null): string | null {
 function getCoverUrl(coverPath: string | null): string | null {
   if (!coverPath) return null;
   return `${env.supabaseUrl}/storage/v1/object/public/businesses/${coverPath}`;
+}
+
+function getGalleryImageUrl(imagePath: string): string {
+  return `${env.supabaseUrl}/storage/v1/object/public/businesses/${imagePath}`;
 }
 
 function slugify(text: string): string {
@@ -66,6 +71,391 @@ async function deleteBusinessImage(path: string | null): Promise<void> {
   if (!path) return;
   await supabase.storage.from('businesses').remove([path]);
 }
+
+// ─── Jalali Date Picker Field ──────────────────────────────────────
+
+interface JalaliDateFieldProps {
+  label: string;
+  value: string | null;
+  onChange: (isoDate: string | null) => void;
+  onClear: () => void;
+  hint?: string;
+}
+
+function JalaliDateField({ label, value, onChange, onClear, hint }: JalaliDateFieldProps) {
+  const [inputValue, setInputValue] = useState(() => {
+    if (!value) return '';
+    try {
+      return formatJalaliInput(new Date(value));
+    } catch {
+      return '';
+    }
+  });
+  const [error, setError] = useState<string | null>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setInputValue(val);
+    setError(null);
+
+    if (!val.trim()) {
+      onClear();
+      return;
+    }
+
+    const parsed = parseJalaliInput(val);
+    if (!parsed) {
+      setError('فرمت صحیح: ۱۴۰۵/۰۳/۱۵');
+      return;
+    }
+
+    try {
+      const iso = jalaliToISODate(parsed.jy, parsed.jm, parsed.jd);
+      onChange(iso);
+    } catch {
+      setError('تاریخ نامعتبر است');
+    }
+  };
+
+  return (
+    <FormField label={label} hint={hint} error={error ?? undefined}>
+      <div className="relative">
+        <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500 pointer-events-none" />
+        <Input
+          value={inputValue}
+          onChange={handleChange}
+          placeholder="۱۴۰۵/۰۳/۱۵"
+          className="pr-10"
+          dir="ltr"
+        />
+      </div>
+    </FormField>
+  );
+}
+
+// ─── Gallery Manager (multi-image upload + slideshow preview) ──────
+
+interface GalleryManagerProps {
+  businessId: string;
+}
+
+function GalleryManager({ businessId }: GalleryManagerProps) {
+  const { data: images, isLoading } = useAdminBusinessImages(businessId);
+  const addImage = useAddBusinessImage();
+  const deleteImage = useDeleteBusinessImage();
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
+  const [slideIndex, setSlideIndex] = useState(0);
+
+  const handleUpload = async (files: FileList) => {
+    setUploadError(null);
+    const fileArr = Array.from(files);
+    if (fileArr.length === 0) return;
+
+    const maxSize = 5 * 1024 * 1024;
+    const tooLarge = fileArr.find((f) => f.size > maxSize);
+    if (tooLarge) {
+      setUploadError('حداکثر حجم هر فایل ۵ مگابایت است');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      for (const file of fileArr) {
+        const path = await uploadBusinessImage(file, 'gallery');
+        await addImage.mutateAsync({ businessId, imagePath: path });
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'خطا در آپلود تصاویر';
+      setUploadError(msg);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDelete = async (imageId: string, imagePath: string) => {
+    try {
+      await deleteImage.mutateAsync({ imageId, businessId });
+      await deleteBusinessImage(imagePath);
+    } catch {
+      // hook shows toast
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="w-5 h-5 text-neutral-400 animate-spin" />
+      </div>
+    );
+  }
+
+  const imgs = images ?? [];
+
+  return (
+    <div className="space-y-3">
+      {/* Slideshow preview */}
+      {imgs.length > 0 && (
+        <GallerySlideshow
+          images={imgs}
+          activeIndex={slideIndex}
+          onIndexChange={setSlideIndex}
+          onDelete={handleDelete}
+        />
+      )}
+
+      {/* Upload area */}
+      <input
+        ref={setInputRef}
+        type="file"
+        accept="image/*"
+        multiple
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files) handleUpload(e.target.files);
+          e.target.value = '';
+        }}
+      />
+      <button
+        type="button"
+        onClick={() => inputRef?.click()}
+        disabled={uploading || imgs.length >= 5}
+        className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 border-dashed border-neutral-300 text-sm text-neutral-600 hover:border-primary-400 hover:text-primary-600 hover:bg-primary-50/50 transition-colors disabled:opacity-50"
+      >
+        {uploading ? (
+          <Loader2 className="w-4 h-4 animate-spin" />
+        ) : (
+          <Upload className="w-4 h-4" />
+        )}
+        {uploading ? 'در حال آپلود...' : `افزودن تصویر${imgs.length >= 5 ? ' (حداکثر ۵)' : ''}`}
+      </button>
+
+      {uploadError && (
+        <p className="text-xs text-error-600 flex items-center gap-1.5">
+          <AlertCircle className="w-3.5 h-3.5" />
+          {uploadError}
+        </p>
+      )}
+
+      {imgs.length === 0 && !uploading && (
+        <p className="text-xs text-neutral-400 text-center">
+          هنوز تصویری آپلود نشده است. می‌توانید تا ۵ تصویر اضافه کنید.
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ─── Gallery Slideshow (admin preview with delete) ─────────────────
+
+function GallerySlideshow({
+  images,
+  activeIndex,
+  onIndexChange,
+  onDelete,
+}: {
+  images: BusinessImage[];
+  activeIndex: number;
+  onIndexChange: (idx: number) => void;
+  onDelete: (imageId: string, imagePath: string) => void;
+}) {
+  const clampedIndex = Math.min(activeIndex, images.length - 1);
+  const goPrev = () => onIndexChange(Math.max(0, clampedIndex - 1));
+  const goNext = () => onIndexChange(Math.min(images.length - 1, clampedIndex + 1));
+
+  return (
+    <div>
+      {/* Main slide */}
+      <div className="relative rounded-xl overflow-hidden bg-neutral-900 aspect-[16/10] group">
+        {images.map((img, i) => (
+          <div
+            key={img.id}
+            className={cn(
+              'absolute inset-0 transition-opacity duration-300',
+              i === clampedIndex ? 'opacity-100' : 'opacity-0',
+            )}
+          >
+            <img
+              src={getGalleryImageUrl(img.imagePath)}
+              alt={`تصویر ${i + 1}`}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ))}
+
+        {/* Delete button */}
+        <button
+          onClick={() => onDelete(images[clampedIndex].id, images[clampedIndex].imagePath)}
+          className="absolute top-2 left-2 w-8 h-8 rounded-full bg-neutral-900/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+          aria-label="حذف تصویر"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+
+        {/* Nav arrows */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={goPrev}
+              disabled={clampedIndex === 0}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-neutral-900/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0"
+              aria-label="قبلی"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <button
+              onClick={goNext}
+              disabled={clampedIndex === images.length - 1}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-neutral-900/50 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-0"
+              aria-label="بعدی"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+          </>
+        )}
+
+        {/* Counter */}
+        {images.length > 1 && (
+          <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-full bg-neutral-900/60 text-white text-xs font-medium">
+            {toPersianDigits(clampedIndex + 1)} / {toPersianDigits(images.length)}
+          </div>
+        )}
+      </div>
+
+      {/* Thumbnails */}
+      {images.length > 1 && (
+        <div className="flex gap-2 mt-2 overflow-x-auto scrollbar-hide">
+          {images.map((img, i) => (
+            <button
+              key={img.id}
+              onClick={() => onIndexChange(i)}
+              className={cn(
+                'shrink-0 w-14 h-10 rounded-lg overflow-hidden border-2 transition-colors',
+                i === clampedIndex ? 'border-primary-500' : 'border-transparent opacity-60 hover:opacity-100',
+              )}
+            >
+              <img src={getGalleryImageUrl(img.imagePath)} alt="" className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Image Upload Field (single image: logo/cover) ─────────────────
+
+interface ImageUploadFieldProps {
+  label: string;
+  path: string | null;
+  onPathChange: (path: string | null) => void;
+  folder: 'logos' | 'covers' | 'gallery';
+  aspect?: 'square' | 'wide';
+  hint?: string;
+}
+
+function ImageUploadField({ label, path, onPathChange, folder, aspect = 'square', hint }: ImageUploadFieldProps) {
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
+
+  const imageUrl = path ? `${env.supabaseUrl}/storage/v1/object/public/businesses/${path}` : null;
+
+  const handleFile = async (file: File) => {
+    setUploadError(null);
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError('حداکثر حجم فایل ۵ مگابایت است');
+      return;
+    }
+    setUploading(true);
+    try {
+      const oldPath = path;
+      const newPath = await uploadBusinessImage(file, folder);
+      onPathChange(newPath);
+      if (oldPath) {
+        await deleteBusinessImage(oldPath);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'خطا در آپلود تصویر';
+      setUploadError(msg);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemove = async () => {
+    if (path) {
+      try {
+        await deleteBusinessImage(path);
+      } catch {
+        // ignore — DB will still be cleared
+      }
+    }
+    onPathChange(null);
+  };
+
+  return (
+    <FormField label={label} hint={hint} error={uploadError ?? undefined}>
+      <div className="flex items-start gap-3">
+        <div
+          className={cn(
+            'relative group rounded-lg overflow-hidden border border-neutral-200 bg-neutral-50 shrink-0',
+            aspect === 'square' ? 'w-20 h-20' : 'w-32 h-20',
+          )}
+        >
+          {imageUrl ? (
+            <img src={imageUrl} alt={label} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageIcon className="w-6 h-6 text-neutral-300" />
+            </div>
+          )}
+          {imageUrl && !uploading && (
+            <button
+              onClick={handleRemove}
+              className="absolute top-1 left-1 w-6 h-6 rounded-full bg-neutral-900/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              aria-label="حذف تصویر"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+          {uploading && (
+            <div className="absolute inset-0 bg-neutral-900/40 flex items-center justify-center">
+              <Loader2 className="w-5 h-5 text-white animate-spin" />
+            </div>
+          )}
+        </div>
+
+        <div className="flex-1">
+          <input
+            ref={setInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleFile(file);
+              e.target.value = '';
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => inputRef?.click()}
+            disabled={uploading}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-neutral-300 text-sm text-neutral-600 hover:border-primary-400 hover:text-primary-600 hover:bg-primary-50/50 transition-colors disabled:opacity-50"
+          >
+            <Upload className="w-4 h-4" />
+            {imageUrl ? 'تغییر تصویر' : 'آپلود تصویر'}
+          </button>
+          <p className="text-xs text-neutral-400 mt-1.5">حداکثر ۵ مگابایت — JPG, PNG, WebP</p>
+        </div>
+      </div>
+    </FormField>
+  );
+}
+
+// ─── Main Page ─────────────────────────────────────────────────────
 
 export function AdminBusinessPage() {
   const [search, setSearch] = useState('');
@@ -216,7 +606,7 @@ function StatMini({ label, value, icon }: { label: string; value: number; icon: 
         {icon}
       </div>
       <div>
-        <p className="text-lg font-extrabold text-neutral-800 leading-none">{value}</p>
+        <p className="text-lg font-extrabold text-neutral-800 leading-none">{toPersianDigits(value)}</p>
         <p className="text-xs text-neutral-500 mt-1">{label}</p>
       </div>
     </Card>
@@ -243,9 +633,15 @@ function BusinessRow({
     update.mutate({ businessId: biz.id, input: { isFeatured: !biz.isFeatured } });
   };
 
+  const dateRangeLabel = useMemo(() => {
+    if (!biz.startDate && !biz.endDate) return null;
+    const start = biz.startDate ? formatJalaliShort(new Date(biz.startDate)) : 'نامشخص';
+    const end = biz.endDate ? formatJalaliShort(new Date(biz.endDate)) : 'نامشخص';
+    return `${start} تا ${end}`;
+  }, [biz.startDate, biz.endDate]);
+
   return (
     <Card className="p-0 overflow-hidden">
-      {/* Cover banner */}
       <div className="relative h-20 bg-gradient-to-l from-primary-100 to-accent-50">
         {coverUrl ? (
           <img src={coverUrl} alt={biz.name} className="w-full h-full object-cover" />
@@ -256,7 +652,6 @@ function BusinessRow({
       <div className="p-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            {/* Logo */}
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-neutral-700 to-neutral-300 flex items-center justify-center shrink-0 overflow-hidden border-2 border-surface -mt-8 relative shadow-sm">
               {logoUrl ? (
                 <img src={logoUrl} alt={biz.name} className="w-full h-full object-cover" />
@@ -286,6 +681,12 @@ function BusinessRow({
                     {biz.city}
                   </span>
                 )}
+                {dateRangeLabel && (
+                  <span className="flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    {dateRangeLabel}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -309,119 +710,6 @@ function BusinessRow({
         </div>
       </div>
     </Card>
-  );
-}
-
-// ─── Image Upload Field ───────────────────────────────────────────
-
-interface ImageUploadFieldProps {
-  label: string;
-  path: string | null;
-  onPathChange: (path: string | null) => void;
-  folder: 'logos' | 'covers' | 'gallery';
-  aspect?: 'square' | 'wide';
-  hint?: string;
-}
-
-function ImageUploadField({ label, path, onPathChange, folder, aspect = 'square', hint }: ImageUploadFieldProps) {
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
-
-  const imageUrl = path ? `${env.supabaseUrl}/storage/v1/object/public/businesses/${path}` : null;
-
-  const handleFile = async (file: File) => {
-    setUploadError(null);
-    if (file.size > 5 * 1024 * 1024) {
-      setUploadError('حداکثر حجم فایل ۵ مگابایت است');
-      return;
-    }
-    setUploading(true);
-    try {
-      const oldPath = path;
-      const newPath = await uploadBusinessImage(file, folder);
-      onPathChange(newPath);
-      if (oldPath) {
-        await deleteBusinessImage(oldPath);
-      }
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : 'خطا در آپلود تصویر';
-      setUploadError(msg);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleRemove = async () => {
-    if (path) {
-      try {
-        await deleteBusinessImage(path);
-      } catch {
-        // ignore — DB will still be cleared
-      }
-    }
-    onPathChange(null);
-  };
-
-  return (
-    <FormField label={label} hint={hint} error={uploadError ?? undefined}>
-      <div className="flex items-start gap-3">
-        {/* Preview */}
-        <div
-          className={cn(
-            'relative group rounded-lg overflow-hidden border border-neutral-200 bg-neutral-50 shrink-0',
-            aspect === 'square' ? 'w-20 h-20' : 'w-32 h-20',
-          )}
-        >
-          {imageUrl ? (
-            <img src={imageUrl} alt={label} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <ImageIcon className="w-6 h-6 text-neutral-300" />
-            </div>
-          )}
-          {imageUrl && !uploading && (
-            <button
-              onClick={handleRemove}
-              className="absolute top-1 left-1 w-6 h-6 rounded-full bg-neutral-900/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-              aria-label="حذف تصویر"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-          {uploading && (
-            <div className="absolute inset-0 bg-neutral-900/40 flex items-center justify-center">
-              <Loader2 className="w-5 h-5 text-white animate-spin" />
-            </div>
-          )}
-        </div>
-
-        {/* Upload button */}
-        <div className="flex-1">
-          <input
-            ref={setInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleFile(file);
-              e.target.value = '';
-            }}
-          />
-          <button
-            type="button"
-            onClick={() => inputRef?.click()}
-            disabled={uploading}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg border border-dashed border-neutral-300 text-sm text-neutral-600 hover:border-primary-400 hover:text-primary-600 hover:bg-primary-50/50 transition-colors disabled:opacity-50"
-          >
-            <Upload className="w-4 h-4" />
-            {imageUrl ? 'تغییر تصویر' : 'آپلود تصویر'}
-          </button>
-          <p className="text-xs text-neutral-400 mt-1.5">حداکثر ۵ مگابایت — JPG, PNG, WebP</p>
-        </div>
-      </div>
-    </FormField>
   );
 }
 
@@ -456,6 +744,8 @@ function BusinessFormDrawer({ mode, categories, biz, onClose }: BusinessFormDraw
   const [status, setStatus] = useState<BusinessStatus>(biz?.status ?? 'pending');
   const [isFeatured, setIsFeatured] = useState(biz?.isFeatured ?? false);
   const [displayOrder, setDisplayOrder] = useState(String(biz?.displayOrder ?? '0'));
+  const [startDate, setStartDate] = useState<string | null>(biz?.startDate ?? null);
+  const [endDate, setEndDate] = useState<string | null>(biz?.endDate ?? null);
   const [formError, setFormError] = useState<string | null>(null);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -474,6 +764,11 @@ function BusinessFormDrawer({ mode, categories, biz, onClose }: BusinessFormDraw
     if (!slug.trim()) { setFormError('نامک (slug) الزامی است'); return; }
     if (!categoryId) { setFormError('دسته‌بندی الزامی است'); return; }
 
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      setFormError('تاریخ شروع باید قبل از تاریخ پایان باشد');
+      return;
+    }
+
     try {
       const payload = {
         name: name.trim(),
@@ -491,12 +786,21 @@ function BusinessFormDrawer({ mode, categories, biz, onClose }: BusinessFormDraw
         status,
         isFeatured,
         displayOrder: parseInt(displayOrder, 10) || 0,
+        startDate,
+        endDate,
       };
 
       if (mode === 'create') {
         await create.mutateAsync(payload);
       } else if (biz) {
-        await update.mutateAsync({ businessId: biz.id, input: payload });
+        await update.mutateAsync({
+          businessId: biz.id,
+          input: {
+            ...payload,
+            clearStartDate: !startDate,
+            clearEndDate: !endDate,
+          },
+        });
       }
       onClose();
     } catch (err) {
@@ -523,8 +827,8 @@ function BusinessFormDrawer({ mode, categories, biz, onClose }: BusinessFormDraw
           </div>
         )}
 
-        {/* Images */}
-        <FormSection title="تصاویر" description="لوگو و تصویر کاور کسب‌وکار">
+        {/* Images: logo + cover */}
+        <FormSection title="تصاویر اصلی" description="لوگو و تصویر کاور کسب‌وکار">
           <ImageUploadField
             label="لوگو"
             path={logoPath}
@@ -542,6 +846,16 @@ function BusinessFormDrawer({ mode, categories, biz, onClose }: BusinessFormDraw
             hint="تصویر افقی، حداقل ۸۰۰×۳۰۰ پیکسل"
           />
         </FormSection>
+
+        {/* Gallery (edit mode only — needs business ID) */}
+        {mode === 'edit' && biz && (
+          <FormSection
+            title="گالری تصاویر"
+            description="تا ۵ تصویر برای نمایش به‌صورت اسلاید در صفحه کسب‌وکار"
+          >
+            <GalleryManager businessId={biz.id} />
+          </FormSection>
+        )}
 
         {/* Basic Info */}
         <FormSection title="اطلاعات پایه">
@@ -596,6 +910,39 @@ function BusinessFormDrawer({ mode, categories, biz, onClose }: BusinessFormDraw
               placeholder="توضیح کامل کسب‌وکار..."
             />
           </FormField>
+        </FormSection>
+
+        {/* Date Range */}
+        <FormSection
+          title="بازه زمانی فعالیت"
+          description="تاریخ شروع و پایان فعالیت کسب‌وکار با تقویم شمسی"
+        >
+          <FormRow>
+            <JalaliDateField
+              label="از تاریخ (شمسی)"
+              value={startDate}
+              onChange={setStartDate}
+              onClear={() => setStartDate(null)}
+              hint="مثلاً: ۱۴۰۵/۰۳/۱۵"
+            />
+            <JalaliDateField
+              label="تا تاریخ (شمسی)"
+              value={endDate}
+              onChange={setEndDate}
+              onClear={() => setEndDate(null)}
+              hint="مثلاً: ۱۴۰۵/۰۶/۱۵"
+            />
+          </FormRow>
+          {(startDate || endDate) && (
+            <div className="flex items-center gap-2 text-xs text-neutral-500 bg-primary-50/50 rounded-lg px-3 py-2">
+              <Calendar className="w-3.5 h-3.5 text-primary-500" />
+              <span>
+                {startDate ? formatJalaliShort(new Date(startDate)) : 'نامشخص'}
+                {' تا '}
+                {endDate ? formatJalaliShort(new Date(endDate)) : 'نامشخص'}
+              </span>
+            </div>
+          )}
         </FormSection>
 
         {/* Location */}
