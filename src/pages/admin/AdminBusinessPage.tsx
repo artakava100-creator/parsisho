@@ -23,7 +23,8 @@ import { StatusBadge } from '@/components/admin/StatusBadge';
 import { env } from '@/config/env';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/cn';
-import { toJalali, formatJalaliShort, formatJalaliInput, parseJalaliInput, jalaliToISODate, toPersianDigits } from '@/lib/jalali';
+import { toJalali, formatJalaliShort, formatJalaliInput, parseJalaliInput, jalaliToISODate } from '@/lib/jalali';
+import { toPersianDigits } from '@/lib/persian';
 import type { BusinessAdminRow, BusinessCategoryWithActive, BusinessImage, BusinessStatus } from '@/types';
 
 const STATUS_LABELS: Record<BusinessStatus, string> = {
