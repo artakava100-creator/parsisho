@@ -216,7 +216,10 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
     const track = trackRef.current;
     if (!track) return;
     const clamped = Math.max(0, Math.min(index, images.length - 1));
-    track.scrollTo({ left: clamped * track.clientWidth, behavior: 'smooth' });
+    const slide = track.children[clamped] as HTMLElement | undefined;
+    if (slide) {
+      track.scrollTo({ left: slide.offsetLeft, behavior: 'smooth' });
+    }
     setActiveIndex(clamped);
   }, [images.length]);
 
@@ -228,7 +231,8 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
       if (ticking) return;
       ticking = true;
       requestAnimationFrame(() => {
-        const idx = Math.round(track.scrollLeft / track.clientWidth);
+        const slideWidth = track.clientWidth || 1;
+        const idx = Math.round(Math.abs(track.scrollLeft) / slideWidth);
         setActiveIndex(Math.max(0, Math.min(idx, images.length - 1)));
         ticking = false;
       });
