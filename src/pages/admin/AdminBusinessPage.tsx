@@ -24,7 +24,10 @@ import { StatusBadge } from '@/components/admin/StatusBadge';
 import { env } from '@/config/env';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/cn';
-import { toJalali, formatJalaliShort, jalaliToISODate } from '@/lib/jalali';
+import {
+  toJalali, formatJalaliShort, jalaliToISODate,
+  jalaliMonthLength, jalaliFirstWeekday, PERSIAN_MONTHS,
+} from '@/lib/jalali';
 import { toPersianDigits } from '@/lib/persian';
 import type { BusinessAdminRow, BusinessCategoryWithActive, BusinessImage, BusinessStatus } from '@/types';
 
@@ -76,50 +79,8 @@ async function deleteBusinessImage(path: string | null): Promise<void> {
 
 // ─── Jalali Date Picker Field ──────────────────────────────────────
 
-const PERSIAN_MONTH_NAMES = [
-  'فروردین', 'اردیبهشت', 'خرداد',
-  'تیر', 'مرداد', 'شهریور',
-  'مهر', 'آبان', 'آذر',
-  'دی', 'بهمن', 'اسفند',
-];
-
 // Persian week starts on Saturday (شنبه). These are the short weekday headers.
 const WEEKDAY_HEADERS = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
-
-function jalaliMonthLength(jy: number, jm: number): number {
-  if (jm <= 6) return 31;
-  if (jm <= 11) return 30;
-  // Esfand: 30 in leap years, 29 otherwise
-  // Leap year rule: add 2336 to jy, then check specific cycles
-  const breaks = [
-    -61, 9, 38, 199, 426, 686, 756, 818, 1111, 1181,
-    1210, 1635, 2060, 2097, 2192, 2262, 2324, 2394,
-    2456, 3178,
-  ];
-  let jump = 0;
-  for (let i = 0; i < breaks.length; i++) {
-    const leapJ = breaks[i];
-    const jp = breaks[i - 1] ?? leapJ;
-    let leap = leapJ - jp;
-    if (jy < leapJ) {
-      jump += jy - jp - 1;
-      break;
-    }
-    jump += leap - 1;
-  }
-  const leapN = ((jump % 33) + 33) % 33;
-  const isLeap = leapN % 4 === 0 && leapN !== 32;
-  return isLeap ? 30 : 29;
-}
-
-// Returns the weekday index (0=Saturday ... 6=Friday) for the 1st of a Jalali month.
-function jalaliFirstWeekday(jy: number, jm: number): number {
-  const iso = jalaliToISODate(jy, jm, 1);
-  const d = new Date(iso);
-  // JS getDay(): 0=Sun, 1=Mon, ..., 6=Sat
-  // We want 0=Sat, 1=Sun, ..., 6=Fri
-  return (d.getDay() + 1) % 7;
-}
 
 interface JalaliDateFieldProps {
   label: string;
@@ -245,7 +206,7 @@ function JalaliDateField({ label, value, onChange, onClear, hint }: JalaliDateFi
                 <ChevronRight className="w-4 h-4" />
               </button>
               <span className="text-sm font-bold text-neutral-800">
-                {PERSIAN_MONTH_NAMES[viewMonth - 1]} {toPersianDigits(viewYear)}
+                {PERSIAN_MONTHS[viewMonth - 1]} {toPersianDigits(viewYear)}
               </span>
               <button
                 type="button"

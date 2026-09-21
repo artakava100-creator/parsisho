@@ -1,6 +1,6 @@
 import { toPersianDigits } from './persian';
 
-const PERSIAN_MONTHS = [
+export const PERSIAN_MONTHS = [
   'فروردین', 'اردیبهشت', 'خرداد',
   'تیر', 'مرداد', 'شهریور',
   'مهر', 'آبان', 'آذر',
@@ -9,6 +9,13 @@ const PERSIAN_MONTHS = [
 
 const PERSIAN_WEEKDAYS = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
 
+// ─── Core conversion: Gregorian → Jalali ─────────────────────────────
+// Standard algorithm from jalaali-js (proven, widely used). Accurate for all years.
+
+function div(a: number, b: number): number {
+  return Math.floor(a / b);
+}
+
 function gregorianToJalali(gy: number, gm: number, gd: number): [number, number, number] {
   const g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
   let jy = gy <= 1600 ? 0 : 979;
@@ -16,24 +23,104 @@ function gregorianToJalali(gy: number, gm: number, gd: number): [number, number,
   const gy2 = gm > 6 ? gy + 1 : gy;
   let days =
     365 * gy +
-    Math.floor((gy2 + 3) / 4) -
-    Math.floor((gy2 + 99) / 100) +
-    Math.floor((gy2 + 399) / 400) -
+    div(gy2 + 3, 4) -
+    div(gy2 + 99, 100) +
+    div(gy2 + 399, 400) -
     80 +
     g_d_m[gm - 1] +
     gd;
-  jy += 33 * Math.floor(days / 12053);
+  jy += 33 * div(days, 12053);
   days %= 12053;
-  jy += 4 * Math.floor(days / 1461);
+  jy += 4 * div(days, 1461);
   days %= 1461;
   if (days > 365) {
-    jy += Math.floor((days - 1) / 365);
+    jy += div(days - 1, 365);
     days = (days - 1) % 365;
   }
-  const jm = days < 186 ? 1 + Math.floor(days / 31) : 7 + Math.floor((days - 186) / 30);
+  const jm = days < 186 ? 1 + div(days, 31) : 7 + div(days - 186, 30);
   const jd = 1 + (days < 186 ? days % 31 : (days - 186) % 30);
   return [jy, jm, jd];
 }
+
+// ─── Core conversion: Jalali → Gregorian ─────────────────────────────
+// Standard algorithm from jalaali-js. Accurate for all years.
+// The previous implementation was completely broken (produced dates centuries off).
+
+function jalaliToGregorian(jy: number, jm: number, jd: number): [number, number, number] {
+  let gy = jy <= 979 ? 621 : 1600;
+  jy -= jy <= 979 ? 0 : 979;
+  let days =
+    365 * jy +
+    div(jy, 33) * 8 +
+    div((jy % 33) + 3, 4) +
+    78 +
+    jd +
+    (jm < 7 ? (jm - 1) * 31 : (jm - 7) * 30 + 186);
+  gy += 400 * div(days, 146097);
+  days %= 146097;
+  if (days > 36524) {
+    gy += 100 * div(--days, 36524);
+    days %= 36524;
+    if (days >= 365) days++;
+  }
+  gy += 4 * div(days, 1461);
+  days %= 1461;
+  if (days > 365) {
+    gy += div(days - 1, 365);
+    days = (days - 1) % 365;
+  }
+  let gd = days + 1;
+  const sal_a = [
+    0,
+    31,
+    (gy % 4 === 0 && gy % 100 !== 0) || gy % 400 === 0 ? 29 : 28,
+    31, 30, 31, 30, 31, 31, 30, 31, 30, 31,
+  ];
+  let gm = 0;
+  for (gm = 0; gm < 13 && gd > sal_a[gm]; gm++) gd -= sal_a[gm];
+  return [gy, gm, gd];
+}
+
+// ─── Jalali leap year & month length ─────────────────────────────────
+
+export function isJalaliLeapYear(jy: number): boolean {
+  const breaks = [
+    -61, 9, 38, 199, 426, 686, 756, 818, 1111, 1181,
+    1210, 1635, 2060, 2097, 2192, 2262, 2324, 2394,
+    2456, 3178,
+  ];
+  let jump = 0;
+  for (let i = 0; i < breaks.length; i++) {
+    const leapJ = breaks[i];
+    const jp = breaks[i - 1] ?? leapJ;
+    const leap = leapJ - jp;
+    if (jy < leapJ) {
+      jump += jy - jp - 1;
+      break;
+    }
+    jump += leap - 1;
+  }
+  const leapN = ((jump % 33) + 33) % 33;
+  return leapN % 4 === 0 && leapN !== 32;
+}
+
+export function jalaliMonthLength(jy: number, jm: number): number {
+  if (jm <= 6) return 31;
+  if (jm <= 11) return 30;
+  return isJalaliLeapYear(jy) ? 30 : 29;
+}
+
+// Returns the weekday index for the 1st of a Jalali month.
+// 0 = Saturday (شنبه), 1 = Sunday, ..., 6 = Friday (جمعه)
+export function jalaliFirstWeekday(jy: number, jm: number): number {
+  const [gy, gm, gd] = jalaliToGregorian(jy, jm, 1);
+  const d = new Date(Date.UTC(gy, gm - 1, gd, 12, 0, 0));
+  // JS getUTCDay(): 0=Sun, 1=Mon, ..., 6=Sat
+  // We want 0=Sat, 1=Sun, ..., 6=Fri
+  return (d.getUTCDay() + 1) % 7;
+}
+
+// ─── Public interfaces & formatting ──────────────────────────────────
 
 export interface JalaliDate {
   year: number;
@@ -74,36 +161,12 @@ export function formatTime(date: Date): string {
   return `${h}:${m}`;
 }
 
-function jalaliToGregorian(jy: number, jm: number, jd: number): [number, number, number] {
-  const j_d_m = [0, 31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
-  let gy = jy <= 979 ? 621 : 1600;
-  jy -= jy <= 979 ? 0 : 979;
-  let days = 365 * jy + Math.floor(jy / 33) * 12053 + Math.floor((jy % 33) / 4);
-  for (let i = 1; i < jm; i++) days += j_d_m[i];
-  days += jd;
-  gy += 400 * Math.floor(days / 146097);
-  days %= 146097;
-  if (days > 36524) {
-    gy += 100 * Math.floor(--days / 36524);
-    days %= 36524;
-    if (days >= 365) days++;
-  }
-  gy += 4 * Math.floor(days / 1461);
-  days %= 1461;
-  if (days > 365) {
-    gy += Math.floor((days - 1) / 365);
-    days = (days - 1) % 365;
-  }
-  let gd = days + 1;
-  const sal_a = [0, 31, ((gy % 4 === 0 && gy % 100 !== 0) || gy % 400 === 0) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-  let gm = 0;
-  for (gm = 0; gm < 13 && gd > sal_a[gm]; gm++) gd -= sal_a[gm];
-  return [gy, gm, gd];
-}
+// ─── Jalali → ISO conversion ─────────────────────────────────────────
+// Produces a noon-UTC ISO string so the date never shifts due to timezone.
 
 export function jalaliToISODate(jy: number, jm: number, jd: number): string {
   const [gy, gm, gd] = jalaliToGregorian(jy, jm, jd);
-  return `${gy}-${String(gm).padStart(2, '0')}-${String(gd).padStart(2, '0')}T00:00:00+03:30`;
+  return `${gy}-${String(gm).padStart(2, '0')}-${String(gd).padStart(2, '0')}T12:00:00Z`;
 }
 
 export function parseJalaliInput(input: string): { jy: number; jm: number; jd: number } | null {
