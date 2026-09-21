@@ -1,8 +1,8 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Building2, Plus, Edit3, Star, AlertCircle, Search, Trash2,
   Image as ImageIcon, Loader2, X, Upload, MapPin, Phone, Globe,
-  ChevronLeft, ChevronRight, Calendar, Clock,
+  ChevronLeft, ChevronRight, Calendar,
 } from 'lucide-react';
 import {
   useAdminBusinesses, useAdminBusinessCategories,
@@ -24,7 +24,7 @@ import { StatusBadge } from '@/components/admin/StatusBadge';
 import { env } from '@/config/env';
 import { supabase } from '@/lib/supabase';
 import { cn } from '@/lib/cn';
-import { toJalali, formatJalaliShort, formatJalaliInput, parseJalaliInput, jalaliToISODate } from '@/lib/jalali';
+import { toJalali, formatJalaliShort, jalaliToISODate } from '@/lib/jalali';
 import { toPersianDigits } from '@/lib/persian';
 import type { BusinessAdminRow, BusinessCategoryWithActive, BusinessImage, BusinessStatus } from '@/types';
 
@@ -76,6 +76,51 @@ async function deleteBusinessImage(path: string | null): Promise<void> {
 
 // ─── Jalali Date Picker Field ──────────────────────────────────────
 
+const PERSIAN_MONTH_NAMES = [
+  'فروردین', 'اردیبهشت', 'خرداد',
+  'تیر', 'مرداد', 'شهریور',
+  'مهر', 'آبان', 'آذر',
+  'دی', 'بهمن', 'اسفند',
+];
+
+// Persian week starts on Saturday (شنبه). These are the short weekday headers.
+const WEEKDAY_HEADERS = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج'];
+
+function jalaliMonthLength(jy: number, jm: number): number {
+  if (jm <= 6) return 31;
+  if (jm <= 11) return 30;
+  // Esfand: 30 in leap years, 29 otherwise
+  // Leap year rule: add 2336 to jy, then check specific cycles
+  const breaks = [
+    -61, 9, 38, 199, 426, 686, 756, 818, 1111, 1181,
+    1210, 1635, 2060, 2097, 2192, 2262, 2324, 2394,
+    2456, 3178,
+  ];
+  let jump = 0;
+  for (let i = 0; i < breaks.length; i++) {
+    const leapJ = breaks[i];
+    const jp = breaks[i - 1] ?? leapJ;
+    let leap = leapJ - jp;
+    if (jy < leapJ) {
+      jump += jy - jp - 1;
+      break;
+    }
+    jump += leap - 1;
+  }
+  const leapN = ((jump % 33) + 33) % 33;
+  const isLeap = leapN % 4 === 0 && leapN !== 32;
+  return isLeap ? 30 : 29;
+}
+
+// Returns the weekday index (0=Saturday ... 6=Friday) for the 1st of a Jalali month.
+function jalaliFirstWeekday(jy: number, jm: number): number {
+  const iso = jalaliToISODate(jy, jm, 1);
+  const d = new Date(iso);
+  // JS getDay(): 0=Sun, 1=Mon, ..., 6=Sat
+  // We want 0=Sat, 1=Sun, ..., 6=Fri
+  return (d.getDay() + 1) % 7;
+}
+
 interface JalaliDateFieldProps {
   label: string;
   value: string | null;
@@ -85,51 +130,187 @@ interface JalaliDateFieldProps {
 }
 
 function JalaliDateField({ label, value, onChange, onClear, hint }: JalaliDateFieldProps) {
-  const [inputValue, setInputValue] = useState(() => {
-    if (!value) return '';
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const selectedJalali = useMemo(() => {
+    if (!value) return null;
     try {
-      return formatJalaliInput(new Date(value));
+      return toJalali(new Date(value));
     } catch {
-      return '';
+      return null;
     }
-  });
-  const [error, setError] = useState<string | null>(null);
+  }, [value]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setInputValue(val);
-    setError(null);
+  // Calendar view state: start from selected month, or today
+  const today = useMemo(() => toJalali(new Date()), []);
+  const [viewYear, setViewYear] = useState(selectedJalali?.year ?? today.year);
+  const [viewMonth, setViewMonth] = useState(selectedJalali?.month ?? today.month);
 
-    if (!val.trim()) {
-      onClear();
-      return;
+  // Sync view to selected date when value changes (e.g. edit mode load)
+  useEffect(() => {
+    if (selectedJalali) {
+      setViewYear(selectedJalali.year);
+      setViewMonth(selectedJalali.month);
     }
+  }, [selectedJalali]);
 
-    const parsed = parseJalaliInput(val);
-    if (!parsed) {
-      setError('فرمت صحیح: ۱۴۰۵/۰۳/۱۵');
-      return;
-    }
+  // Close popover on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
 
-    try {
-      const iso = jalaliToISODate(parsed.jy, parsed.jm, parsed.jd);
-      onChange(iso);
-    } catch {
-      setError('تاریخ نامعتبر است');
+  const displayText = selectedJalali
+    ? `${toPersianDigits(selectedJalali.day)} ${selectedJalali.monthName} ${toPersianDigits(selectedJalali.year)}`
+    : '';
+
+  const monthLength = jalaliMonthLength(viewYear, viewMonth);
+  const firstWeekday = jalaliFirstWeekday(viewYear, viewMonth);
+
+  // Build grid: array of day numbers (or null for empty cells before day 1)
+  const grid: (number | null)[] = [];
+  for (let i = 0; i < firstWeekday; i++) grid.push(null);
+  for (let d = 1; d <= monthLength; d++) grid.push(d);
+
+  const goPrevMonth = () => {
+    if (viewMonth === 1) {
+      setViewMonth(12);
+      setViewYear((y) => y - 1);
+    } else {
+      setViewMonth((m) => m - 1);
     }
   };
 
+  const goNextMonth = () => {
+    if (viewMonth === 12) {
+      setViewMonth(1);
+      setViewYear((y) => y + 1);
+    } else {
+      setViewMonth((m) => m + 1);
+    }
+  };
+
+  const handleDayClick = (day: number) => {
+    const iso = jalaliToISODate(viewYear, viewMonth, day);
+    onChange(iso);
+    setOpen(false);
+  };
+
+  const handleClear = () => {
+    onClear();
+    setOpen(false);
+  };
+
   return (
-    <FormField label={label} hint={hint} error={error ?? undefined}>
-      <div className="relative">
-        <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500 pointer-events-none" />
-        <Input
-          value={inputValue}
-          onChange={handleChange}
-          placeholder="۱۴۰۵/۰۳/۱۵"
-          className="pr-10"
-          dir="ltr"
-        />
+    <FormField label={label} hint={hint}>
+      <div ref={containerRef} className="relative">
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="w-full h-11 px-3 rounded-lg bg-surface-sunken border border-neutral-300 text-neutral-800 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 flex items-center justify-between gap-2 hover:border-neutral-400 transition-colors"
+        >
+          <span className={cn('flex items-center gap-2', !displayText && 'text-neutral-400')}>
+            <Calendar className="w-4 h-4 text-neutral-500" />
+            {displayText || 'انتخاب تاریخ...'}
+          </span>
+          {displayText && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); handleClear(); }}
+              className="w-5 h-5 rounded-full flex items-center justify-center text-neutral-400 hover:text-neutral-600 hover:bg-neutral-200 transition-colors"
+              aria-label="پاک کردن تاریخ"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </button>
+
+        {open && (
+          <div className="absolute z-50 mt-1 right-0 left-0 bg-surface rounded-xl border border-neutral-200 shadow-lg p-3" dir="rtl">
+            {/* Header: prev/next + month/year */}
+            <div className="flex items-center justify-between mb-3">
+              <button
+                type="button"
+                onClick={goPrevMonth}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-neutral-600 hover:bg-neutral-100 transition-colors"
+                aria-label="ماه قبل"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+              <span className="text-sm font-bold text-neutral-800">
+                {PERSIAN_MONTH_NAMES[viewMonth - 1]} {toPersianDigits(viewYear)}
+              </span>
+              <button
+                type="button"
+                onClick={goNextMonth}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-neutral-600 hover:bg-neutral-100 transition-colors"
+                aria-label="ماه بعد"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Weekday headers */}
+            <div className="grid grid-cols-7 gap-1 mb-1">
+              {WEEKDAY_HEADERS.map((wd) => (
+                <div key={wd} className="h-8 flex items-center justify-center text-xs font-medium text-neutral-400">
+                  {wd}
+                </div>
+              ))}
+            </div>
+
+            {/* Day grid */}
+            <div className="grid grid-cols-7 gap-1">
+              {grid.map((day, i) => {
+                if (day === null) return <div key={`e-${i}`} />;
+
+                const isSelected =
+                  selectedJalali?.year === viewYear &&
+                  selectedJalali?.month === viewMonth &&
+                  selectedJalali?.day === day;
+                const isToday = today.year === viewYear && today.month === viewMonth && today.day === day;
+
+                return (
+                  <button
+                    key={`d-${day}`}
+                    type="button"
+                    onClick={() => handleDayClick(day)}
+                    className={cn(
+                      'h-9 w-full rounded-lg flex items-center justify-center text-sm transition-colors',
+                      isSelected
+                        ? 'bg-primary-500 text-white font-bold'
+                        : isToday
+                          ? 'bg-primary-50 text-primary-700 font-semibold border border-primary-200'
+                          : 'text-neutral-700 hover:bg-neutral-100',
+                    )}
+                  >
+                    {toPersianDigits(day)}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Clear button */}
+            {displayText && (
+              <div className="mt-3 flex justify-center">
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="text-xs text-neutral-500 hover:text-error-600 transition-colors"
+                >
+                  پاک کردن تاریخ
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </FormField>
   );
