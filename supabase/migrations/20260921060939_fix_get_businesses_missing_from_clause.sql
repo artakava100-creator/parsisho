@@ -1,14 +1,20 @@
 /*
-# Fix get_businesses aggregate ORDER BY error
+# Fix get_businesses: missing FROM-clause entry for table "c"
 
 ## Problem
-The `get_businesses` function used a top-level `ORDER BY` with `jsonb_agg`
-without a `GROUP BY` clause, causing:
-"column b.is_featured must appear in the GROUP BY clause or be used in an aggregate function"
+The last fix (fix_get_businesses_orderby) wrapped the paginated query in a
+subquery aliased as `b`, but the outer jsonb_build_object still referenced
+`c.name` and `c.slug` — columns from the business_categories table that are
+only visible INSIDE the subquery, not outside it. This caused:
+
+  ERROR: 42P01: missing FROM-clause entry for table "c"
+
+every time get_businesses was called, so the entire business neighborhood
+page showed zero results regardless of how many businesses existed.
 
 ## Fix
-Move ORDER BY into the jsonb_agg aggregate's own ORDER BY clause,
-and wrap LIMIT/OFFSET in a subquery so pagination works correctly.
+Change the outer jsonb_build_object to use the column aliases the subquery
+actually exposes (category_name, category_slug) instead of c.name / c.slug.
 */
 
 CREATE OR REPLACE FUNCTION public.get_businesses(
