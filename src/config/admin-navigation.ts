@@ -48,6 +48,7 @@ export const adminNavGroups: AdminNavGroup[] = [
       { label: 'مزایده‌ها', to: '/admin/marketplace/auctions', icon: Gavel, permission: 'manage_auctions' },
       { label: 'سرزمین هیجان', to: '/admin/marketplace/engagement', icon: Gamepad2, permission: 'manage_missions' },
       { label: 'کسب‌وکارها', to: '/admin/marketplace/businesses', icon: Building2, permission: 'manage_businesses' },
+      { label: 'دسته‌بندی کسب‌وکارها', to: '/admin/marketplace/business-categories', icon: FolderTree, permission: 'manage_businesses' },
       { label: 'تبلیغات', to: '/admin/marketplace/ads', icon: Megaphone, permission: 'manage_content' },
       { label: 'صفحه اصلی', to: '/admin/marketplace/homepage', icon: Home, permission: 'manage_content' },
       { label: 'مدیریت ویژه', to: '/admin/marketplace/special', icon: Sparkles, permission: 'manage_content' },

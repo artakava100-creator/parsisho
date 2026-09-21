@@ -1,12 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { Gavel, Store, Trophy, Gamepad2, Home } from 'lucide-react';
+import { Gavel, Store, Gamepad2, Home, Building2 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 
 const bottomNavItems = [
   { to: '/', label: 'خانه', icon: Home, end: true },
   { to: '/auctions', label: 'مزایده', icon: Gavel, end: false },
   { to: '/market', label: 'بازار', icon: Store, end: false },
-  { to: '/missions', label: 'مأموریت', icon: Trophy, end: false },
+  { to: '/businesses', label: 'کسب‌وکار', icon: Building2, end: false },
   { to: '/excitement', label: 'هیجان', icon: Gamepad2, end: false },
 ];
 

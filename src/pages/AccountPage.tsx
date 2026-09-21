@@ -20,6 +20,7 @@ import {
   Trophy,
   ShoppingBag,
   MousePointerClick,
+  Plus,
 } from 'lucide-react';
 import { useAuth } from '@/providers/useAuth';
 import { useToast } from '@/providers/useToast';
@@ -473,6 +474,25 @@ export function AccountPage() {
           <p className="text-xs sm:text-sm text-neutral-500">
             برای مشاهده و پیگیری سفارش‌های فروشگاه به صفحه سفارش‌ها مراجعه کنید.
           </p>
+        </Card>
+
+        {/* My Businesses */}
+        <Card className="p-4 sm:p-8 mb-4 sm:mb-6">
+          <div className="flex items-center justify-between mb-3 sm:mb-5">
+            <h2 className="text-base sm:text-lg font-bold text-neutral-800">کسب‌وکارهای من</h2>
+            <Link to="/my-businesses" className="text-xs sm:text-sm text-primary-700 hover:text-primary-200 transition-colors">
+              مشاهده همه
+            </Link>
+          </div>
+          <p className="text-xs sm:text-sm text-neutral-500 mb-4">
+            کسب‌وکارهای ثبت‌شده توسط شما و وضعیت آن‌ها را مدیریت کنید.
+          </p>
+          <Link to="/businesses/register">
+            <Button size="sm">
+              <Plus className="w-4 h-4" />
+              ثبت کسب‌وکار جدید
+            </Button>
+          </Link>
         </Card>
 
         <p className="text-xs text-neutral-600 text-center px-4">

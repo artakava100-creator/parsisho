@@ -142,3 +142,93 @@ export function useDeleteBusinessImage() {
     },
   });
 }
+
+// ─── Business Category Management ────────────────────────────────────
+
+export function useCreateBusinessCategory() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (input: {
+      name: string;
+      slug: string;
+      description?: string | null;
+      iconName?: string | null;
+      displayOrder?: number;
+      isActive?: boolean;
+    }) => adminBusinessService.createCategory(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-business-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['business-categories'] });
+      toast.success('دسته‌بندی ایجاد شد', 'دسته‌بندی جدید با موفقیت ایجاد شد');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'خطا در ایجاد دسته‌بندی';
+      toast.error('خطا', msg);
+    },
+  });
+}
+
+export function useUpdateBusinessCategory() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: ({ categoryId, input }: {
+      categoryId: string;
+      input: {
+        name?: string | null;
+        slug?: string | null;
+        description?: string | null;
+        iconName?: string | null;
+        displayOrder?: number | null;
+        isActive?: boolean | null;
+      };
+    }) => adminBusinessService.updateCategory(categoryId, input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-business-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['business-categories'] });
+      toast.success('دسته‌بندی ویرایش شد', 'تغییرات با موفقیت ذخیره شد');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'خطا در ویرایش دسته‌بندی';
+      toast.error('خطا', msg);
+    },
+  });
+}
+
+export function useDeleteBusinessCategory() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (categoryId: string) => adminBusinessService.deleteCategory(categoryId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-business-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['business-categories'] });
+      toast.success('دسته‌بندی حذف شد', 'دسته‌بندی با موفقیت حذف شد');
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'خطا در حذف دسته‌بندی';
+      toast.error('خطا', msg);
+    },
+  });
+}
+
+export function useReorderBusinessCategories() {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
+  return useMutation({
+    mutationFn: (items: Array<{ id: string; display_order: number }>) =>
+      adminBusinessService.reorderCategories(items),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-business-categories'] });
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : 'خطا در مرتب‌سازی';
+      toast.error('خطا', msg);
+    },
+  });
+}

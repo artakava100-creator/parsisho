@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronLeft, ShieldCheck } from 'lucide-react';
+import { Menu, X, ChevronLeft, ShieldCheck, Home } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useAuth } from '@/providers/useAuth';
 import { hasPermission } from '@/lib/permissions';
@@ -132,6 +132,13 @@ export function AdminHeader() {
         <Breadcrumb items={breadcrumbs} />
       </div>
       <div className="flex items-center gap-2 shrink-0">
+        <Link
+          to="/"
+          className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-primary-700 transition-colors px-2 py-1 rounded-lg hover:bg-primary-50"
+        >
+          <Home className="w-4 h-4" />
+          <span className="hidden sm:inline">صفحه اصلی</span>
+        </Link>
         {user && (
           <span className="text-sm text-neutral-600 hidden sm:block truncate max-w-32">
             {user.displayName}

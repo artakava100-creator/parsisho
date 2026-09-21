@@ -664,6 +664,8 @@ export interface GameRoundRpcResult {
 
 export type BusinessStatus = 'pending' | 'active' | 'inactive';
 
+export type BusinessSubscriptionType = 'free' | 'featured';
+
 export interface BusinessCategory {
   id: string;
   name: string;
@@ -671,6 +673,24 @@ export interface BusinessCategory {
   description: string | null;
   iconName: string | null;
   displayOrder: number;
+}
+
+export interface CreateBusinessCategoryInput {
+  name: string;
+  slug: string;
+  description?: string | null;
+  iconName?: string | null;
+  displayOrder?: number;
+  isActive?: boolean;
+}
+
+export interface UpdateBusinessCategoryInput {
+  name?: string | null;
+  slug?: string | null;
+  description?: string | null;
+  iconName?: string | null;
+  displayOrder?: number | null;
+  isActive?: boolean | null;
 }
 
 export interface BusinessCategoryWithActive extends BusinessCategory {
@@ -721,6 +741,9 @@ export interface BusinessDetail {
   createdAt: string;
   startDate: string | null;
   endDate: string | null;
+  subscriptionType: BusinessSubscriptionType;
+  subscriptionExpiresAt: string | null;
+  ownerId: string | null;
   images: BusinessImage[];
 }
 
@@ -734,6 +757,9 @@ export interface BusinessAdminRow extends BusinessSummary {
   provinceName: string | null;
   cityId: string | null;
   cityName: string | null;
+  subscriptionType: BusinessSubscriptionType;
+  subscriptionExpiresAt: string | null;
+  ownerId: string | null;
 }
 
 export interface CreateBusinessInput {
@@ -1139,4 +1165,102 @@ export interface NewsletterListResult {
   total: number;
   page: number;
   pageSize: number;
+}
+
+// ─── Site Search Types ─────────────────────────────────────────────
+
+export interface SearchResultProduct {
+  id: string;
+  name: string;
+  slug: string;
+  short_description: string | null;
+  image_url: string;
+  price: number;
+  category_name: string | null;
+  category_slug: string | null;
+}
+
+export interface SearchResultBusiness {
+  id: string;
+  name: string;
+  slug: string;
+  short_description: string | null;
+  logo_path: string | null;
+  cover_path: string | null;
+  city: string | null;
+  is_featured: boolean;
+  category_name: string;
+  category_slug: string;
+}
+
+export interface SearchResultAuction {
+  id: string;
+  title: string;
+  slug: string;
+  image_url: string | null;
+  current_price: number;
+  status: string;
+  ends_at: string;
+  is_official: boolean;
+  product_name: string | null;
+}
+
+export interface SiteSearchResult {
+  success: boolean;
+  error?: string;
+  products: SearchResultProduct[];
+  businesses: SearchResultBusiness[];
+  auctions: SearchResultAuction[];
+  totals: { products: number; businesses: number; auctions: number };
+}
+
+// ─── User Business Types ───────────────────────────────────────────
+
+export interface UserBusinessRow {
+  id: string;
+  name: string;
+  slug: string;
+  short_description: string | null;
+  category_id: string;
+  category_name: string;
+  category_slug: string;
+  city: string | null;
+  locality: string | null;
+  logo_path: string | null;
+  cover_path: string | null;
+  status: BusinessStatus;
+  is_featured: boolean;
+  subscription_type: BusinessSubscriptionType;
+  subscription_expires_at: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  created_at: string;
+}
+
+export interface UserRegisterBusinessInput {
+  name: string;
+  slug: string;
+  categoryId: string;
+  shortDescription?: string | null;
+  description?: string | null;
+  city?: string | null;
+  locality?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  logoPath?: string | null;
+  coverPath?: string | null;
+}
+
+export interface UserUpdateBusinessInput {
+  name?: string | null;
+  shortDescription?: string | null;
+  description?: string | null;
+  city?: string | null;
+  locality?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  logoPath?: string | null;
+  coverPath?: string | null;
 }

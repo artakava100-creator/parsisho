@@ -48,6 +48,10 @@ const AdminMarketplaceDashboardPage = lazy(() => import('@/pages/admin/AdminMark
 const AdminHomepagePage = lazy(() => import('@/pages/admin/AdminHomepagePage').then((m) => ({ default: m.AdminHomepagePage })));
 const AdminSpecialPage = lazy(() => import('@/pages/admin/AdminSpecialPage').then((m) => ({ default: m.AdminSpecialPage })));
 const AdminNewsletterPage = lazy(() => import('@/pages/admin/AdminNewsletterPage').then((m) => ({ default: m.AdminNewsletterPage })));
+const AdminBusinessCategoryPage = lazy(() => import('@/pages/admin/AdminBusinessCategoryPage').then((m) => ({ default: m.AdminBusinessCategoryPage })));
+const SearchPage = lazy(() => import('@/pages/SearchPage').then((m) => ({ default: m.SearchPage })));
+const RegisterBusinessPage = lazy(() => import('@/pages/business/RegisterBusinessPage').then((m) => ({ default: m.RegisterBusinessPage })));
+const MyBusinessesPage = lazy(() => import('@/pages/business/MyBusinessesPage').then((m) => ({ default: m.MyBusinessesPage })));
 
 const placeholders = {
   auctions: { title: 'تالار مزایده', description: 'مزایده‌های زنده و مهیج پارسیشو', icon: <Gavel className="w-8 h-8" /> },
@@ -93,6 +97,9 @@ export function AppRoutes() {
         <Route path="/excitement/guess-it" element={<ProtectedRoute><Suspense fallback={<FullPageSpinner />}><GuessItPage /></Suspense></ProtectedRoute>} />
         <Route path="/businesses" element={<Suspense fallback={<FullPageSpinner />}><BusinessListPage /></Suspense>} />
         <Route path="/businesses/:slug" element={<Suspense fallback={<FullPageSpinner />}><BusinessDetailPage /></Suspense>} />
+        <Route path="/businesses/register" element={<ProtectedRoute><Suspense fallback={<FullPageSpinner />}><RegisterBusinessPage /></Suspense></ProtectedRoute>} />
+        <Route path="/my-businesses" element={<ProtectedRoute><Suspense fallback={<FullPageSpinner />}><MyBusinessesPage /></Suspense></ProtectedRoute>} />
+        <Route path="/search" element={<Suspense fallback={<FullPageSpinner />}><SearchPage /></Suspense>} />
 
         {/* Auth - public only */}
         <Route path="/auth/sign-in" element={<PublicOnlyRoute><Suspense fallback={<FullPageSpinner />}><SignInPage /></Suspense></PublicOnlyRoute>} />
@@ -256,6 +263,11 @@ export function AppRoutes() {
         <Route path="/admin/marketplace/businesses" element={
           <AdminRoute permission="manage_businesses">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminBusinessPage /></Suspense></AdminLayout>
+          </AdminRoute>
+        } />
+        <Route path="/admin/marketplace/business-categories" element={
+          <AdminRoute permission="manage_businesses">
+            <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminBusinessCategoryPage /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/ads" element={

@@ -1,9 +1,10 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Building2, Search, MapPin, Star, Store, Factory, Wrench, Brush, Cookie, Wheat, AlertCircle } from 'lucide-react';
+import { Building2, Search, MapPin, Star, Store, Factory, Wrench, Brush, Cookie, Wheat, AlertCircle, Plus } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { FullPageSpinner } from '@/components/ui/Spinner';
 import { useBusinessCategories, useBusinesses } from '@/hooks/useBusinesses';
@@ -124,6 +125,13 @@ export function BusinessListPage() {
               کشف کسب‌وکارها، تولیدکنندگان و خدمات‌دهندگان محلی مورد اعتماد
             </p>
           </div>
+          <div className="flex-1" />
+          <Link to="/businesses/register">
+            <Button size="sm" className="hidden sm:flex shrink-0">
+              <Plus className="w-4 h-4" />
+              ثبت کسب‌وکار
+            </Button>
+          </Link>
         </div>
       </section>
 
@@ -206,6 +214,14 @@ export function BusinessListPage() {
               icon={<Building2 className="w-8 h-8" />}
               title="هنوز کسب‌وکاری ثبت نشده"
               description="به‌زودی کسب‌وکارهای محلی در اینجا نمایش داده می‌شوند"
+              action={
+                <Link to="/businesses/register">
+                  <Button size="sm">
+                    <Plus className="w-4 h-4" />
+                    ثبت کسب‌وکار
+                  </Button>
+                </Link>
+              }
             />
           </Card>
         ) : (
