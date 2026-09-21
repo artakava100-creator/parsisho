@@ -730,6 +730,10 @@ export interface BusinessAdminRow extends BusinessSummary {
   createdAt: string;
   startDate: string | null;
   endDate: string | null;
+  provinceId: string | null;
+  provinceName: string | null;
+  cityId: string | null;
+  cityName: string | null;
 }
 
 export interface CreateBusinessInput {
@@ -750,6 +754,8 @@ export interface CreateBusinessInput {
   displayOrder?: number;
   startDate?: string | null;
   endDate?: string | null;
+  provinceId?: string | null;
+  cityId?: string | null;
 }
 
 export interface UpdateBusinessInput {
@@ -772,6 +778,10 @@ export interface UpdateBusinessInput {
   endDate?: string | null;
   clearStartDate?: boolean;
   clearEndDate?: boolean;
+  provinceId?: string | null;
+  cityId?: string | null;
+  clearProvince?: boolean;
+  clearCity?: boolean;
 }
 
 export interface AdSlot {

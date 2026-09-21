@@ -36,6 +36,10 @@ interface AdminListResult {
     category_slug: string;
     city: string | null;
     locality: string | null;
+    province_id: string | null;
+    province_name: string | null;
+    city_id: string | null;
+    city_name: string | null;
     status: string;
     is_featured: boolean;
     display_order: number;
@@ -76,6 +80,10 @@ function mapAdminRow(row: AdminListResult['businesses'] extends (infer T)[] | un
     categorySlug: row.category_slug,
     city: row.city,
     locality: row.locality,
+    provinceId: row.province_id,
+    provinceName: row.province_name,
+    cityId: row.city_id,
+    cityName: row.city_name,
     logoPath: row.logo_path,
     coverPath: row.cover_path ?? null,
     isFeatured: row.is_featured,
@@ -141,6 +149,8 @@ export class AdminBusinessService extends BaseService {
       p_display_order: input.displayOrder ?? 0,
       p_start_date: input.startDate ?? null,
       p_end_date: input.endDate ?? null,
+      p_province_id: input.provinceId ?? null,
+      p_city_id: input.cityId ?? null,
     });
 
     if (error) throw normalizeError(error);
@@ -175,6 +185,10 @@ export class AdminBusinessService extends BaseService {
       p_end_date: input.endDate ?? null,
       p_clear_start_date: input.clearStartDate ?? false,
       p_clear_end_date: input.clearEndDate ?? false,
+      p_province_id: input.provinceId ?? null,
+      p_city_id: input.cityId ?? null,
+      p_clear_province: input.clearProvince ?? false,
+      p_clear_city: input.clearCity ?? false,
     });
 
     if (error) throw normalizeError(error);
@@ -244,6 +258,27 @@ export class AdminBusinessService extends BaseService {
     if (!result.success) {
       throw { message: result.error ?? 'خطا در حذف تصویر' } as ApiError;
     }
+  }
+
+  async listProvinces(): Promise<Array<{ id: string; name: string }>> {
+    const { data, error } = await this.client
+      .from('provinces')
+      .select('id, name')
+      .order('name');
+
+    if (error) throw normalizeError(error);
+    return data ?? [];
+  }
+
+  async listCities(provinceId: string): Promise<Array<{ id: string; name: string }>> {
+    const { data, error } = await this.client
+      .from('cities')
+      .select('id, name')
+      .eq('province_id', provinceId)
+      .order('name');
+
+    if (error) throw normalizeError(error);
+    return data ?? [];
   }
 }
 

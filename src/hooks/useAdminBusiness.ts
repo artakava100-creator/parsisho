@@ -10,6 +10,23 @@ export function useAdminBusinessCategories() {
   });
 }
 
+export function useAdminProvinces() {
+  return useQuery({
+    queryKey: ['admin-provinces'],
+    queryFn: () => adminBusinessService.listProvinces(),
+    staleTime: Infinity,
+  });
+}
+
+export function useAdminCities(provinceId: string | null) {
+  return useQuery({
+    queryKey: ['admin-cities', provinceId],
+    queryFn: () => adminBusinessService.listCities(provinceId!),
+    enabled: !!provinceId,
+    staleTime: Infinity,
+  });
+}
+
 export function useAdminBusinesses(params: {
   status?: string | null;
   categoryId?: string | null;

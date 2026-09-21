@@ -8,6 +8,7 @@ import {
   useAdminBusinesses, useAdminBusinessCategories,
   useCreateBusiness, useUpdateBusiness, useDeleteBusiness,
   useAdminBusinessImages, useAddBusinessImage, useDeleteBusinessImage,
+  useAdminProvinces, useAdminCities,
 } from '@/hooks/useAdminBusiness';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -735,7 +736,10 @@ function BusinessFormDrawer({ mode, categories, biz, onClose }: BusinessFormDraw
   const [categoryId, setCategoryId] = useState(biz?.categoryId ?? '');
   const [shortDescription, setShortDescription] = useState(biz?.shortDescription ?? '');
   const [description, setDescription] = useState('');
-  const [city, setCity] = useState(biz?.city ?? '');
+  const [provinceId, setProvinceId] = useState(biz?.provinceId ?? '');
+  const [cityId, setCityId] = useState(biz?.cityId ?? '');
+  const { data: provinces, isLoading: provincesLoading } = useAdminProvinces();
+  const { data: cities, isLoading: citiesLoading } = useAdminCities(provinceId || null);
   const [locality, setLocality] = useState(biz?.locality ?? '');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
@@ -748,6 +752,11 @@ function BusinessFormDrawer({ mode, categories, biz, onClose }: BusinessFormDraw
   const [startDate, setStartDate] = useState<string | null>(biz?.startDate ?? null);
   const [endDate, setEndDate] = useState<string | null>(biz?.endDate ?? null);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const handleProvinceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setProvinceId(e.target.value);
+    setCityId('');
+  };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -764,6 +773,8 @@ function BusinessFormDrawer({ mode, categories, biz, onClose }: BusinessFormDraw
     if (!name.trim()) { setFormError('نام کسب‌وکار الزامی است'); return; }
     if (!slug.trim()) { setFormError('نامک (slug) الزامی است'); return; }
     if (!categoryId) { setFormError('دسته‌بندی الزامی است'); return; }
+    if (!provinceId) { setFormError('استان الزامی است'); return; }
+    if (!cityId) { setFormError('شهر الزامی است'); return; }
 
     if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
       setFormError('تاریخ شروع باید قبل از تاریخ پایان باشد');
@@ -777,7 +788,7 @@ function BusinessFormDrawer({ mode, categories, biz, onClose }: BusinessFormDraw
         categoryId,
         shortDescription: shortDescription.trim() || null,
         description: description.trim() || null,
-        city: city.trim() || null,
+        city: null,
         locality: locality.trim() || null,
         address: address.trim() || null,
         phone: phone.trim() || null,
@@ -789,6 +800,8 @@ function BusinessFormDrawer({ mode, categories, biz, onClose }: BusinessFormDraw
         displayOrder: parseInt(displayOrder, 10) || 0,
         startDate,
         endDate,
+        provinceId: provinceId || null,
+        cityId: cityId || null,
       };
 
       if (mode === 'create') {
@@ -800,6 +813,8 @@ function BusinessFormDrawer({ mode, categories, biz, onClose }: BusinessFormDraw
             ...payload,
             clearStartDate: !startDate,
             clearEndDate: !endDate,
+            clearProvince: !provinceId,
+            clearCity: !cityId,
           },
         });
       }
@@ -949,13 +964,37 @@ function BusinessFormDrawer({ mode, categories, biz, onClose }: BusinessFormDraw
         {/* Location */}
         <FormSection title="موقعیت و تماس">
           <FormRow>
-            <FormField label="شهر">
-              <Input value={city} onChange={(e) => setCity(e.target.value)} placeholder="تهران" />
+            <FormField label="استان" required>
+              <select
+                value={provinceId}
+                onChange={handleProvinceChange}
+                disabled={provincesLoading}
+                className="w-full h-11 px-3 rounded-lg bg-surface-sunken border border-neutral-300 text-neutral-800 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 disabled:opacity-50"
+              >
+                <option value="">انتخاب استان...</option>
+                {provinces?.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
             </FormField>
-            <FormField label="محله">
-              <Input value={locality} onChange={(e) => setLocality(e.target.value)} placeholder="سعادت‌آباد" />
+            <FormField label="شهر" required>
+              <select
+                value={cityId}
+                onChange={(e) => setCityId(e.target.value)}
+                disabled={!provinceId || citiesLoading}
+                className="w-full h-11 px-3 rounded-lg bg-surface-sunken border border-neutral-300 text-neutral-800 text-sm focus:outline-none focus:border-primary-500 focus:ring-1 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="">{provinceId ? 'انتخاب شهر...' : 'ابتدا استان را انتخاب کنید'}</option>
+                {cities?.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
             </FormField>
           </FormRow>
+
+          <FormField label="محله">
+            <Input value={locality} onChange={(e) => setLocality(e.target.value)} placeholder="سعادت‌آباد" />
+          </FormField>
 
           <FormField label="آدرس">
             <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="آدرس کامل" />
