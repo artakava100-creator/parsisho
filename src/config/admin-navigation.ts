@@ -13,6 +13,7 @@ export interface AdminNavItem {
   icon: typeof LayoutDashboard;
   permission?: Permission;
   badge?: string;
+  children?: AdminNavItem[];
 }
 
 export interface AdminNavGroup {
@@ -47,9 +48,14 @@ export const adminNavGroups: AdminNavGroup[] = [
       { label: 'تحلیل‌ها', to: '/admin/marketplace/analytics', icon: BarChart3, permission: 'manage_content' },
       { label: 'مزایده‌ها', to: '/admin/marketplace/auctions', icon: Gavel, permission: 'manage_auctions' },
       { label: 'سرزمین هیجان', to: '/admin/marketplace/engagement', icon: Gamepad2, permission: 'manage_missions' },
-      { label: 'کسب‌وکارها', to: '/admin/marketplace/businesses', icon: Building2, permission: 'manage_businesses' },
-      { label: 'دسته‌بندی کسب‌وکارها', to: '/admin/marketplace/business-categories', icon: FolderTree, permission: 'manage_businesses' },
-      { label: 'اسلایدر کسب‌وکار', to: '/admin/marketplace/business-slider', icon: GalleryHorizontalEnd, permission: 'manage_businesses' },
+      {
+        label: 'مدیریت کسب‌وکار', to: '/admin/marketplace/businesses', icon: Building2, permission: 'manage_businesses',
+        children: [
+          { label: 'مدیریت کسب‌وکار', to: '/admin/marketplace/businesses', icon: Building2, permission: 'manage_businesses' },
+          { label: 'مدیریت دسته‌بندی‌ها', to: '/admin/marketplace/business-categories', icon: FolderTree, permission: 'manage_businesses' },
+          { label: 'مدیریت اسلایدر', to: '/admin/marketplace/business-slider', icon: GalleryHorizontalEnd, permission: 'manage_businesses' },
+        ],
+      },
       { label: 'تبلیغات', to: '/admin/marketplace/ads', icon: Megaphone, permission: 'manage_content' },
       { label: 'صفحه اصلی', to: '/admin/marketplace/homepage', icon: Home, permission: 'manage_content' },
       { label: 'مدیریت ویژه', to: '/admin/marketplace/special', icon: Sparkles, permission: 'manage_content' },
@@ -84,6 +90,24 @@ export function findNavItemByPath(pathname: string): AdminNavItem | null {
   for (const group of adminNavGroups) {
     for (const item of group.items) {
       if (pathname === item.to) return item;
+      if (item.children) {
+        for (const child of item.children) {
+          if (pathname === child.to) return child;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+export function findParentNavItemByPath(pathname: string): AdminNavItem | null {
+  for (const group of adminNavGroups) {
+    for (const item of group.items) {
+      if (item.children) {
+        for (const child of item.children) {
+          if (pathname === child.to) return item;
+        }
+      }
     }
   }
   return null;

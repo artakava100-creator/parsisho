@@ -4,6 +4,7 @@ import {
   ArrowUp, ArrowDown, Plus, X, Pencil, Check, AlertCircle,
   Copy, Monitor, Smartphone, Layers as LayersIcon, Sparkles,
   Type, Image as ImageIcon2, Square, MousePointerClick,
+  GalleryHorizontalEnd,
 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -773,7 +774,7 @@ function LayerRow({
 // ─── Main Admin Page ─────────────────────────────────────────────
 
 export function AdminBusinessSliderPage() {
-  const { data: slides, isLoading, error: fetchError } = useAdminBusinessSlides();
+  const { data: slides, isLoading, error: fetchError, refetch } = useAdminBusinessSlides();
   const createMutation = useCreateBusinessSlide();
   const updateMutation = useUpdateBusinessSlide();
   const deleteMutation = useDeleteBusinessSlide();
@@ -1098,9 +1099,16 @@ export function AdminBusinessSliderPage() {
       <div>
         <AdminPageHeader title="اسلایدر کسب‌وکار" description="مدیریت اسلایدهای تبلیغاتی صفحه کسب‌وکار" />
         <Card className="p-5">
-          <div className="flex flex-col items-center justify-center py-8 text-error-600 gap-2">
+          <div className="flex flex-col items-center justify-center py-8 text-error-600 gap-3">
             <AlertCircle className="w-6 h-6" />
             <p className="text-sm">بارگذاری اسلایدها انجام نشد. صفحه را دوباره بارگذاری کنید.</p>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => refetch()}
+            >
+              تلاش مجدد
+            </Button>
           </div>
         </Card>
       </div>
@@ -1136,8 +1144,12 @@ export function AdminBusinessSliderPage() {
             />
           ))}
           {allSlides.length === 0 && (
-            <div className="text-center py-8 text-neutral-400 text-sm">
-              هنوز اسلایدی وجود ندارد. روی «افزودن اسلاید» کلیک کنید.
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-neutral-100 flex items-center justify-center text-neutral-400 mb-3">
+                <GalleryHorizontalEnd className="w-6 h-6" />
+              </div>
+              <p className="text-sm font-medium text-neutral-600">هنوز اسلایدی وجود ندارد</p>
+              <p className="text-xs text-neutral-400 mt-1">روی «افزودن اسلاید» کلیک کنید تا اولین اسلاید را بسازید.</p>
             </div>
           )}
         </div>

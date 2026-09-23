@@ -74,7 +74,9 @@ export function BusinessHeroSlider() {
   if (isLoading) {
     return (
       <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 pb-2">
-        <div className="rounded-xl sm:rounded-2xl bg-neutral-100 animate-pulse h-[200px] sm:h-[280px] lg:h-[320px]" />
+        <div className="rounded-xl sm:rounded-2xl bg-neutral-100 animate-pulse h-[200px] sm:h-[280px] lg:h-[320px] relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-neutral-100 via-neutral-50 to-neutral-100 animate-pulse" />
+        </div>
       </section>
     );
   }
@@ -120,14 +122,14 @@ export function BusinessHeroSlider() {
           <>
             <button
               onClick={goPrev}
-              className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/80 hover:bg-white shadow-md flex items-center justify-center transition-all hover:scale-110"
+              className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/85 backdrop-blur-sm hover:bg-white shadow-md flex items-center justify-center transition-all hover:scale-110 active:scale-95"
               aria-label="اسلاید قبلی"
             >
               <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-700" />
             </button>
             <button
               onClick={goNext}
-              className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/80 hover:bg-white shadow-md flex items-center justify-center transition-all hover:scale-110"
+              className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/85 backdrop-blur-sm hover:bg-white shadow-md flex items-center justify-center transition-all hover:scale-110 active:scale-95"
               aria-label="اسلاید بعدی"
             >
               <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-neutral-700" />
@@ -145,7 +147,7 @@ export function BusinessHeroSlider() {
                   'h-1.5 rounded-full transition-all duration-300',
                   idx === current
                     ? 'w-6 bg-white shadow-sm'
-                    : 'w-1.5 bg-white/50 hover:bg-white/70',
+                    : 'w-1.5 bg-white/40 hover:bg-white/70',
                 )}
                 aria-label={`اسلاید ${idx + 1}`}
               />

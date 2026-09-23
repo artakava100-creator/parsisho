@@ -2,6 +2,7 @@ import { type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import { cn } from '@/lib/cn';
+import { findParentNavItemByPath } from '@/config/admin-navigation';
 
 export interface BreadcrumbItem {
   label: string;
@@ -54,6 +55,10 @@ export function buildBreadcrumbs(pathname: string, navLabel?: string): Breadcrum
   if (pathname.startsWith('/admin/marketplace')) {
     items.push({ label: 'مرکز کنترل بازار', to: '/admin/marketplace' });
     if (pathname !== '/admin/marketplace' && navLabel) {
+      const parent = findParentNavItemByPath(pathname);
+      if (parent && parent.label !== navLabel) {
+        items.push({ label: parent.label });
+      }
       items.push({ label: navLabel });
     }
   } else if (pathname.startsWith('/admin/system')) {

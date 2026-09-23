@@ -1,13 +1,80 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronLeft, ShieldCheck, Home } from 'lucide-react';
+import { Menu, X, ChevronLeft, ChevronDown, ShieldCheck, Home } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { useAuth } from '@/providers/useAuth';
 import { hasPermission } from '@/lib/permissions';
-import { adminNavGroups, findNavItemByPath, type AdminNavItem } from '@/config/admin-navigation';
+import { adminNavGroups, findNavItemByPath, findParentNavItemByPath, type AdminNavItem } from '@/config/admin-navigation';
 import { toPersianDigits } from '@/lib/persian';
 import { Drawer } from './Drawer';
 import { Breadcrumb, buildBreadcrumbs } from './Breadcrumb';
+
+function NavSubItem({ item, onNavigate }: { item: AdminNavItem; onNavigate?: () => void }) {
+  const location = useLocation();
+  const isActive = location.pathname === item.to;
+
+  const Icon = item.icon;
+  return (
+    <Link
+      to={item.to}
+      onClick={onNavigate}
+      className={cn(
+        'flex items-center gap-2.5 pr-4 pl-3 py-1.5 rounded-lg text-sm transition-colors',
+        isActive
+          ? 'bg-primary-50 text-primary-700 font-medium'
+          : 'text-neutral-500 hover:bg-neutral-100 hover:text-neutral-700',
+      )}
+      aria-current={isActive ? 'page' : undefined}
+    >
+      <Icon className="w-3.5 h-3.5 shrink-0" />
+      <span className="flex-1 truncate text-xs">{item.label}</span>
+    </Link>
+  );
+}
+
+function NavParentItem({ item, onNavigate }: { item: AdminNavItem; onNavigate?: () => void }) {
+  const location = useLocation();
+  const { user } = useAuth();
+
+  if (item.permission && !hasPermission(user?.role, item.permission)) return null;
+
+  const Icon = item.icon;
+  const hasActiveChild = item.children!.some(
+    (child) => location.pathname === child.to || location.pathname.startsWith(child.to + '/'),
+  );
+  const [expanded, setExpanded] = useState(hasActiveChild);
+
+  return (
+    <div>
+      <button
+        onClick={() => setExpanded((p) => !p)}
+        className={cn(
+          'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors w-full',
+          hasActiveChild
+            ? 'bg-primary-50 text-primary-700 font-medium'
+            : 'text-neutral-600 hover:bg-neutral-100 hover:text-neutral-800',
+        )}
+        aria-expanded={expanded}
+      >
+        <Icon className="w-4 h-4 shrink-0" />
+        <span className="flex-1 truncate text-right">{item.label}</span>
+        <ChevronDown
+          className={cn(
+            'w-3.5 h-3.5 shrink-0 transition-transform duration-normal',
+            expanded && 'rotate-180',
+          )}
+        />
+      </button>
+      {expanded && (
+        <div className="space-y-0.5 mt-0.5 mr-3 border-r border-neutral-200 pr-1">
+          {item.children!.map((child) => (
+            <NavSubItem key={child.to} item={child} onNavigate={onNavigate} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function NavLink({ item, onNavigate }: { item: AdminNavItem; onNavigate?: () => void }) {
   const location = useLocation();
@@ -15,6 +82,10 @@ function NavLink({ item, onNavigate }: { item: AdminNavItem; onNavigate?: () => 
   const isActive = location.pathname === item.to;
 
   if (item.permission && !hasPermission(user?.role, item.permission)) return null;
+
+  if (item.children && item.children.length > 0) {
+    return <NavParentItem item={item} onNavigate={onNavigate} />;
+  }
 
   const Icon = item.icon;
   return (
