@@ -1264,3 +1264,137 @@ export interface UserUpdateBusinessInput {
   logoPath?: string | null;
   coverPath?: string | null;
 }
+
+// ─── Business Slider Types ─────────────────────────────────────────
+
+export type SlideAnimationType = 'fade' | 'slide' | 'zoom' | 'fade-slide' | 'none';
+export type SlideContentPosition = 'right' | 'center' | 'left';
+export type SlideTextColor = 'light' | 'dark';
+export type SlideLinkType = 'none' | 'business' | 'category' | 'custom';
+export type SlideLayerType = 'image' | 'text' | 'button' | 'decorative';
+
+export interface BusinessSlideLayer {
+  id: string;
+  layerType: SlideLayerType;
+  content: string | null;
+  imagePath: string | null;
+  linkUrl: string | null;
+  positionX: number;
+  positionY: number;
+  width: number | null;
+  zIndex: number;
+  animationDelayMs: number;
+  animationType: SlideAnimationType;
+  sortOrder: number;
+  isVisible: boolean;
+  slideId?: string;
+}
+
+export interface BusinessSlide {
+  id: string;
+  internalName: string;
+  title: string | null;
+  eyebrow: string | null;
+  description: string | null;
+  ctaText: string | null;
+  ctaUrl: string | null;
+  cta2Text: string | null;
+  cta2Url: string | null;
+  backgroundImagePath: string | null;
+  mainImagePath: string | null;
+  mobileImagePath: string | null;
+  overlayOpacity: number;
+  contentPosition: SlideContentPosition;
+  textColor: SlideTextColor;
+  animationType: SlideAnimationType;
+  durationMs: number;
+  transitionMs: number;
+  sortOrder: number;
+  linkType: SlideLinkType;
+  linkBusinessId: string | null;
+  linkCategoryId: string | null;
+  linkCustomUrl: string | null;
+  layers: BusinessSlideLayer[];
+}
+
+export interface BusinessSlideListItem extends Omit<BusinessSlide, 'layers'> {
+  isActive: boolean;
+  isPublished: boolean;
+  startsAt: string | null;
+  endsAt: string | null;
+  layerCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BusinessSlideDetail extends BusinessSlide {
+  isActive: boolean;
+  isPublished: boolean;
+  startsAt: string | null;
+  endsAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateBusinessSlideInput {
+  internalName: string;
+  title?: string | null;
+  eyebrow?: string | null;
+  description?: string | null;
+  ctaText?: string | null;
+  ctaUrl?: string | null;
+  cta2Text?: string | null;
+  cta2Url?: string | null;
+  backgroundImagePath?: string | null;
+  mainImagePath?: string | null;
+  mobileImagePath?: string | null;
+  overlayOpacity?: number;
+  contentPosition?: SlideContentPosition;
+  textColor?: SlideTextColor;
+  animationType?: SlideAnimationType;
+  durationMs?: number;
+  transitionMs?: number;
+  sortOrder?: number;
+  isActive?: boolean;
+  isPublished?: boolean;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  linkType?: SlideLinkType;
+  linkBusinessId?: string | null;
+  linkCategoryId?: string | null;
+  linkCustomUrl?: string | null;
+}
+
+export interface UpdateBusinessSlideInput extends Partial<CreateBusinessSlideInput> {
+  clearStartsAt?: boolean;
+  clearEndsAt?: boolean;
+  clearBackgroundImage?: boolean;
+  clearMainImage?: boolean;
+  clearMobileImage?: boolean;
+  clearLinkBusinessId?: boolean;
+  clearLinkCategoryId?: boolean;
+  clearLinkCustomUrl?: boolean;
+}
+
+export interface CreateSlideLayerInput {
+  slideId: string;
+  layerType: SlideLayerType;
+  content?: string | null;
+  imagePath?: string | null;
+  linkUrl?: string | null;
+  positionX?: number;
+  positionY?: number;
+  width?: number | null;
+  zIndex?: number;
+  animationDelayMs?: number;
+  animationType?: SlideAnimationType;
+  sortOrder?: number;
+  isVisible?: boolean;
+}
+
+export interface UpdateSlideLayerInput extends Partial<CreateSlideLayerInput> {
+  clearContent?: boolean;
+  clearImage?: boolean;
+  clearLinkUrl?: boolean;
+  clearWidth?: boolean;
+}

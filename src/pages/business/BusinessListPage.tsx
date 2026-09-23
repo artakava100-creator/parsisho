@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, Search, MapPin, Star, Store, Factory, Wrench, Brush, Cookie, Wheat, AlertCircle, Plus } from 'lucide-react';
+import { BusinessHeroSlider } from '@/components/business/BusinessHeroSlider';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Input } from '@/components/ui/Input';
@@ -113,15 +114,18 @@ export function BusinessListPage() {
 
   return (
     <div className="animate-fade-in pb-12">
+      {/* Business Slider */}
+      <BusinessHeroSlider />
+
       {/* Header */}
-      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6">
-        <div className="flex items-center gap-2.5 sm:gap-3 mb-2">
+      <section className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-4 sm:pb-6">
+        <div className="flex items-center gap-2.5 sm:gap-3 mb-1">
           <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary-50 border border-primary-500/25 flex items-center justify-center shrink-0">
             <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-primary-700" />
           </div>
           <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-extrabold text-neutral-800">محله کسب‌وکار</h1>
-            <p className="text-xs sm:text-sm text-neutral-500">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-neutral-900">محله کسب‌وکار</h1>
+            <p className="text-xs sm:text-sm text-neutral-500 mt-0.5">
               کشف کسب‌وکارها، تولیدکنندگان و خدمات‌دهندگان محلی مورد اعتماد
             </p>
           </div>

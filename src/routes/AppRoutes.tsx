@@ -49,6 +49,7 @@ const AdminHomepagePage = lazy(() => import('@/pages/admin/AdminHomepagePage').t
 const AdminSpecialPage = lazy(() => import('@/pages/admin/AdminSpecialPage').then((m) => ({ default: m.AdminSpecialPage })));
 const AdminNewsletterPage = lazy(() => import('@/pages/admin/AdminNewsletterPage').then((m) => ({ default: m.AdminNewsletterPage })));
 const AdminBusinessCategoryPage = lazy(() => import('@/pages/admin/AdminBusinessCategoryPage').then((m) => ({ default: m.AdminBusinessCategoryPage })));
+const AdminBusinessSliderPage = lazy(() => import('@/pages/admin/AdminBusinessSliderPage').then((m) => ({ default: m.AdminBusinessSliderPage })));
 const SearchPage = lazy(() => import('@/pages/SearchPage').then((m) => ({ default: m.SearchPage })));
 const RegisterBusinessPage = lazy(() => import('@/pages/business/RegisterBusinessPage').then((m) => ({ default: m.RegisterBusinessPage })));
 const MyBusinessesPage = lazy(() => import('@/pages/business/MyBusinessesPage').then((m) => ({ default: m.MyBusinessesPage })));
@@ -268,6 +269,11 @@ export function AppRoutes() {
         <Route path="/admin/marketplace/business-categories" element={
           <AdminRoute permission="manage_businesses">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminBusinessCategoryPage /></Suspense></AdminLayout>
+          </AdminRoute>
+        } />
+        <Route path="/admin/marketplace/business-slider" element={
+          <AdminRoute permission="manage_businesses">
+            <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminBusinessSliderPage /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/ads" element={
