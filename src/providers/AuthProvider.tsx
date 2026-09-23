@@ -106,7 +106,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return;
         }
         if (data.session) {
-          const authUser = await buildAuthUser(extractUserInfo(data.session));
+          const { data: refreshedData, error: refreshError } = await supabase.auth.refreshSession();
+          const session = refreshError || !refreshedData.session ? data.session : refreshedData.session;
+          const authUser = await buildAuthUser(extractUserInfo(session));
           if (!mounted) return;
           setUser(authUser);
           setState('authenticated');
