@@ -55,7 +55,10 @@ export class AdminVariantService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcIdResult;
+    const result = this.unwrapRpcRow(data as RpcIdResult | RpcIdResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در ایجاد تنوع' } as ApiError;
     }
@@ -75,7 +78,10 @@ export class AdminVariantService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcResult;
+    const result = this.unwrapRpcRow(data as RpcResult | RpcResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در ویرایش تنوع' } as ApiError;
     }
@@ -88,7 +94,10 @@ export class AdminVariantService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcResult;
+    const result = this.unwrapRpcRow(data as RpcResult | RpcResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در حذف تنوع' } as ApiError;
     }
@@ -101,7 +110,10 @@ export class AdminVariantService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcResult;
+    const result = this.unwrapRpcRow(data as RpcResult | RpcResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در ترتیب‌بندی' } as ApiError;
     }

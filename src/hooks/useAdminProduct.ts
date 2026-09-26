@@ -102,10 +102,10 @@ export function useBulkTransitionProductStatus() {
   });
 }
 
-export function usePreviewProduct() {
+export function usePreviewProduct(productId: string | undefined) {
   return useQuery({
-    queryKey: ['admin', 'products', 'preview'],
-    queryFn: () => adminProductService.previewProduct(''),
-    enabled: false,
+    queryKey: ['admin', 'products', 'preview', productId],
+    queryFn: () => adminProductService.previewProduct(productId!),
+    enabled: !!productId,
   });
 }

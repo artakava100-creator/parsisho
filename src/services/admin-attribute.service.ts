@@ -92,7 +92,10 @@ export class AdminAttributeService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcIdResult;
+    const result = this.unwrapRpcRow(data as RpcIdResult | RpcIdResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در ایجاد ویژگی' } as ApiError;
     }
@@ -116,7 +119,10 @@ export class AdminAttributeService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcResult;
+    const result = this.unwrapRpcRow(data as RpcResult | RpcResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در ویرایش ویژگی' } as ApiError;
     }
@@ -129,7 +135,10 @@ export class AdminAttributeService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcResult;
+    const result = this.unwrapRpcRow(data as RpcResult | RpcResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در حذف ویژگی' } as ApiError;
     }
@@ -142,7 +151,10 @@ export class AdminAttributeService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcResult;
+    const result = this.unwrapRpcRow(data as RpcResult | RpcResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در ترتیب‌بندی' } as ApiError;
     }
@@ -156,7 +168,10 @@ export class AdminAttributeService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcResult;
+    const result = this.unwrapRpcRow(data as RpcResult | RpcResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در تغییر وضعیت ویژگی' } as ApiError;
     }
@@ -182,7 +197,10 @@ export class AdminAttributeService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcResult;
+    const result = this.unwrapRpcRow(data as RpcResult | RpcResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در تنظیم مقدار ویژگی' } as ApiError;
     }

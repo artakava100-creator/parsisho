@@ -42,8 +42,8 @@ interface DetailRow {
   brand_name: string | null;
   short_description: string | null;
   description: string | null;
-  seller_id: string | null;
-  producer_id: string | null;
+  seller_id?: string | null;
+  producer_id?: string | null;
   is_published: boolean;
   is_active: boolean;
   is_new: boolean;
@@ -92,8 +92,8 @@ function mapDetail(row: DetailRow): AdminProductDetail {
     brandName: row.brand_name,
     shortDescription: row.short_description,
     description: row.description,
-    sellerId: row.seller_id,
-    producerId: row.producer_id,
+    sellerId: row.seller_id ?? null,
+    producerId: row.producer_id ?? null,
     isPublished: row.is_published,
     isActive: row.is_active,
     isNew: row.is_new,
@@ -162,7 +162,10 @@ export class AdminProductService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcIdResult;
+    const result = this.unwrapRpcRow(data as RpcIdResult | RpcIdResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در ایجاد محصول' } as ApiError;
     }
@@ -193,7 +196,10 @@ export class AdminProductService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcResult;
+    const result = this.unwrapRpcRow(data as RpcResult | RpcResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در ویرایش محصول' } as ApiError;
     }
@@ -207,7 +213,10 @@ export class AdminProductService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcResult;
+    const result = this.unwrapRpcRow(data as RpcResult | RpcResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در تغییر وضعیت' } as ApiError;
     }
@@ -220,7 +229,10 @@ export class AdminProductService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcResult;
+    const result = this.unwrapRpcRow(data as RpcResult | RpcResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در انتشار' } as ApiError;
     }
@@ -234,7 +246,10 @@ export class AdminProductService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcResult;
+    const result = this.unwrapRpcRow(data as RpcResult | RpcResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در تنظیم زمان انتشار' } as ApiError;
     }
@@ -247,7 +262,10 @@ export class AdminProductService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as RpcResult;
+    const result = this.unwrapRpcRow(data as RpcResult | RpcResult[]);
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در حذف محصول' } as ApiError;
     }
@@ -261,7 +279,13 @@ export class AdminProductService extends BaseService {
 
     if (error) throw normalizeError(error);
 
-    const result = data as { success: boolean; error?: string; affected_count: number };
+    const result = this.unwrapRpcRow(
+      data as { success: boolean; error?: string; affected_count: number } |
+        { success: boolean; error?: string; affected_count: number }[],
+    );
+    if (!result) {
+      throw { message: 'پاسخ نامعتبر از سرور' } as ApiError;
+    }
     if (!result.success) {
       throw { message: result.error ?? 'خطا در تغییر وضعیت گروهی' } as ApiError;
     }

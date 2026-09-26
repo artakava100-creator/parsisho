@@ -6,7 +6,7 @@ import { FullPageSpinner } from '@/components/ui/Spinner';
 import { PlaceholderPage } from '@/pages/PlaceholderPage';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { AdminPlaceholderPage } from '@/components/admin/AdminPlaceholderPage';
-import { Gavel, Store, Wallet, Trophy, Gamepad2, Users, Building2, Gift, User, Bell, Settings, ShieldCheck, Megaphone } from 'lucide-react';
+import { Gavel, Store, Wallet, Trophy, Gamepad2, Users, Building2, Gift, User, Bell, Settings, ShieldCheck } from 'lucide-react';
 
 const HomePage = lazy(() => import('@/pages/HomePage').then((m) => ({ default: m.HomePage })));
 const SignInPage = lazy(() => import('@/pages/auth/SignInPage').then((m) => ({ default: m.SignInPage })));
@@ -148,7 +148,7 @@ export function AppRoutes() {
 
         {/* ── Marketplace Control Center ── */}
         <Route path="/admin/marketplace" element={
-          <AdminRoute>
+          <AdminRoute permission="view_marketplace">
             <AdminLayout>
               <Suspense fallback={<FullPageSpinner />}>
                 <AdminMarketplaceDashboardPage />
@@ -157,97 +157,97 @@ export function AppRoutes() {
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/storefront" element={
-          <AdminRoute permission="storefront.manage">
+          <AdminRoute permission="manage_storefront">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminStorefrontPage /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/products" element={
-          <AdminRoute permission="products.manage">
+          <AdminRoute permission="manage_products">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminProductListPage /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/products/:id" element={
-          <AdminRoute permission="products.manage">
+          <AdminRoute permission="manage_products">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminProductDetailPage /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/categories" element={
-          <AdminRoute permission="categories.manage">
+          <AdminRoute permission="manage_categories">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminCategoryPage /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/brands" element={
-          <AdminRoute permission="brands.manage">
+          <AdminRoute permission="manage_brands">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminBrandPage /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/attributes" element={
-          <AdminRoute permission="attributes.manage">
+          <AdminRoute permission="manage_attributes">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminAttributePage /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/media" element={
-          <AdminRoute permission="manage_store_media">
+          <AdminRoute permission="manage_media">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminPlaceholder title="رسانه‌ها" /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/slideshow" element={
-          <AdminRoute permission="manage_store_slideshow">
+          <AdminRoute permission="manage_storefront">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminPlaceholder title="اسلایدشو" /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/merchandising" element={
-          <AdminRoute permission="manage_store_merchandising">
+          <AdminRoute permission="manage_merchandising">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminPlaceholder title="مرچندایزینگ" /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/inventory" element={
-          <AdminRoute permission="manage_store_inventory">
+          <AdminRoute permission="manage_inventory">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminPlaceholder title="مدیریت موجودی" /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/pricing" element={
-          <AdminRoute permission="manage_store_pricing">
+          <AdminRoute permission="manage_pricing">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminPlaceholder title="قیمت‌گذاری" /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/search" element={
-          <AdminRoute permission="manage_store_search">
+          <AdminRoute permission="manage_merchandising">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminPlaceholder title="تنظیمات جستجو" /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/promotions" element={
-          <AdminRoute permission="manage_store_promotions">
+          <AdminRoute permission="manage_promotions">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminPlaceholder title="تخفیف‌ها و پروموشن" /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/orders" element={
-          <AdminRoute permission="manage_store_orders">
+          <AdminRoute permission="manage_orders">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminPlaceholder title="مدیریت سفارش‌ها" /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/sellers" element={
-          <AdminRoute permission="manage_store_sellers">
+          <AdminRoute permission="manage_sellers">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminPlaceholder title="فروشندگان" /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/customers" element={
-          <AdminRoute permission="manage_store_customers">
+          <AdminRoute permission="manage_customers">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminPlaceholder title="مشتریان" /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/reviews" element={
-          <AdminRoute permission="manage_store_reviews">
+          <AdminRoute permission="manage_reviews">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminPlaceholder title="نظرات" /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/shipping" element={
-          <AdminRoute permission="manage_store_shipping">
+          <AdminRoute permission="manage_shipping">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminPlaceholder title="تنظیمات ارسال" /></Suspense></AdminLayout>
           </AdminRoute>
         } />
         <Route path="/admin/marketplace/analytics" element={
-          <AdminRoute permission="manage_store_analytics">
+          <AdminRoute permission="view_analytics">
             <AdminLayout><Suspense fallback={<FullPageSpinner />}><AdminPlaceholder title="تحلیل‌ها" /></Suspense></AdminLayout>
           </AdminRoute>
         } />
